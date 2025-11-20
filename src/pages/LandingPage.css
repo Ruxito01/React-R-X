@@ -1,0 +1,327 @@
+/* src/pages/LandingPage.css */
+
+/* 1. URL de la fuente 'Inter' CORREGIDA */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* 2. DEFINICIÓN DE LA ANIMACIÓN */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Fondo negro para toda la página */
+  background-color: #000; 
+}
+
+.landing-container {
+  overflow-x: hidden;
+}
+
+.landing-section {
+  height: 100vh;
+  min-height: 600px; 
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* ----- SECCIÓN 1: INTRO ----- */
+#intro {
+  color: white;
+  text-align: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 16vh; 
+}
+
+/* 3. ESTILOS PARA LA ANIMACIÓN DE CARGA */
+#intro .animate-on-load {
+  opacity: 0; /* Empiezan invisibles */
+  animation: fadeUp 0.7s ease-out forwards; /* Aplicamos la animación */
+}
+
+/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÓN DE CARGA */
+#intro .intro-logo.animate-on-load {
+  animation-delay: 0.2s;
+}
+#intro .intro-title.animate-on-load {
+  animation-delay: 0.4s;
+}
+#intro .ingresar-button.animate-on-load,
+#intro .rux-movil-button.animate-on-load {
+  animation-delay: 0.6s;
+}
+
+
+#intro .intro-logo {
+  width: 220px;
+  margin-bottom: 20px;
+}
+
+#intro .intro-title {
+  font-size: 2.8em;
+  line-height: 1.2;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+  margin-bottom: 50px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+#intro .ingresar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 0.2s ease;
+}
+
+#intro .ingresar-button img {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 1.9));
+}
+
+#intro .ingresar-button span {
+  font-family: 'Inter', sans-serif;
+  font-style: italic;
+  font-size: 30px;
+  color: #FF6610;
+  font-weight: normal;
+  line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 8.9);
+}
+
+#intro .ingresar-button:hover {
+  transform: scale(1.1) translateX(-45%); 
+}
+
+#intro .rux-movil-button {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+#intro .rux-movil-button img {
+  width: 300px;
+  height: auto;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.9));
+}
+
+#intro .rux-movil-button:hover {
+  transform: scale(1.05);
+}
+
+/* 5. ESTILOS PARA LA ANIMACIÓN DE SCROLL */
+
+/* Estado inicial (oculto) para las secciones */
+#login,
+#descarga,
+.footer {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Estado final (visible) cuando se añade la clase .is-visible */
+#login.is-visible,
+#descarga.is-visible,
+.footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ----- SECCIÓN 2: LOGIN ----- */
+#login {
+  padding: 0;
+  /* La transición ya está definida arriba */
+}
+
+#login .login-container {
+  position: relative;
+  z-index: 2;
+  background: none;
+}
+
+.interactive-background {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.background-strip {
+  flex: 1;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: filter 0.6s ease;
+  filter: brightness(0.6) saturate(1.1);
+}
+
+.interactive-background .background-strip:hover {
+  filter: brightness(1) saturate(1);
+}
+
+
+/* ----- SECCIÓN 3: DESCARGA ----- */
+#descarga {
+  color: white;
+  text-align: center;
+  flex-direction: column;
+  /* La transición ya está definida arriba */
+}
+
+.descarga-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#descarga .descarga-title {
+  font-size: 3.5em;
+  font-weight: bold;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  margin-bottom: 40px;
+}
+
+#descarga .telefonos-img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+/* ===== INICIO ESTILOS FOOTER ===== */
+.footer {
+  background-color: #000000;
+  color: #a0a0a0;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  /* La transición ya está definida arriba */
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-logo img {
+  width: 100px;
+  height: auto;
+}
+
+.footer-info {
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.footer-info p {
+  margin: 5px 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-social a {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.footer-social a:hover {
+  transform: scale(1.15);
+}
+
+.footer-social img {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Media Query para Móviles --- */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .footer-logo {
+    order: 1;
+  }
+
+  .footer-info {
+    order: 3;
+    text-align: center;
+  }
+
+  .footer-social {
+    order: 2;
+  }
+
+  /* --- Ajustes Móviles para Intro --- */
+  #intro .intro-logo {
+    width: 180px; /* Más pequeño en móviles */
+  }
+
+  #intro .intro-title {
+    font-size: 2em; /* Más pequeño en móviles */
+  }
+
+  #intro .rux-movil-button img {
+    width: 200px; /* Más pequeño en móviles */
+  }
+
+  #intro .ingresar-button span {
+    font-size: 24px; /* Más pequeño en móviles */
+  }
+
+  #intro .ingresar-button img {
+    width: 24px; /* Más pequeño en móviles */
+    height: 24px;
+  }
+
+  /* --- Ajustes Móviles para Descarga --- */
+  #descarga .descarga-title {
+    font-size: 2.5em; /* Más pequeño en móviles */
+  }
+
+}

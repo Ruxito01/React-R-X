@@ -1,0 +1,183 @@
+/* src/pages/Login.css */
+
+:root {
+  --primary-color: #ff6600;
+  --text-color: #333;
+  --placeholder-color: #999;
+  --box-background-color: #ffffff;
+  --border-color: #ddd;
+}
+
+/* 1. Hacemos el contenedor más ancho para que quepan las 2 columnas */
+.login-container {
+  max-width: 800px; /* Antes era 420px */
+  width: 100%;
+}
+
+/* 2. Convertimos el login-box en un contenedor flex (2 columnas) */
+.login-box {
+  display: flex;
+  flex-direction: row;
+  background-color: var(--box-background-color);
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0; /* Quitamos el padding de aquí... */
+  overflow: hidden; /* Importante para redondear las esquinas de la imagen */
+
+  /* --- AÑADIMOS LA TRANSICIÓN --- */
+  /* Esto hace que el movimiento sea suave */
+  /* Ajustamos la transición para el efecto 3D */
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Ya no necesitamos el :hover estático, 
+   JavaScript se encarga de todo. 
+*/
+
+
+/* --- NUEVOS ESTILOS --- */
+
+/* 3. Estilos para la columna de la imagen */
+.login-image-side {
+  flex: 1; /* Ocupa el 50% del espacio */
+  background-size: cover;
+  background-position: center;
+}
+
+/* 4. Estilos para la columna del formulario */
+.login-form-side {
+  flex: 1; /* Ocupa el otro 50% del espacio */
+  padding: 30px 40px; /* ...y lo ponemos aquí */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* --- FIN NUEVOS ESTILOS --- */
+
+
+/* El resto de tus estilos no necesitan casi cambios */
+.login-header {
+  margin-bottom: 25px;
+}
+
+.rux-logo {
+  width: 70px; 
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.login-header h2 {
+  color: var(--text-color);
+  font-size: 1.8em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.login-form .input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1em;
+  color: var(--text-color);
+  box-sizing: border-box; 
+}
+
+.login-form input[type="email"]::placeholder,
+.login-form input[type="password"]::placeholder {
+  color: var(--placeholder-color);
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 0.9em;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.remember-me input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.login-options a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-options a:hover {
+  text-decoration: underline;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #e05e00;
+}
+
+.signup-link {
+  margin-top: 25px;
+  font-size: 0.9em;
+  color: var(--text-color);
+}
+
+.signup-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsividad para Móviles --- */
+@media (max-width: 768px) {
+  .login-container {
+    max-width: 420px; /* Vuelve al tamaño original */
+  }
+
+  .login-image-side {
+    display: none; /* Ocultamos la imagen en pantallas pequeñas */
+  }
+
+  .login-form-side {
+    flex: 100%; /* El formulario ocupa todo el ancho */
+  }
+}
