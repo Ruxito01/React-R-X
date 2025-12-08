@@ -10,7 +10,8 @@
 
 /* 1. Hacemos el contenedor más ancho para que quepan las 2 columnas */
 .login-container {
-  max-width: 800px; /* Antes era 420px */
+  max-width: 800px;
+  /* Antes era 420px */
   width: 100%;
 }
 
@@ -24,8 +25,10 @@
   text-align: center;
   width: 100%;
   box-sizing: border-box;
-  padding: 0; /* Quitamos el padding de aquí... */
-  overflow: hidden; /* Importante para redondear las esquinas de la imagen */
+  padding: 0;
+  /* Quitamos el padding de aquí... */
+  overflow: hidden;
+  /* Importante para redondear las esquinas de la imagen */
 
   /* --- AÑADIMOS LA TRANSICIÓN --- */
   /* Esto hace que el movimiento sea suave */
@@ -42,15 +45,18 @@
 
 /* 3. Estilos para la columna de la imagen */
 .login-image-side {
-  flex: 1; /* Ocupa el 50% del espacio */
+  flex: 1;
+  /* Ocupa el 50% del espacio */
   background-size: cover;
   background-position: center;
 }
 
 /* 4. Estilos para la columna del formulario */
 .login-form-side {
-  flex: 1; /* Ocupa el otro 50% del espacio */
-  padding: 30px 40px; /* ...y lo ponemos aquí */
+  flex: 1;
+  /* Ocupa el otro 50% del espacio */
+  padding: 30px 40px;
+  /* ...y lo ponemos aquí */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -65,7 +71,7 @@
 }
 
 .rux-logo {
-  width: 70px; 
+  width: 70px;
   height: auto;
   margin-bottom: 10px;
 }
@@ -98,7 +104,7 @@
   border-radius: 8px;
   font-size: 1em;
   color: var(--text-color);
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 .login-form input[type="email"]::placeholder,
@@ -151,6 +157,43 @@
   background-color: #e05e00;
 }
 
+/* Botón de Google */
+.google-login-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background-color: #ffffff;
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-login-button:hover {
+  background-color: #f8f8f8;
+  border-color: #c6c6c6;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.google-login-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .signup-link {
   margin-top: 25px;
   font-size: 0.9em;
@@ -170,14 +213,17 @@
 /* --- Responsividad para Móviles --- */
 @media (max-width: 768px) {
   .login-container {
-    max-width: 420px; /* Vuelve al tamaño original */
+    max-width: 420px;
+    /* Vuelve al tamaño original */
   }
 
   .login-image-side {
-    display: none; /* Ocultamos la imagen en pantallas pequeñas */
+    display: none;
+    /* Ocultamos la imagen en pantallas pequeñas */
   }
 
   .login-form-side {
-    flex: 100%; /* El formulario ocupa todo el ancho */
+    flex: 100%;
+    /* El formulario ocupa todo el ancho */
   }
 }

@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.app-footer {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #a0a0a0;
+    font-family: 'Inter', sans-serif;
+    border-top: 2px solid rgba(255, 102, 16, 0.3);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.footer-logo-section {
+    align-items: flex-start;
+}
+
+.footer-logo-img {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 2px 8px rgba(255, 102, 16, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.footer-logo-img:hover {
+    transform: scale(1.05);
+}
+
+.footer-info-section {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.footer-info-section p {
+    margin: 0.3rem 0;
+}
+
+.footer-info-section strong {
+    color: #FF6610;
+    font-weight: 700;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.footer-social-icons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* FIX CRITICAL: Asegurar que todos los iconos se muestren correctamente */
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 102, 16, 0.1);
+    border: 2px solid rgba(255, 102, 16, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px;
+}
+
+.social-link:hover {
+    background: rgba(255, 102, 16, 0.2);
+    border-color: #FF6610;
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 102, 16, 0.4);
+}
+
+/* FIX CRITICAL: Esto soluciona el problema de visualización de iconos */
+.social-link img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    /* Asegura que el SVG escale correctamente */
+    display: block;
+    filter: brightness(0) saturate(100%) invert(48%) sepia(85%) saturate(2426%) hue-rotate(2deg) brightness(102%) contrast(102%);
+    transition: filter 0.3s ease;
+}
+
+.social-link:hover img {
+    filter: brightness(0) saturate(100%) invert(48%) sepia(85%) saturate(2426%) hue-rotate(2deg) brightness(120%) contrast(102%);
+    transform: scale(1.1);
+}
+
+.footer-bottom {
+    background: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255, 102, 16, 0.2);
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: #888;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2rem;
+        padding: 2rem 1rem;
+    }
+
+    .footer-logo-section {
+        align-items: center;
+    }
+
+    .footer-social-icons {
+        justify-content: center;
+    }
+
+    .footer-info-section {
+        align-items: center;
+    }
+}

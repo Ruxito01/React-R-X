@@ -1,29 +1,22 @@
 // src/layouts/MainLayout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import './MainLayout.css';
 
-// Este será el "contenedor" para las páginas de Diego
 const MainLayout = () => {
   return (
-    <div>
-      {/* Aquí pondremos el Navbar principal de la app (cuando esté logueado) */}
-      <nav style={{ 
-        background: '#1a1a1a', 
-        color: 'white', 
-        padding: '1rem', 
-        textAlign: 'center',
-        fontSize: '1.2rem'
-      }}>
-        Barra de Navegación de RUX (Logueado)
-      </nav>
-
-      {/* El <Outlet> renderizará Home o Dashboard */}
-      <main>
+    <div className="main-layout">
+      <Header />
+      
+      <main className="main-content">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 };
 
-// La línea que soluciona el error:
 export default MainLayout;

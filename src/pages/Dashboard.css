@@ -1,0 +1,609 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.dashboard-container {
+    min-height: 100vh;
+    background-size: 80%;
+    background-position: bottom unset;
+    background-repeat: repeat;
+    background-attachment: scroll;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    position: relative;
+}
+
+/* Superposición semi-transparente elegante */
+.dashboard-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.45) 0%,
+            rgba(245, 245, 245, 0.35) 50%,
+            rgba(232, 232, 232, 0.45) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Asegurar que el contenido esté por encima de la superposición */
+.dashboard-header,
+.dashboard-grid {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animación de entrada para el header - Más impactante */
+.dashboard-header {
+    text-align: left;
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+    animation: fadeInDownBounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes fadeInDownBounce {
+    0% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.9);
+        filter: blur(5px);
+    }
+
+    60% {
+        transform: translateY(10px) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #FF6610;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* SECCIÓN IZQUIERDA con animación mejorada */
+.left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideInRotateLeft 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+    animation-fill-mode: both;
+}
+
+@keyframes slideInRotateLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px) rotateY(-15deg) scale(0.9);
+        filter: blur(3px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* SECCIÓN DERECHA con animación mejorada */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideInRotateRight 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s;
+    animation-fill-mode: both;
+}
+
+@keyframes slideInRotateRight {
+    0% {
+        opacity: 0;
+        transform: translateX(100px) rotateY(15deg) scale(0.9);
+        filter: blur(3px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Usuario Destacado con animación espectacular */
+.featured-user-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 3px solid #FF6610;
+    animation: popInBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.5s;
+    animation-fill-mode: both;
+}
+
+@keyframes popInBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-5deg);
+        filter: blur(4px);
+    }
+
+    50% {
+        transform: scale(1.05) rotate(2deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: blur(0);
+    }
+}
+
+.card-title {
+    background: #FF6610;
+    color: white;
+    padding: 0.8rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+/* Nuevo layout horizontal para usuario destacado */
+.featured-content-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    background: #f8f8f8;
+}
+
+.runner-icon-circle {
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+}
+
+.runner-icon-circle svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Sección central con km + barras + label */
+.center-stats-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.distance-with-bars {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.distance-number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.vertical-bars-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+
+.v-bar {
+    width: 12px;
+    background: #FF6610;
+    border-radius: 2px;
+}
+
+.v-bar.medium {
+    height: 35px;
+}
+
+.v-bar.tall {
+    height: 48px;
+}
+
+.participation-label {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 600;
+    margin-left: 0.2rem;
+}
+
+/* Sección del número de rutas con mini barras */
+.number-fifteen-section {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-left: 1.5rem;
+}
+
+.fifteen-number {
+    font-size: 4.2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.mini-bars-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.3rem;
+}
+
+.mini-bar {
+    width: 10px;
+    background: #FF6610;
+    border-radius: 2px;
+}
+
+.mini-bar.short {
+    height: 18px;
+}
+
+.mini-bar.tall {
+    height: 28px;
+}
+
+/* Tabla de Usuarios con animación elegante */
+.users-table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideInScaleUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s;
+    animation-fill-mode: both;
+}
+
+@keyframes slideInScaleUp {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+        filter: blur(3px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table thead {
+    background: #FF6610;
+    color: white;
+}
+
+.users-table th {
+    padding: 0.8rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.users-table th:last-child {
+    border-right: none;
+}
+
+.users-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.users-table tbody tr:hover {
+    background: #fff8f5;
+    transform: scale(1.01);
+}
+
+.users-table tbody tr.selected-row {
+    background: #ffe8d6 !important;
+    border-left: 4px solid #FF6610;
+    box-shadow: 0 2px 8px rgba(255, 102, 16, 0.2);
+}
+
+.row-light {
+    background: #fff;
+}
+
+.row-white {
+    background: #ffffff;
+}
+
+.users-table td {
+    padding: 0.7rem 0.8rem;
+    color: #333;
+    font-size: 0.95rem;
+    border-right: 1px solid #e0e0e0;
+}
+
+.users-table td:last-child {
+    border-right: none;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: pre-line;
+}
+
+.table-footer {
+    background: #FF6610;
+    color: white;
+    padding: 0.6rem;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* Gráficos con animaciones espectaculares y escalonadas */
+.chart-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: flipInScale 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation-fill-mode: both;
+}
+
+@keyframes flipInScale {
+    0% {
+        opacity: 0;
+        transform: perspective(800px) rotateX(-45deg) scale(0.8);
+        filter: blur(4px);
+    }
+
+    50% {
+        transform: perspective(800px) rotateX(10deg) scale(1.03);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(800px) rotateX(0deg) scale(1);
+        filter: blur(0);
+    }
+}
+
+.chart-card:nth-child(1) {
+    animation-delay: 0.7s;
+}
+
+.chart-card:nth-child(2) {
+    animation-delay: 0.9s;
+}
+
+.chart-card:nth-child(3) {
+    animation-delay: 1.1s;
+}
+
+.chart-title {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.chart-title-bold {
+    color: #666;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* Tooltips para gráficos */
+.chart-tooltip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Gráfico Donut */
+.donut-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.donut-svg {
+    width: 200px;
+    height: 200px;
+}
+
+.donut-segment {
+    transition: opacity 0.2s ease;
+}
+
+.donut-segment:hover {
+    opacity: 0.8;
+}
+
+/* Gráfico de Líneas con Área */
+.line-area-chart {
+    position: relative;
+    padding: 1rem;
+}
+
+.area-svg {
+    width: 100%;
+    height: 150px;
+    display: block;
+}
+
+.chart-x-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.chart-point {
+    transition: all 0.2s ease;
+}
+
+.chart-point:hover {
+    r: 3;
+    filter: drop-shadow(0 0 3px #FF6610);
+}
+
+/* Gráfico de Barras Horizontal */
+.bar-chart-horizontal {
+    padding: 1rem;
+}
+
+.bars-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 150px;
+    gap: 0.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.bar-vertical {
+    width: 70%;
+    background: #FF6610;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+    min-height: 10px;
+    cursor: pointer;
+}
+
+.bar-vertical:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+.bar-label-bottom {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .featured-content-horizontal {
+        flex-wrap: wrap;
+    }
+
+    .number-fifteen-section {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .featured-content-horizontal {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .center-stats-section {
+        width: 100%;
+    }
+
+    .number-fifteen-section {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .users-table {
+        font-size: 0.8rem;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 0.5rem;
+    }
+
+    .donut-svg {
+        width: 150px;
+        height: 150px;
+    }
+
+    .distance-number {
+        font-size: 2rem;
+    }
+
+    .fifteen-number {
+        font-size: 3rem;
+    }
+}

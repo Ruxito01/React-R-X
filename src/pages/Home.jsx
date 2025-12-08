@@ -11,5 +11,4 @@ const Home = () => {
   );
 };
 
-// La línea que soluciona el error:
 export default Home;

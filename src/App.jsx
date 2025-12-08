@@ -8,6 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import MainLayout from "./layouts/MainLayout"; 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Vehiculos from "./pages/Vehiculos";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/vehiculos" element={<Vehiculos />} />
         </Route>
       </Routes>
     </Router>
