@@ -8,13 +8,15 @@ import Login from './Login';
 // Importa el Footer completo
 import Footer from '../components/Footer';
 
+// Importa el componente Starfield
+import Starfield from '../components/Starfield';
+
 // Importa tus imágenes
 import fondoIntro from '../assets/fondo-intro.jpg';
 import ruxLogo from '../assets/rux-logo.png';
 import btnRuxMovil from '../assets/btn-rux-movil.png';
 import iconoIngresar from '../assets/icono-ingresar.svg';
 import fondoDescarga from '../assets/fondo-descarga.jpg';
-import telefonosApp from '../assets/telefonos-app.png';
 
 // --- AÑADIMOS LAS 5 IMÁGENES DEL LOGIN ---
 import img1 from '../assets/login-bg-1.jpg';
@@ -126,6 +128,9 @@ const LandingPage = () => {
       {/* --- SECCIÓN 3: DESCARGA --- */}
       {/* 8. Asignamos la referencia 'descargaRef' */}
       <section id="descarga" className="landing-section" style={{ backgroundImage: `url(${fondoDescarga})` }} ref={descargaRef}>
+        {/* Componente Starfield como fondo */}
+        <Starfield />
+        
         <div className="descarga-content">
           <h2 className="descarga-title">¡Descarga la app!</h2>
           

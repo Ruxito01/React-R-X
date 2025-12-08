@@ -593,6 +593,30 @@ html {
   position: relative;
 }
 
+/* Capa oscura semitransparente sobre la imagen de fondo */
+#descarga::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Canvas de estrellas sobre la capa oscura pero bajo el contenido */
+.starfield-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  /* Sobre la capa oscura (z-index: 0) */
+}
+
 .descarga-content {
   display: flex;
   flex-direction: column;
@@ -600,6 +624,9 @@ html {
   justify-content: center;
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 2;
+  /* Sobre estrellas (z-index: 1) */
 }
 
 #descarga .descarga-title {
@@ -611,6 +638,7 @@ html {
   margin: 0 auto;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
   z-index: 10;
+  position: relative;
 }
 
 /* --- AJUSTES SPLINE --- */
