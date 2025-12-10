@@ -40,7 +40,7 @@ const Footer = () => {
               <img src={iconInstagram} alt="Instagram" />
             </a>
             <a 
-              href="mailto:info@rux.com.ec"
+              href="mailto:rux01rux@gmail.com"
               className="social-link"
             >
               <img src={iconCorreo} alt="Correo" />
