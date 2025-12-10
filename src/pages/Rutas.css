@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-.dashboard-container {
+.rutas-container {
     min-height: 100vh;
     background-size: 80%;
     background-position: bottom unset;
@@ -15,7 +15,7 @@
 }
 
 /* Contenedor principal tipo tarjeta que agrupa todo el dashboard */
-.dashboard-main-card {
+.rutas-main-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
     padding: 2rem;
@@ -29,7 +29,7 @@
 }
 
 /* Superposición semi-transparente elegante */
-.dashboard-container::before {
+.rutas-container::before {
     content: '';
     position: absolute;
     top: 0;
@@ -45,37 +45,37 @@
 }
 
 /* Asegurar que el contenido esté por encima de la superposición */
-.dashboard-header,
-.dashboard-grid {
+.rutas-header,
+.rutas-grid {
     position: relative;
     z-index: 1;
 }
 
-/* Animación de entrada para el header - Más impactante */
-.dashboard-header {
+/* Animación de entrada para el header - Rutas: Swing Diagonal */
+.rutas-header {
     text-align: left;
     margin-bottom: 1rem;
     padding-left: 0.5rem;
-    animation: fadeInDownBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: swingDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes fadeInDownBounce {
+@keyframes swingDown {
     0% {
         opacity: 0;
-        transform: translateY(-100px) scale(0.7);
+        transform: translateX(-100px) translateY(-50px) rotate(-15deg);
     }
 
-    70% {
-        transform: translateY(5px) scale(1.03);
+    60% {
+        transform: translateX(10px) translateY(5px) rotate(3deg);
     }
 
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateX(0) translateY(0) rotate(0deg);
     }
 }
 
-.dashboard-header h1 {
+.rutas-header h1 {
     font-size: 3rem;
     font-weight: 700;
     color: #FF6610;
@@ -85,88 +85,89 @@
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.dashboard-grid {
+.rutas-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     width: 100%;
 }
 
-/* SECCIÓN IZQUIERDA con animación mejorada - Ahora ocupa 2 columnas */
-.left-section {
-    grid-column: 1 / 3;
+/* SECCIÓN IZQUIERDA - Diagonal desde arriba-izquierda */
+.rutas-left-section {
+    grid-column: 1 / 2;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    animation: slideInRotateLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: slideDiagonalLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
     animation-fill-mode: both;
-    height: 100%;
 }
 
-@keyframes slideInRotateLeft {
+@keyframes slideDiagonalLeft {
     0% {
         opacity: 0;
-        transform: translateX(-150px) rotateZ(-5deg) scale(0.8);
+        transform: translateX(-120px) translateY(-60px) rotate(-8deg);
     }
 
     100% {
         opacity: 1;
-        transform: translateX(0) rotateZ(0deg) scale(1);
+        transform: translateX(0) translateY(0) rotate(0deg);
     }
 }
 
-/* SECCIÓN DERECHA con animación mejorada - Ahora ocupa 1 columna */
-.right-section {
-    grid-column: 3 / 4;
-    grid-row: 1 / 4;
+/* SECCIÓN DERECHA - Diagonal desde arriba-derecha */
+.rutas-right-section {
+    grid-column: 2 / 3;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    animation: slideInRotateRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+    animation: slideDiagonalRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
     animation-fill-mode: both;
 }
 
-@keyframes slideInRotateRight {
+@keyframes slideDiagonalRight {
     0% {
         opacity: 0;
-        transform: translateX(150px) rotateZ(5deg) scale(0.8);
+        transform: translateX(120px) translateY(-60px) rotate(8deg);
     }
 
     100% {
         opacity: 1;
-        transform: translateX(0) rotateZ(0deg) scale(1);
+        transform: translateX(0) translateY(0) rotate(0deg);
     }
 }
 
-/* Usuario Destacado con animación espectacular */
-.featured-user-card {
+/* Ruta Destacada - Pop con rebote */
+.featured-route-card {
     background: #ffffff;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 3px solid #FF6610;
-    animation: popInBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+    animation: popSwing 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
     animation-fill-mode: both;
 }
 
-@keyframes popInBounce {
+@keyframes popSwing {
     0% {
         opacity: 0;
-        transform: scale(0.5) rotateZ(-10deg);
+        transform: scale(0.3) rotate(-10deg);
     }
 
-    60% {
-        transform: scale(1.05) rotateZ(2deg);
+    50% {
+        transform: scale(1.08) rotate(3deg);
+    }
+
+    70% {
+        transform: scale(0.95) rotate(-1deg);
     }
 
     100% {
         opacity: 1;
-        transform: scale(1) rotateZ(0deg);
+        transform: scale(1) rotate(0deg);
     }
 }
 
-.card-title {
+.route-card-title {
     background: #FF6610;
     color: white;
     padding: 0.8rem;
@@ -176,8 +177,8 @@
     letter-spacing: 1px;
 }
 
-/* Nuevo layout horizontal para usuario destacado */
-.featured-content-horizontal {
+/* Layout horizontal para ruta destacada */
+.route-featured-content-horizontal {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -186,100 +187,100 @@
     background: #f8f8f8;
 }
 
-.runner-icon-circle {
+.route-icon-circle {
     width: 110px;
     height: 110px;
     flex-shrink: 0;
 }
 
-.runner-icon-circle svg {
+.route-icon-circle svg {
     width: 100%;
     height: 100%;
 }
 
-/* Sección central con km + barras + label */
-.center-stats-section {
+/* Sección central con distancia + barras + label */
+.route-center-stats-section {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
 }
 
-.distance-with-bars {
+.route-distance-with-bars {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.distance-number {
+.route-distance-number {
     font-size: 2.8rem;
     font-weight: 700;
     color: #1a1a1a;
 }
 
-.vertical-bars-group {
+.route-vertical-bars-group {
     display: flex;
     align-items: flex-end;
     gap: 0.4rem;
 }
 
-.v-bar {
+.route-v-bar {
     width: 12px;
     background: #FF6610;
     border-radius: 2px;
 }
 
-.v-bar.medium {
+.route-v-bar.medium {
     height: 35px;
 }
 
-.v-bar.tall {
+.route-v-bar.tall {
     height: 48px;
 }
 
-.participation-label {
+.route-participation-label {
     font-size: 1rem;
     color: #666;
     font-weight: 600;
     margin-left: 0.2rem;
 }
 
-/* Sección del número de rutas con mini barras */
-.number-fifteen-section {
+/* Sección del número de participantes con mini barras */
+.route-number-section {
     display: flex;
     align-items: center;
     gap: 0.7rem;
     padding-left: 1.5rem;
 }
 
-.fifteen-number {
+.route-number {
     font-size: 4.2rem;
     font-weight: 700;
     color: #1a1a1a;
 }
 
-.mini-bars-group {
+.route-mini-bars-group {
     display: flex;
     align-items: flex-end;
     gap: 0.3rem;
 }
 
-.mini-bar {
+.route-mini-bar {
     width: 10px;
     background: #FF6610;
     border-radius: 2px;
 }
 
-.mini-bar.short {
+.route-mini-bar.short {
     height: 18px;
 }
 
-.mini-bar.tall {
+.route-mini-bar.tall {
     height: 28px;
 }
 
-/* Tabla de Usuarios con animación elegante */
-.users-table-card {
+/* Tabla de Rutas */
+.routes-table-card {
     background: #ffffff;
     border-radius: 12px;
     overflow: hidden;
@@ -289,7 +290,7 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 400px;
+    min-height: 250px;
 }
 
 @keyframes slideInScaleUp {
@@ -304,7 +305,7 @@
     }
 }
 
-.users-table {
+.routes-table {
     width: 100%;
     border-collapse: collapse;
     height: 100%;
@@ -312,26 +313,26 @@
     flex-direction: column;
 }
 
-.users-table thead {
+.routes-table thead {
     background: #FF6610;
     color: white;
     flex-shrink: 0;
 }
 
-.users-table tbody {
+.routes-table tbody {
     flex: 1;
     overflow-y: auto;
     display: block;
 }
 
-.users-table thead,
-.users-table tbody tr {
+.routes-table thead,
+.routes-table tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
 }
 
-.users-table th {
+.routes-table th {
     padding: 0.8rem;
     text-align: left;
     font-weight: 700;
@@ -340,52 +341,52 @@
     border-right: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.users-table th:last-child {
+.routes-table th:last-child {
     border-right: none;
 }
 
-.users-table tbody tr {
+.routes-table tbody tr {
     transition: all 0.2s ease;
     border-bottom: 1px solid #e0e0e0;
 }
 
-.users-table tbody tr:hover {
+.routes-table tbody tr:hover {
     background: #fff8f5;
     transform: scale(1.01);
 }
 
-.users-table tbody tr.selected-row {
+.routes-table tbody tr.selected-route-row {
     background: #ffe8d6 !important;
     border-left: 4px solid #FF6610;
     box-shadow: 0 2px 8px rgba(255, 102, 16, 0.2);
 }
 
-.row-light {
+.route-row-light {
     background: #fff;
 }
 
-.row-white {
+.route-row-white {
     background: #ffffff;
 }
 
-.users-table td {
+.routes-table td {
     padding: 0.7rem 0.8rem;
     color: #333;
     font-size: 0.95rem;
     border-right: 1px solid #e0e0e0;
 }
 
-.users-table td:last-child {
+.routes-table td:last-child {
     border-right: none;
 }
 
-.user-name {
+.route-name-cell {
     font-weight: 600;
     color: #1a1a1a;
     white-space: pre-line;
 }
 
-.table-footer {
+.route-table-footer {
     background: #FF6610;
     color: white;
     padding: 0.6rem;
@@ -393,8 +394,8 @@
     font-size: 0.85rem;
 }
 
-/* Gráficos con animaciones espectaculares y escalonadas */
-.chart-card {
+/* Gráficos */
+.route-chart-card {
     background: #ffffff;
     border-radius: 12px;
     padding: 1.2rem;
@@ -404,7 +405,7 @@
 }
 
 /* Tarjeta que ocupa todo el ancho */
-.chart-card-full-width {
+.route-chart-card-full-width {
     grid-column: 1 / -1;
 }
 
@@ -424,19 +425,19 @@
     }
 }
 
-.chart-card:nth-child(1) {
+.route-chart-card:nth-child(1) {
     animation-delay: 0.3s;
 }
 
-.chart-card:nth-child(2) {
+.route-chart-card:nth-child(2) {
     animation-delay: 0.4s;
 }
 
-.chart-card:nth-child(3) {
+.route-chart-card:nth-child(3) {
     animation-delay: 0.5s;
 }
 
-.chart-title {
+.route-chart-title {
     color: #333;
     font-weight: 600;
     font-size: 0.85rem;
@@ -444,7 +445,7 @@
     text-align: left;
 }
 
-.chart-title-bold {
+.route-chart-title-bold {
     color: #666;
     font-weight: 700;
     font-size: 0.9rem;
@@ -454,7 +455,7 @@
 }
 
 /* Tooltips para gráficos */
-.chart-tooltip {
+.route-chart-tooltip {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -482,177 +483,77 @@
     }
 }
 
-/* Gráfico Donut */
-.donut-chart {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-}
-
-.donut-svg {
-    width: 200px;
-    height: 200px;
-}
-
-.donut-segment {
-    transition: opacity 0.2s ease;
-}
-
-.donut-segment:hover {
-    opacity: 0.8;
-}
-
-/* Gráfico de Líneas con Área */
-.line-area-chart {
-    position: relative;
-    padding: 1rem;
-}
-
-.area-svg {
-    width: 100%;
-    height: 250px;
-    display: block;
-}
-
-.chart-x-labels {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    font-size: 0.75rem;
-    color: #666;
-    font-weight: 600;
-}
-
-.chart-point {
-    transition: all 0.2s ease;
-}
-
-.chart-point:hover {
-    r: 3;
-    filter: drop-shadow(0 0 3px #FF6610);
-}
-
-/* Gráfico de Barras Horizontal */
-.bar-chart-horizontal {
-    padding: 1rem;
-}
-
-.bars-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 150px;
-    gap: 0.5rem;
-    padding-bottom: 1.5rem;
-}
-
-.bar-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    height: 100%;
-}
-
-.bar-vertical {
-    width: 70%;
-    background: #FF6610;
-    border-radius: 4px 4px 0 0;
-    transition: all 0.3s ease;
-    min-height: 10px;
-    cursor: pointer;
-}
-
-.bar-vertical:hover {
-    opacity: 0.8;
-    transform: scaleY(1.05);
-}
-
-.bar-label-bottom {
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    color: #666;
-    font-weight: 600;
-}
-
 /* Responsive */
 @media (max-width: 1200px) {
-    .dashboard-grid {
+    .rutas-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
     }
 
-    .left-section {
+    .rutas-left-section {
         grid-column: 1;
     }
 
-    .right-section {
+    .rutas-right-section {
         grid-column: 1;
         grid-row: auto;
     }
 
-    .dashboard-header h1 {
+    .rutas-header h1 {
         font-size: 2.5rem;
     }
 
-    .featured-content-horizontal {
+    .route-featured-content-horizontal {
         flex-wrap: wrap;
     }
 
-    .number-fifteen-section {
+    .route-number-section {
         padding-left: 0;
     }
 }
 
 @media (max-width: 768px) {
-    .dashboard-container {
+    .rutas-container {
         padding: 1rem;
     }
 
-    .dashboard-main-card {
+    .rutas-main-card {
         padding: 1rem;
         border-radius: 12px;
     }
 
-    .dashboard-header h1 {
+    .rutas-header h1 {
         font-size: 1.8rem;
     }
 
-    .featured-content-horizontal {
+    .route-featured-content-horizontal {
         flex-direction: column;
         gap: 1rem;
     }
 
-    .center-stats-section {
+    .route-center-stats-section {
         width: 100%;
     }
 
-    .number-fifteen-section {
+    .route-number-section {
         width: 100%;
         justify-content: center;
     }
 
-    .users-table {
+    .routes-table {
         font-size: 0.8rem;
     }
 
-    .users-table th,
-    .users-table td {
+    .routes-table th,
+    .routes-table td {
         padding: 0.5rem;
     }
 
-    .donut-svg {
-        width: 150px;
-        height: 150px;
-    }
-
-    .distance-number {
+    .route-distance-number {
         font-size: 2rem;
     }
 
-    .fifteen-number {
+    .route-number {
         font-size: 3rem;
     }
 }

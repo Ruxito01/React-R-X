@@ -199,28 +199,6 @@ const Vehiculos = () => {
   const maxValorLineas = Math.max(...usoMensual.map(d => d.valor));
   const maxValorBarras = Math.max(...distanciaSemanal.map(d => d.valor));
 
-  // Generar puntos para el path del gráfico de área
-  const generateAreaPath = () => {
-    const width = 100;
-    const height = 100;
-    const points = usoMensual.map((d, i) => {
-      const x = (i / (usoMensual.length - 1)) * width;
-      const y = height - (d.valor / maxValorLineas) * height;
-      return `${x},${y}`;
-    });
-    
-    const linePath = points.join(' L ');
-    const areaPath = `M 0,${height} L ${points[0]} L ${linePath} L ${width},${height} Z`;
-    return { linePath: `M ${points[0]} L ${linePath}`, areaPath };
-  };
-
-  const { linePath, areaPath } = generateAreaPath();
-
-  // Calcular el porcentaje del donut
-  const circumference = 2 * Math.PI * 70;
-  const ruralOffset = (selectedVehicle.categorias.urbano / 100) * circumference;
-  const montañaOffset = ((selectedVehicle.categorias.urbano + selectedVehicle.categorias.rural) / 100) * circumference;
-
   // Función para obtener la fecha actual en español
   const getFechaActual = () => {
     const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -236,7 +214,9 @@ const Vehiculos = () => {
         <h1>DASHBOARD DE VEHÍCULOS</h1>
       </div>
 
-      <div className="vehiculos-grid">
+      {/* Contenedor principal tipo tarjeta */}
+      <div className="vehiculos-main-card">
+        <div className="vehiculos-grid">
         {/* SECCIÓN IZQUIERDA: Vehículo destacado + Tabla */}
         <div className="left-section">
           {/* Vehículo Destacado - Diseño Horizontal */}
@@ -315,63 +295,137 @@ const Vehiculos = () => {
 
         {/* SECCIÓN DERECHA: Gráficos */}
         <div className="right-section">
-          {/* Gráfico Donut */}
+          {/* Gráfico de Barras Horizontales */}
           <div className="chart-card">
             <div className="chart-title">Distribución de terreno</div>
-            <div className="donut-chart" style={{ position: 'relative' }}>
-              <svg viewBox="0 0 200 200" className="donut-svg">
-                {/* Urbano - Naranja */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="70"
-                  fill="none"
-                  stroke="#FF6610"
-                  strokeWidth="40"
-                  strokeDasharray={`${(selectedVehicle.categorias.urbano / 100) * circumference} ${circumference}`}
-                  strokeDashoffset="0"
-                  transform="rotate(-90 100 100)"
-                  className="donut-segment"
-                  onMouseEnter={() => setHoveredPoint('urbano')}
-                  onMouseLeave={() => setHoveredPoint(null)}
-                  style={{ cursor: 'pointer' }}
-                />
-                {/* Rural - Naranja claro */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="70"
-                  fill="none"
-                  stroke="#FFB380"
-                  strokeWidth="40"
-                  strokeDasharray={`${(selectedVehicle.categorias.rural / 100) * circumference} ${circumference}`}
-                  strokeDashoffset={-ruralOffset}
-                  transform="rotate(-90 100 100)"
-                  className="donut-segment"
-                  onMouseEnter={() => setHoveredPoint('rural')}
-                  onMouseLeave={() => setHoveredPoint(null)}
-                  style={{ cursor: 'pointer' }}
-                />
-                {/* Montaña - Naranja muy claro */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="70"
-                  fill="none"
-                  stroke="#FFD4B8"
-                  strokeWidth="40"
-                  strokeDasharray={`${(selectedVehicle.categorias.montaña / 100) * circumference} ${circumference}`}
-                  strokeDashoffset={-montañaOffset}
-                  transform="rotate(-90 100 100)"
-                  className="donut-segment"
-                  onMouseEnter={() => setHoveredPoint('montaña')}
-                  onMouseLeave={() => setHoveredPoint(null)}
-                  style={{ cursor: 'pointer' }}
-                />
-                <text x="100" y="100" textAnchor="middle" dy=".3em" fontSize="16" fontWeight="700" fill="#333">
-                  {selectedVehicle.nombre.split(' ')[0]}
-                </text>
-              </svg>
+            <div className="horizontal-bars-chart" style={{ position: 'relative', padding: '20px 15px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {/* Barra Urbano */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#333', 
+                    marginBottom: '5px',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}>
+                    <span>Urbano</span>
+                    <span style={{ color: '#FF6610' }}>{selectedVehicle.categorias.urbano}%</span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    height: '28px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div 
+                      style={{ 
+                        width: `${selectedVehicle.categorias.urbano}%`, 
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #FF6610 0%, #FF8844 100%)',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1.1)';
+                        setHoveredPoint('urbano');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1)';
+                        setHoveredPoint(null);
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Barra Rural */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#333', 
+                    marginBottom: '5px',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}>
+                    <span>Rural</span>
+                    <span style={{ color: '#FFB380' }}>{selectedVehicle.categorias.rural}%</span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    height: '28px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div 
+                      style={{ 
+                        width: `${selectedVehicle.categorias.rural}%`, 
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #FFB380 0%, #FFC999 100%)',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1.1)';
+                        setHoveredPoint('rural');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1)';
+                        setHoveredPoint(null);
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Barra Montaña */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#333', 
+                    marginBottom: '5px',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}>
+                    <span>Montaña</span>
+                    <span style={{ color: '#FFD4B8' }}>{selectedVehicle.categorias.montaña}%</span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    height: '28px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div 
+                      style={{ 
+                        width: `${selectedVehicle.categorias.montaña}%`, 
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #FFD4B8 0%, #FFE5D4 100%)',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1.1)';
+                        setHoveredPoint('montaña');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scaleY(1)';
+                        setHoveredPoint(null);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
               {hoveredPoint && (
                 <div className="chart-tooltip">
                   {hoveredPoint === 'urbano' && `Urbano: ${selectedVehicle.categorias.urbano}%`}
@@ -382,70 +436,96 @@ const Vehiculos = () => {
             </div>
           </div>
 
-          {/* Gráfico de Líneas con Área */}
+          {/* Gráfico Radial - Distancia Semanal */}
           <div className="chart-card">
-            <div className="chart-title-bold">USO DEL VEHÍCULO ESTE MES</div>
-            <div className="line-area-chart" style={{ position: 'relative' }}>
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="area-svg">
+            <div className="chart-title-bold">DISTANCIA SEMANAL (KM)</div>
+            <div className="radial-chart" style={{ position: 'relative', padding: '10px' }}>
+              <svg viewBox="0 0 200 200" style={{ width: '100%', height: 'auto' }}>
                 <defs>
-                  <linearGradient id="areaGradientVehicle" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#FF6610" stopOpacity="0.6"/>
+                  <linearGradient id="radialGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FF6610" stopOpacity="0.5"/>
                     <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
                   </linearGradient>
                 </defs>
-                <path d={areaPath} fill="url(#areaGradientVehicle)" />
-                <path d={linePath} fill="none" stroke="#FF6610" strokeWidth="0.5" />
-                {usoMensual.map((d, i) => {
-                  const x = (i / (usoMensual.length - 1)) * 100;
-                  const y = 100 - (d.valor / maxValorLineas) * 100;
+                
+                {/* Círculos de fondo (guías) */}
+                {[20, 40, 60, 80, 100].map((percent) => (
+                  <circle
+                    key={percent}
+                    cx="100"
+                    cy="100"
+                    r={percent * 0.6}
+                    fill="none"
+                    stroke="#f0f0f0"
+                    strokeWidth="1"
+                  />
+                ))}
+                
+                {/* Polígono del área de datos */}
+                <path
+                  d={(() => {
+                    // Calcular los puntos del polígono hexagonal
+                    const points = distanciaSemanal.map((dato, i) => {
+                      const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+                      const radius = (dato.valor / maxValorBarras) * 60;
+                      const x = 100 + radius * Math.cos(angle);
+                      const y = 100 + radius * Math.sin(angle);
+                      return `${x},${y}`;
+                    });
+                    return `M ${points.join(' L ')} Z`;
+                  })()}
+                  fill="url(#radialGradient)"
+                  stroke="#FF6610"
+                  strokeWidth="2"
+                />
+                
+                {/* Puntos de datos */}
+                {distanciaSemanal.map((dato, i) => {
+                  const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+                  const radius = (dato.valor / maxValorBarras) * 60;
+                  const x = 100 + radius * Math.cos(angle);
+                  const y = 100 + radius * Math.sin(angle);
+                  
                   return (
-                    <circle 
-                      key={i} 
-                      cx={x} 
-                      cy={y} 
-                      r="2" 
-                      fill="#FF6610"
-                      className="chart-point"
-                      onMouseEnter={() => setHoveredPoint(`line-${i}`)}
-                      onMouseLeave={() => setHoveredPoint(null)}
-                      style={{ cursor: 'pointer' }}
-                    />
+                    <g key={i}>
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r="4"
+                        fill="#FF6610"
+                        stroke="#fff"
+                        strokeWidth="2"
+                        style={{ cursor: 'pointer' }}
+                        onMouseEnter={() => setHoveredBar(i)}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                    </g>
+                  );
+                })}
+                
+                {/* Labels de días */}
+                {distanciaSemanal.map((dato, i) => {
+                  const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+                  const labelRadius = 75;
+                  const x = 100 + labelRadius * Math.cos(angle);
+                  const y = 100 + labelRadius * Math.sin(angle);
+                  
+                  return (
+                    <text
+                      key={i}
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dy=".3em"
+                      fontSize="11"
+                      fontWeight="700"
+                      fill="#333"
+                    >
+                      {dato.dia}
+                    </text>
                   );
                 })}
               </svg>
-              <div className="chart-x-labels">
-                {usoMensual.map((d, i) => (
-                  <span key={i}>{d.dia}</span>
-                ))}
-              </div>
-              {hoveredPoint && hoveredPoint.startsWith('line-') && (
-                <div className="chart-tooltip">
-                  Día {usoMensual[parseInt(hoveredPoint.split('-')[1])].dia}: {usoMensual[parseInt(hoveredPoint.split('-')[1])].valor} viajes
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Gráfico de Barras - Distancia Semanal */}
-          <div className="chart-card">
-            <div className="chart-title-bold">DISTANCIA SEMANAL (KM)</div>
-            <div className="bar-chart-horizontal" style={{ position: 'relative' }}>
-              <div className="bars-container">
-                {distanciaSemanal.map((dato, index) => {
-                  const height = (dato.valor / maxValorBarras) * 100;
-                  return (
-                    <div key={index} className="bar-wrapper">
-                      <div 
-                        className="bar-vertical" 
-                        style={{ height: `${height}%` }}
-                        onMouseEnter={() => setHoveredBar(index)}
-                        onMouseLeave={() => setHoveredBar(null)}
-                      ></div>
-                      <div className="bar-label-bottom">{dato.dia}</div>
-                    </div>
-                  );
-                })}
-              </div>
               {hoveredBar !== null && (
                 <div className="chart-tooltip">
                   {distanciaSemanal[hoveredBar].dia}: {distanciaSemanal[hoveredBar].valor} km
@@ -453,6 +533,103 @@ const Vehiculos = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Gráfico de Barras Agrupadas - Uso Mensual */}
+        <div className="chart-card chart-card-full-width">
+          <div className="chart-title-bold">USO DEL VEHÍCULO ESTE MES</div>
+          <div className="grouped-bar-chart" style={{ position: 'relative', padding: '20px 10px' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-end', 
+              justifyContent: 'space-around',
+              height: '250px',
+              borderBottom: '2px solid #e0e0e0',
+              gap: '8px',
+              paddingBottom: '10px'
+            }}>
+              {usoMensual.map((dato, i) => {
+                const heightPercent = (dato.valor / maxValorLineas) * 100;
+                const minHeight = 20; // Altura mínima en píxeles para que siempre sean visibles
+                const calculatedHeight = Math.max((heightPercent / 100) * 240, minHeight); // 240px es el 100% del contenedor (250 - 10 de padding)
+                return (
+                  <div 
+                    key={i} 
+                    style={{ 
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      position: 'relative'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '30px',
+                        height: `${calculatedHeight}px`,
+                        background: `linear-gradient(180deg, #FF6610 0%, #FFB380 100%)`,
+                        borderRadius: '4px 4px 0 0',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        boxShadow: '0 2px 4px rgba(255, 102, 16, 0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(255, 102, 16, 0.4)';
+                        setHoveredPoint(`bar-${i}`);
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(255, 102, 16, 0.2)';
+                        setHoveredPoint(null);
+                      }}
+                    >
+                      {/* Barra de acento superior */}
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '3px',
+                        background: '#FF4400',
+                        borderRadius: '4px 4px 0 0'
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Labels de días */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-around',
+              marginTop: '10px',
+              gap: '8px'
+            }}>
+              {usoMensual.map((dato, i) => (
+                <div 
+                  key={i}
+                  style={{ 
+                    flex: 1,
+                    textAlign: 'center',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#666'
+                  }}
+                >
+                  {dato.dia}
+                </div>
+              ))}
+            </div>
+            {hoveredPoint && hoveredPoint.startsWith('bar-') && (
+              <div className="chart-tooltip">
+                Día {usoMensual[parseInt(hoveredPoint.split('-')[1])].dia}: {usoMensual[parseInt(hoveredPoint.split('-')[1])].valor} viajes
+              </div>
+            )}
+          </div>
+        </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
-/* src/pages/LandingPage.css */
+﻿/* src/pages/LandingPage.css */
 
 /* 1. URL de la fuente 'Inter' CORREGIDA */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* 2. DEFINICIÓN DE LA ANIMACIÓN */
+/* 2. DEFINICIÃ“N DE LA ANIMACIÃ“N */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -18,12 +18,27 @@
 
 html {
   scroll-behavior: smooth;
-  /* Fondo negro para toda la página */
+  /* Fondo negro para toda la pÃ¡gina */
   background-color: #000;
 }
 
 .landing-container {
   overflow-x: hidden;
+  animation: fadeInFromBlack 1.2s ease-out;
+}
+
+@keyframes fadeInFromBlack {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .landing-section {
@@ -41,8 +56,8 @@ html {
   overflow: hidden;
 }
 
-/* ----- SECCIÓN 1: INTRO ----- */
-#intro {
+/* ----- SECCIÃ“N 1: INTRO ----- */
+#inicio {
   color: white;
   text-align: center;
   flex-direction: column;
@@ -50,35 +65,35 @@ html {
   padding-top: 16vh;
 }
 
-/* 3. ESTILOS PARA LA ANIMACIÓN DE CARGA */
-#intro .animate-on-load {
+/* 3. ESTILOS PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .animate-on-load {
   opacity: 0;
   /* Empiezan invisibles */
   animation: fadeUp 0.7s ease-out forwards;
-  /* Aplicamos la animación */
+  /* Aplicamos la animaciÃ³n */
 }
 
-/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÓN DE CARGA */
-#intro .intro-logo.animate-on-load {
+/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .intro-logo.animate-on-load {
   animation-delay: 0.2s;
 }
 
-#intro .intro-title.animate-on-load {
+#inicio .intro-title.animate-on-load {
   animation-delay: 0.4s;
 }
 
-#intro .ingresar-button.animate-on-load,
-#intro .rux-movil-button.animate-on-load {
+#inicio .ingresar-button.animate-on-load,
+#inicio .rux-movil-button.animate-on-load {
   animation-delay: 0.6s;
 }
 
 
-#intro .intro-logo {
+#inicio .intro-logo {
   width: 220px;
   margin-bottom: 20px;
 }
 
-#intro .intro-title {
+#inicio .intro-title {
   font-size: 2.8em;
   line-height: 1.2;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
@@ -88,7 +103,7 @@ html {
   font-style: italic;
 }
 
-#intro .ingresar-button {
+#inicio .ingresar-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,14 +118,14 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .ingresar-button img {
+#inicio .ingresar-button img {
   width: 30px;
   height: 30px;
   margin-bottom: 10px;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 1.9));
 }
 
-#intro .ingresar-button span {
+#inicio .ingresar-button span {
   font-family: 'Inter', sans-serif;
   font-style: italic;
   font-size: 30px;
@@ -120,11 +135,11 @@ html {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 8.9);
 }
 
-#intro .ingresar-button:hover {
+#inicio .ingresar-button:hover {
   transform: scale(1.1) translateX(-45%);
 }
 
-#intro .rux-movil-button {
+#inicio .rux-movil-button {
   position: absolute;
   bottom: 20px;
   left: 20px;
@@ -134,17 +149,17 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .rux-movil-button img {
+#inicio .rux-movil-button img {
   width: 300px;
   height: auto;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.9));
 }
 
-#intro .rux-movil-button:hover {
+#inicio .rux-movil-button:hover {
   transform: scale(1.05);
 }
 
-/* 5. ESTILOS PARA LA ANIMACIÓN DE SCROLL */
+/* 5. ESTILOS PARA LA ANIMACIÃ“N DE SCROLL */
 
 /* Estado inicial (oculto) para las secciones */
 #login,
@@ -155,7 +170,7 @@ html {
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-/* Estado final (visible) cuando se añade la clase .is-visible */
+/* Estado final (visible) cuando se aÃ±ade la clase .is-visible */
 #login.is-visible,
 #descarga.is-visible,
 .footer.is-visible {
@@ -164,10 +179,10 @@ html {
 }
 
 
-/* ----- SECCIÓN 2: LOGIN ----- */
+/* ----- SECCIÃ“N 2: LOGIN ----- */
 #login {
   padding: 0;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
 }
 
 #login .login-container {
@@ -191,7 +206,7 @@ html {
 /* 1. URL de la fuente 'Inter' CORREGIDA */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* 2. DEFINICIÓN DE LA ANIMACIÓN */
+/* 2. DEFINICIÃ“N DE LA ANIMACIÃ“N */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -206,7 +221,7 @@ html {
 
 html {
   scroll-behavior: smooth;
-  /* Fondo negro para toda la página */
+  /* Fondo negro para toda la pÃ¡gina */
   background-color: #000;
 }
 
@@ -229,8 +244,8 @@ html {
   overflow: hidden;
 }
 
-/* ----- SECCIÓN 1: INTRO ----- */
-#intro {
+/* ----- SECCIÃ“N 1: INTRO ----- */
+#inicio {
   color: white;
   text-align: center;
   flex-direction: column;
@@ -238,35 +253,35 @@ html {
   padding-top: 16vh;
 }
 
-/* 3. ESTILOS PARA LA ANIMACIÓN DE CARGA */
-#intro .animate-on-load {
+/* 3. ESTILOS PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .animate-on-load {
   opacity: 0;
   /* Empiezan invisibles */
   animation: fadeUp 0.7s ease-out forwards;
-  /* Aplicamos la animación */
+  /* Aplicamos la animaciÃ³n */
 }
 
-/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÓN DE CARGA */
-#intro .intro-logo.animate-on-load {
+/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .intro-logo.animate-on-load {
   animation-delay: 0.2s;
 }
 
-#intro .intro-title.animate-on-load {
+#inicio .intro-title.animate-on-load {
   animation-delay: 0.4s;
 }
 
-#intro .ingresar-button.animate-on-load,
-#intro .rux-movil-button.animate-on-load {
+#inicio .ingresar-button.animate-on-load,
+#inicio .rux-movil-button.animate-on-load {
   animation-delay: 0.6s;
 }
 
 
-#intro .intro-logo {
+#inicio .intro-logo {
   width: 220px;
   margin-bottom: 20px;
 }
 
-#intro .intro-title {
+#inicio .intro-title {
   font-size: 2.8em;
   line-height: 1.2;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
@@ -276,7 +291,7 @@ html {
   font-style: italic;
 }
 
-#intro .ingresar-button {
+#inicio .ingresar-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -291,14 +306,14 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .ingresar-button img {
+#inicio .ingresar-button img {
   width: 30px;
   height: 30px;
   margin-bottom: 10px;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 1.9));
 }
 
-#intro .ingresar-button span {
+#inicio .ingresar-button span {
   font-family: 'Inter', sans-serif;
   font-style: italic;
   font-size: 30px;
@@ -308,11 +323,11 @@ html {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 8.9);
 }
 
-#intro .ingresar-button:hover {
+#inicio .ingresar-button:hover {
   transform: scale(1.1) translateX(-45%);
 }
 
-#intro .rux-movil-button {
+#inicio .rux-movil-button {
   position: absolute;
   bottom: 20px;
   left: 20px;
@@ -322,17 +337,17 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .rux-movil-button img {
+#inicio .rux-movil-button img {
   width: 300px;
   height: auto;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.9));
 }
 
-#intro .rux-movil-button:hover {
+#inicio .rux-movil-button:hover {
   transform: scale(1.05);
 }
 
-/* 5. ESTILOS PARA LA ANIMACIÓN DE SCROLL */
+/* 5. ESTILOS PARA LA ANIMACIÃ“N DE SCROLL */
 
 /* Estado inicial (oculto) para las secciones */
 #login,
@@ -343,7 +358,7 @@ html {
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-/* Estado final (visible) cuando se añade la clase .is-visible */
+/* Estado final (visible) cuando se aÃ±ade la clase .is-visible */
 #login.is-visible,
 #descarga.is-visible,
 .footer.is-visible {
@@ -352,10 +367,10 @@ html {
 }
 
 
-/* ----- SECCIÓN 2: LOGIN ----- */
+/* ----- SECCIÃ“N 2: LOGIN ----- */
 #login {
   padding: 0;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
 }
 
 #login .login-container {
@@ -389,12 +404,12 @@ html {
 }
 
 
-/* ----- SECCIÓN 3: DESCARGA ----- */
+/* ----- SECCIÃ“N 3: DESCARGA ----- */
 #descarga {
   color: white;
   text-align: center;
   flex-direction: column;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
   position: relative;
 }
 
@@ -424,8 +439,8 @@ html {
   overflow: hidden;
 }
 
-/* ----- SECCIÓN 1: INTRO ----- */
-#intro {
+/* ----- SECCIÃ“N 1: INTRO ----- */
+#inicio {
   color: white;
   text-align: center;
   flex-direction: column;
@@ -433,35 +448,35 @@ html {
   padding-top: 16vh;
 }
 
-/* 3. ESTILOS PARA LA ANIMACIÓN DE CARGA */
-#intro .animate-on-load {
+/* 3. ESTILOS PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .animate-on-load {
   opacity: 0;
   /* Empiezan invisibles */
   animation: fadeUp 0.7s ease-out forwards;
-  /* Aplicamos la animación */
+  /* Aplicamos la animaciÃ³n */
 }
 
-/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÓN DE CARGA */
-#intro .intro-logo.animate-on-load {
+/* 4. RETRASOS (STAGGER) PARA LA ANIMACIÃ“N DE CARGA */
+#inicio .intro-logo.animate-on-load {
   animation-delay: 0.2s;
 }
 
-#intro .intro-title.animate-on-load {
+#inicio .intro-title.animate-on-load {
   animation-delay: 0.4s;
 }
 
-#intro .ingresar-button.animate-on-load,
-#intro .rux-movil-button.animate-on-load {
+#inicio .ingresar-button.animate-on-load,
+#inicio .rux-movil-button.animate-on-load {
   animation-delay: 0.6s;
 }
 
 
-#intro .intro-logo {
+#inicio .intro-logo {
   width: 220px;
   margin-bottom: 20px;
 }
 
-#intro .intro-title {
+#inicio .intro-title {
   font-size: 2.8em;
   line-height: 1.2;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
@@ -471,7 +486,7 @@ html {
   font-style: italic;
 }
 
-#intro .ingresar-button {
+#inicio .ingresar-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -486,14 +501,14 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .ingresar-button img {
+#inicio .ingresar-button img {
   width: 30px;
   height: 30px;
   margin-bottom: 10px;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 1.9));
 }
 
-#intro .ingresar-button span {
+#inicio .ingresar-button span {
   font-family: 'Inter', sans-serif;
   font-style: italic;
   font-size: 30px;
@@ -503,11 +518,11 @@ html {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 8.9);
 }
 
-#intro .ingresar-button:hover {
+#inicio .ingresar-button:hover {
   transform: scale(1.1) translateX(-45%);
 }
 
-#intro .rux-movil-button {
+#inicio .rux-movil-button {
   position: absolute;
   bottom: 20px;
   left: 20px;
@@ -517,17 +532,17 @@ html {
   transition: transform 0.2s ease;
 }
 
-#intro .rux-movil-button img {
+#inicio .rux-movil-button img {
   width: 300px;
   height: auto;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.9));
 }
 
-#intro .rux-movil-button:hover {
+#inicio .rux-movil-button:hover {
   transform: scale(1.05);
 }
 
-/* 5. ESTILOS PARA LA ANIMACIÓN DE SCROLL */
+/* 5. ESTILOS PARA LA ANIMACIÃ“N DE SCROLL */
 
 /* Estado inicial (oculto) para las secciones */
 #login,
@@ -538,7 +553,7 @@ html {
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-/* Estado final (visible) cuando se añade la clase .is-visible */
+/* Estado final (visible) cuando se aÃ±ade la clase .is-visible */
 #login.is-visible,
 #descarga.is-visible,
 .footer.is-visible {
@@ -547,10 +562,10 @@ html {
 }
 
 
-/* ----- SECCIÓN 2: LOGIN ----- */
+/* ----- SECCIÃ“N 2: LOGIN ----- */
 #login {
   padding: 0;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
 }
 
 #login .login-container {
@@ -584,12 +599,12 @@ html {
 }
 
 
-/* ----- SECCIÓN 3: DESCARGA ----- */
+/* ----- SECCIÃ“N 3: DESCARGA ----- */
 #descarga {
   color: white;
   text-align: center;
   flex-direction: column;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
   position: relative;
 }
 
@@ -699,7 +714,7 @@ a[href^="https://spline.design"],
   padding: 40px 20px;
   width: 100%;
   box-sizing: border-box;
-  /* La transición ya está definida arriba */
+  /* La transiciÃ³n ya estÃ¡ definida arriba */
 }
 
 .footer-content {
@@ -745,7 +760,7 @@ a[href^="https://spline.design"],
   height: 24px;
 }
 
-/* --- Media Query para Móviles --- */
+/* --- Media Query para MÃ³viles --- */
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;
@@ -765,29 +780,29 @@ a[href^="https://spline.design"],
     order: 2;
   }
 
-  /* --- Ajustes Móviles para Intro --- */
-  #intro .intro-logo {
+  /* --- Ajustes MÃ³viles para Intro --- */
+  #inicio .intro-logo {
     width: 180px;
   }
 
-  #intro .intro-title {
+  #inicio .intro-title {
     font-size: 2em;
   }
 
-  #intro .rux-movil-button img {
+  #inicio .rux-movil-button img {
     width: 200px;
   }
 
-  #intro .ingresar-button span {
+  #inicio .ingresar-button span {
     font-size: 24px;
   }
 
-  #intro .ingresar-button img {
+  #inicio .ingresar-button img {
     width: 24px;
     height: 24px;
   }
 
-  /* --- Ajustes Móviles para Descarga --- */
+  /* --- Ajustes MÃ³viles para Descarga --- */
   #descarga .descarga-title {
     font-size: 2.5em;
   }

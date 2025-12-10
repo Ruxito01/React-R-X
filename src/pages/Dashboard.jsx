@@ -201,8 +201,8 @@ const Dashboard = () => {
 
   // Generar puntos para el path del gráfico de área
   const generateAreaPath = () => {
-    const width = 100;
-    const height = 100;
+    const width = 200;
+    const height = 60;
     const points = rutasporDia.map((d, i) => {
       const x = (i / (rutasporDia.length - 1)) * width;
       const y = height - (d.valor / maxValorLineas) * height;
@@ -236,7 +236,9 @@ const Dashboard = () => {
         <h1>DASHBOARD DE USUARIOS</h1>
       </div>
 
-      <div className="dashboard-grid">
+      {/* Contenedor principal tipo tarjeta */}
+      <div className="dashboard-main-card">
+        <div className="dashboard-grid">
         {/* SECCIÓN IZQUIERDA: Usuario destacado + Tabla */}
         <div className="left-section">
           {/* Usuario Destacado del Mes - Diseño Horizontal */}
@@ -388,50 +390,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Gráfico de Líneas con Área */}
-          <div className="chart-card">
-            <div className="chart-title-bold">USUARIOS EN RUTAS ESTE MES</div>
-            <div className="line-area-chart" style={{ position: 'relative' }}>
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="area-svg">
-                <defs>
-                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#FF6610" stopOpacity="0.6"/>
-                    <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
-                  </linearGradient>
-                </defs>
-                <path d={areaPath} fill="url(#areaGradient)" />
-                <path d={linePath} fill="none" stroke="#FF6610" strokeWidth="0.5" />
-                {rutasporDia.map((d, i) => {
-                  const x = (i / (rutasporDia.length - 1)) * 100;
-                  const y = 100 - (d.valor / maxValorLineas) * 100;
-                  return (
-                    <circle 
-                      key={i} 
-                      cx={x} 
-                      cy={y} 
-                      r="2" 
-                      fill="#FF6610"
-                      className="chart-point"
-                      onMouseEnter={() => setHoveredPoint(`line-${i}`)}
-                      onMouseLeave={() => setHoveredPoint(null)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  );
-                })}
-              </svg>
-              <div className="chart-x-labels">
-                {rutasporDia.map((d, i) => (
-                  <span key={i}>{d.dia}</span>
-                ))}
-              </div>
-              {hoveredPoint && hoveredPoint.startsWith('line-') && (
-                <div className="chart-tooltip">
-                  Día {rutasporDia[parseInt(hoveredPoint.split('-')[1])].dia}: {rutasporDia[parseInt(hoveredPoint.split('-')[1])].valor} usuarios
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Gráfico de Barras - Distancia Semanal */}
           <div className="chart-card">
             <div className="chart-title-bold">DISTANCIA SEMANAL (KM)</div>
@@ -459,6 +417,51 @@ const Dashboard = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Gráfico de Líneas con Área - Ahora ocupa todo el ancho */}
+        <div className="chart-card chart-card-full-width">
+          <div className="chart-title-bold">USUARIOS EN RUTAS ESTE MES</div>
+          <div className="line-area-chart" style={{ position: 'relative' }}>
+            <svg viewBox="0 0 200 60" preserveAspectRatio="none" className="area-svg">
+              <defs>
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FF6610" stopOpacity="0.6"/>
+                  <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
+                </linearGradient>
+              </defs>
+              <path d={areaPath} fill="url(#areaGradient)" />
+              <path d={linePath} fill="none" stroke="#FF6610" strokeWidth="0.5" />
+              {rutasporDia.map((d, i) => {
+                const x = (i / (rutasporDia.length - 1)) * 200;
+                const y = 60 - (d.valor / maxValorLineas) * 60;
+                return (
+                  <circle 
+                    key={i} 
+                    cx={x} 
+                    cy={y} 
+                    r="2" 
+                    fill="#FF6610"
+                    className="chart-point"
+                    onMouseEnter={() => setHoveredPoint(`line-${i}`)}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                );
+              })}
+            </svg>
+            <div className="chart-x-labels">
+              {rutasporDia.map((d, i) => (
+                <span key={i}>{d.dia}</span>
+              ))}
+            </div>
+            {hoveredPoint && hoveredPoint.startsWith('line-') && (
+              <div className="chart-tooltip">
+                Día {rutasporDia[parseInt(hoveredPoint.split('-')[1])].dia}: {rutasporDia[parseInt(hoveredPoint.split('-')[1])].valor} usuarios
+              </div>
+            )}
+          </div>
+        </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'; // 1. Importamos useEffect y useRef
+import React, { useEffect, useRef, useState } from 'react'; // 1. Importamos useEffect, useRef y useState
 import Spline from '@splinetool/react-spline'; // Importamos Spline
 import './LandingPage.css'; // CSS para esta página
 
@@ -33,6 +33,37 @@ const LandingPage = () => {
   const loginRef = useRef(null);
   const descargaRef = useRef(null);
   const splineContainerRef = useRef(null); // Ref para el contenedor de Spline
+  const introRef = useRef(null); // Ref para la sección intro
+  
+  // Estado para el efecto de paralaje 3D
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Efecto para el paralaje 3D en la sección intro
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const intro = introRef.current;
+      if (!intro) return;
+
+      // Obtener las dimensiones de la sección
+      const rect = intro.getBoundingClientRect();
+      
+      // Calcular la posición del mouse relativa al centro de la sección
+      const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
+      const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+      
+      // Actualizar el estado con valores normalizados
+      setMousePosition({ x, y });
+    };
+
+    const intro = introRef.current;
+    if (intro) {
+      intro.addEventListener('mousemove', handleMouseMove);
+      
+      return () => {
+        intro.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, []);
 
   // Efecto para evitar que el scroll haga zoom en el modelo 3D
   useEffect(() => {
@@ -90,7 +121,16 @@ const LandingPage = () => {
     <div className="landing-container">
       
       {/* --- SECCIÓN 1: INTRO --- */}
-      <section id="intro" className="landing-section" style={{ backgroundImage: `url(${fondoIntro})` }}>
+      <section 
+        id="inicio" 
+        className="landing-section" 
+        ref={introRef}
+        style={{ 
+          backgroundImage: `url(${fondoIntro})`,
+          backgroundPosition: `calc(50% + ${mousePosition.x * 30}px) calc(50% + ${mousePosition.y * 30}px)`,
+          transition: 'background-position 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }}
+      >
         {/* 6. Añadimos la clase 'animate-on-load' a cada elemento */}
         <img src={ruxLogo} alt="RUX Logo" className="intro-logo animate-on-load" />
         <h1 className="intro-title animate-on-load">Nuestra comunidad,<br/>rutas y memorias</h1>

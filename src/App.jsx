@@ -9,6 +9,8 @@ import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Vehiculos from "./pages/Vehiculos";
+import Rutas from "./pages/Rutas";
+import Comunidades from "./pages/Comunidades";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/vehiculos" element={<Vehiculos />} />
+          <Route path="/rutas" element={<Rutas />} />
+          <Route path="/comunidades" element={<Comunidades />} />
         </Route>
       </Routes>
     </Router>
