@@ -17,7 +17,7 @@ const Footer = () => {
           <p><strong>Contáctanos</strong></p>
           <p>Av. Octavio Chacón Moscoso 1-98 y Primera Transversal (Parque industrial)</p>
           <p>Cuenca, Ecuador</p>
-          <p>info@rux.com.ec | +593 99 328 9678</p>
+          <p>rux01rux@gmail.com | +593 99 328 9678</p>
         </div>
 
         <div className="footer-section footer-info-section">
