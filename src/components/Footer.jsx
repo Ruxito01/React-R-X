@@ -32,7 +32,7 @@ const Footer = () => {
               <img src={iconWhatsapp} alt="WhatsApp" />
             </a>
             <a 
-              href="https://instagram.com/rux_ec" 
+              href="https://www.instagram.com/ruxapp?igsh=MzcyOG1hczgyb3A3" 
               target="_blank" 
               rel="noopener noreferrer"
               className="social-link"
