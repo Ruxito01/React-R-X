@@ -201,10 +201,229 @@ html {
   z-index: 1;
 }
 
-/* src/pages/LandingPage.css */
+.background-strip {
+  flex: 1;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: filter 0.6s ease;
+  filter: brightness(0.6) saturate(1.1);
+}
 
-/* 1. URL de la fuente 'Inter' CORREGIDA */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+.interactive-background .background-strip:hover {
+  filter: brightness(1) saturate(1);
+}
+
+
+/* ----- SECCIÓN 3: DESCARGA ----- */
+#descarga {
+  color: white;
+  text-align: center;
+  flex-direction: column;
+  /* La transición ya está definida arriba */
+  position: relative;
+}
+
+/* Capa oscura semitransparente sobre la imagen de fondo */
+#descarga::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Canvas de estrellas sobre la capa oscura pero bajo el contenido */
+.starfield-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  /* Sobre la capa oscura (z-index: 0) */
+}
+
+.descarga-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  /* Sobre estrellas (z-index: 1) */
+}
+
+#descarga .descarga-title {
+  font-size: 3.5em;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+  margin: 0 auto;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+  position: relative;
+}
+
+/* --- AJUSTES SPLINE --- */
+.spline-container {
+  width: 100%;
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.spline-container canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Ocultar logo de Spline (Marca de agua) - Intento CSS */
+#spline-watermark,
+a[href^="https://spline.design"],
+[class*="spline-watermark"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Elemento Cover para tapar la marca de agua */
+.spline-watermark-cover {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 140px;
+  height: 40px;
+  background-color: #000;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.spline-watermark-cover span {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+
+/* ===== INICIO ESTILOS FOOTER ===== */
+.footer {
+  background-color: #000000;
+  color: #a0a0a0;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  /* La transición ya está definida arriba */
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-logo img {
+  width: 100px;
+  height: auto;
+}
+
+.footer-info {
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.footer-info p {
+  margin: 5px 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-social a {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.footer-social a:hover {
+  transform: scale(1.15);
+}
+
+.footer-social img {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Media Query para Móviles --- */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .footer-logo {
+    order: 1;
+  }
+
+  .footer-info {
+    order: 3;
+    text-align: center;
+  }
+
+  .footer-social {
+    order: 2;
+  }
+
+  /* --- Ajustes Móviles para Intro --- */
+  #inicio .intro-logo {
+    width: 180px;
+  }
+
+  #inicio .intro-title {
+    font-size: 2em;
+  }
+
+  #inicio .rux-movil-button img {
+    width: 200px;
+  }
+
+  #inicio .ingresar-button span {
+    font-size: 24px;
+  }
+
+  #inicio .ingresar-button img {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* --- Ajustes Móviles para Descarga --- */
+  #descarga .descarga-title {
+    font-size: 2.5em;
+  }
+}
 
 /* 2. DEFINICIÃ“N DE LA ANIMACIÃ“N */
 @keyframes fadeUp {
