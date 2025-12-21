@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 import logo from '../assets/rux-logo.png';
@@ -78,79 +77,165 @@ const Login = () => {
   };
 
   /**
-   * Configurar login de Google con flujo manual
+   * Función helper para abrir popup centrado de Google
    */
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setError('');
-      setLoading(true);
+  const openCenteredPopup = (url, title, w, h) => {
+    // Calcular la posición central
+    const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+    const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
 
-      try {
-        console.log('🔵 Token de Google recibido');
+    const width = window.innerWidth
+      ? window.innerWidth
+      : document.documentElement.clientWidth
+        ? document.documentElement.clientWidth
+        : window.screen.width;
 
-        // Obtener información del usuario usando el access token
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: {
-            'Authorization': `Bearer ${tokenResponse.access_token}`
-          }
-        });
+    const height = window.innerHeight
+      ? window.innerHeight
+      : document.documentElement.clientHeight
+        ? document.documentElement.clientHeight
+        : window.screen.height;
 
-        const userInfo = await userInfoResponse.json();
-        console.log('✅ Información del usuario obtenida:', userInfo.email);
+    const systemZoom = width / window.screen.availWidth;
+    const left = (width - w) / 2 / systemZoom + dualScreenLeft;
+    const top = (height - h) / 2 / systemZoom + dualScreenTop;
 
-        // Verificar usuario en el backend
-        const url = `${import.meta.env.VITE_API_URL}/usuario/email/${userInfo.email}`;
-        const response = await fetch(url);
+    const newWindow = window.open(
+      url,
+      title,
+      `scrollbars=yes,width=${w / systemZoom},height=${h / systemZoom},top=${top},left=${left}`
+    );
 
-        if (response.status === 404) {
-          setError('Esta cuenta de Google no está registrada. Contacta al administrador.');
-          setLoading(false);
-          return;
-        }
-
-        if (!response.ok) {
-          setError('Error al conectar con el servidor. Intenta de nuevo.');
-          setLoading(false);
-          return;
-        }
-
-        const usuario = await response.json();
-        console.log('✅ Usuario encontrado:', usuario.nombre, '- Rol:', usuario.rol);
-
-        // Verificar rol ADMIN
-        if (usuario.rol !== 'ADMIN') {
-          setError('Acceso denegado. Solo administradores pueden acceder a esta plataforma.');
-          setLoading(false);
-          return;
-        }
-
-        // Guardar usuario y navegar
-        const authService = (await import('../services/authService')).default;
-        authService.saveUser(usuario);
-        console.log('✅ Login con Google exitoso, redirigiendo al dashboard');
-        navigate('/dashboard');
-
-      } catch (err) {
-        console.error('❌ Error inesperado:', err);
-        setError('Error inesperado al autenticar con Google.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: (error) => {
-      console.error('❌ Error en Google Login:', error);
-      setError('Error al autenticar con Google. Intenta de nuevo.');
-    },
-    // Configuración para centrar el popup
-    ux_mode: 'popup',
-    select_account: true
-  });
+    if (window.focus && newWindow) newWindow.focus();
+    return newWindow;
+  };
 
   /**
-   * Manejar click en el botón de Google
+   * Manejar click en el botón de Google - Implementación manual con popup centrado
    */
-  const handleGoogleLoginClick = () => {
-    googleLogin();
+  const handleGoogleLoginClick = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const redirectUri = `${window.location.origin}/google-callback`;
+
+      // Crear URL de autorización de Google
+      const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+      authUrl.searchParams.append('client_id', clientId);
+      authUrl.searchParams.append('redirect_uri', redirectUri);
+      authUrl.searchParams.append('response_type', 'token');
+      authUrl.searchParams.append('scope', 'openid email profile');
+      authUrl.searchParams.append('prompt', 'select_account');
+
+      // Abrir popup centrado (500x600)
+      const popup = openCenteredPopup(authUrl.toString(), 'Login con Google', 500, 600);
+
+      if (!popup) {
+        setError('No se pudo abrir el popup. Verifica que los popups no estén bloqueados.');
+        setLoading(false);
+        return;
+      }
+
+      // Escuchar el mensaje del popup
+      const handleMessage = async (event) => {
+        // Verificar origen
+        if (event.origin !== window.location.origin) return;
+
+        // Cerrar popup
+        if (popup && !popup.closed) {
+          popup.close();
+        }
+
+        const { access_token, error: authError } = event.data;
+
+        if (authError) {
+          setError('Error al autenticar con Google. Intenta de nuevo.');
+          setLoading(false);
+          window.removeEventListener('message', handleMessage);
+          return;
+        }
+
+        if (!access_token) {
+          setLoading(false);
+          window.removeEventListener('message', handleMessage);
+          return;
+        }
+
+        try {
+          console.log('🔵 Token de Google recibido');
+
+          // Obtener información del usuario usando el access token
+          const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+              'Authorization': `Bearer ${access_token}`
+            }
+          });
+
+          const userInfo = await userInfoResponse.json();
+          console.log('✅ Información del usuario obtenida:', userInfo.email);
+
+          // Verificar usuario en el backend
+          const url = `${import.meta.env.VITE_API_URL}/usuario/email/${userInfo.email}`;
+          const response = await fetch(url);
+
+          if (response.status === 404) {
+            setError('Esta cuenta de Google no está registrada. Contacta al administrador.');
+            setLoading(false);
+            window.removeEventListener('message', handleMessage);
+            return;
+          }
+
+          if (!response.ok) {
+            setError('Error al conectar con el servidor. Intenta de nuevo.');
+            setLoading(false);
+            window.removeEventListener('message', handleMessage);
+            return;
+          }
+
+          const usuario = await response.json();
+          console.log('✅ Usuario encontrado:', usuario.nombre, '- Rol:', usuario.rol);
+
+          // Verificar rol ADMIN
+          if (usuario.rol !== 'ADMIN') {
+            setError('Acceso denegado. Solo administradores pueden acceder a esta plataforma.');
+            setLoading(false);
+            window.removeEventListener('message', handleMessage);
+            return;
+          }
+
+          // Guardar usuario y navegar
+          const authService = (await import('../services/authService')).default;
+          authService.saveUser(usuario);
+          console.log('✅ Login con Google exitoso, redirigiendo al dashboard');
+          navigate('/dashboard');
+
+        } catch (err) {
+          console.error('❌ Error inesperado:', err);
+          setError('Error inesperado al autenticar con Google.');
+        } finally {
+          setLoading(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Verificar si el popup fue cerrado manualmente
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          setLoading(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 500);
+
+    } catch (err) {
+      console.error('❌ Error al iniciar Google Login:', err);
+      setError('Error al iniciar sesión con Google.');
+      setLoading(false);
+    }
   };
 
   return (
