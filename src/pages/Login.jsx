@@ -119,7 +119,7 @@ const Login = () => {
 
     try {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = `${window.location.origin}/google-callback`;
+      const redirectUri = `${window.location.origin}/google-callback.html`;
 
       // Crear URL de autorización de Google
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
