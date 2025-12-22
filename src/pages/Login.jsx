@@ -111,14 +111,18 @@ const Login = () => {
   };
 
   /**
-   * Manejar click en el botón de Google - Implementación manual con popup centrado
+   * Manejar click en el botón de Google - Redirección directa (más compatible)
    */
   const handleGoogleLoginClick = () => {
     setError('');
     setLoading(true);
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/google-callback.html`;
+    // Usar la página principal como callback en lugar de un archivo separado
+    const redirectUri = `${window.location.origin}/`;
+
+    // Guardar que estamos esperando el callback de Google
+    sessionStorage.setItem('google_auth_pending', 'true');
 
     // Crear URL de autorización de Google
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
@@ -128,110 +132,82 @@ const Login = () => {
     authUrl.searchParams.append('scope', 'openid email profile');
     authUrl.searchParams.append('prompt', 'select_account');
 
-    // Abrir popup centrado (500x600) - directamente sin async/await
-    const popup = openCenteredPopup(authUrl.toString(), 'Login con Google', 500, 600);
-
-    if (!popup || popup.closed) {
-      setError('No se pudo abrir el popup. Verifica que los popups no estén bloqueados.');
-      setLoading(false);
-      return;
-    }
-
-    // Escuchar el mensaje del popup
-      const handleMessage = async (event) => {
-        // Verificar origen
-        if (event.origin !== window.location.origin) return;
-
-        // Cerrar popup
-        if (popup && !popup.closed) {
-          popup.close();
-        }
-
-        const { access_token, error: authError } = event.data;
-
-        if (authError) {
-          setError('Error al autenticar con Google. Intenta de nuevo.');
-          setLoading(false);
-          window.removeEventListener('message', handleMessage);
-          return;
-        }
-
-        if (!access_token) {
-          setLoading(false);
-          window.removeEventListener('message', handleMessage);
-          return;
-        }
-
-        try {
-          console.log('🔵 Token de Google recibido');
-
-          // Obtener información del usuario usando el access token
-          const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: {
-              'Authorization': `Bearer ${access_token}`
-            }
-          });
-
-          const userInfo = await userInfoResponse.json();
-          console.log('✅ Información del usuario obtenida:', userInfo.email);
-
-          // Verificar usuario en el backend
-          const url = `${import.meta.env.VITE_API_URL}/usuario/email/${userInfo.email}`;
-          const response = await fetch(url);
-
-          if (response.status === 404) {
-            setError('Esta cuenta de Google no está registrada. Contacta al administrador.');
-            setLoading(false);
-            window.removeEventListener('message', handleMessage);
-            return;
-          }
-
-          if (!response.ok) {
-            setError('Error al conectar con el servidor. Intenta de nuevo.');
-            setLoading(false);
-            window.removeEventListener('message', handleMessage);
-            return;
-          }
-
-          const usuario = await response.json();
-          console.log('✅ Usuario encontrado:', usuario.nombre, '- Rol:', usuario.rol);
-
-          // Verificar rol ADMIN
-          if (usuario.rol !== 'ADMIN') {
-            setError('Acceso denegado. Solo administradores pueden acceder a esta plataforma.');
-            setLoading(false);
-            window.removeEventListener('message', handleMessage);
-            return;
-          }
-
-          // Guardar usuario y navegar
-          const authService = (await import('../services/authService')).default;
-          authService.saveUser(usuario);
-          console.log('✅ Login con Google exitoso, redirigiendo al dashboard');
-          navigate('/dashboard');
-
-        } catch (err) {
-          console.error('❌ Error inesperado:', err);
-          setError('Error inesperado al autenticar con Google.');
-        } finally {
-          setLoading(false);
-          window.removeEventListener('message', handleMessage);
-          clearTimeout(window._googleLoginTimeout); // Clear timeout in finally block
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Usar timeout en lugar de verificar popup.closed (evita error COOP)
-      // Si después de 2 minutos no hay respuesta, limpiar el estado
-      const timeoutId = setTimeout(() => {
-        setLoading(false);
-        window.removeEventListener('message', handleMessage);
-      }, 120000);
-
-      // Guardar el timeout ID para limpiarlo cuando llegue el mensaje
-      window._googleLoginTimeout = timeoutId;
+    // Redirección directa en lugar de popup
+    window.location.href = authUrl.toString();
   };
+
+  // Procesar callback de Google al cargar la página
+  useEffect(() => {
+    const processGoogleCallback = async () => {
+      // Verificar si hay un token en el hash de la URL
+      const hash = window.location.hash;
+      if (!hash || !sessionStorage.getItem('google_auth_pending')) return;
+
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const error = params.get('error');
+
+      // Limpiar el hash de la URL y el flag
+      window.history.replaceState(null, '', window.location.pathname);
+      sessionStorage.removeItem('google_auth_pending');
+
+      if (error || !accessToken) {
+        setError('Error al autenticar con Google. Intenta de nuevo.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // Obtener información del usuario usando el access token
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+
+        const userInfo = await userInfoResponse.json();
+        console.log('Información del usuario obtenida:', userInfo.email);
+
+        // Verificar usuario en el backend
+        const url = `${import.meta.env.VITE_API_URL}/usuario/email/${userInfo.email}`;
+        const response = await fetch(url);
+
+        if (response.status === 404) {
+          setError('Esta cuenta de Google no está registrada. Contacta al administrador.');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          setError('Error al conectar con el servidor. Intenta de nuevo.');
+          setLoading(false);
+          return;
+        }
+
+        const usuario = await response.json();
+        console.log('Usuario encontrado:', usuario.nombre, '- Rol:', usuario.rol);
+
+        // Verificar rol ADMIN
+        if (usuario.rol !== 'ADMIN') {
+          setError('Acceso denegado. Solo administradores pueden acceder.');
+          setLoading(false);
+          return;
+        }
+
+        // Guardar usuario y navegar
+        const authService = (await import('../services/authService')).default;
+        authService.saveUser(usuario);
+        console.log('Login con Google exitoso, redirigiendo al dashboard');
+        navigate('/dashboard');
+
+      } catch (err) {
+        console.error('Error inesperado:', err);
+        setError('Error inesperado al autenticar con Google.');
+        setLoading(false);
+      }
+    };
+
+    processGoogleCallback();
+  }, [navigate]);
 
   return (
     <div className="login-container">
