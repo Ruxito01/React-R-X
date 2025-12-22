@@ -113,32 +113,31 @@ const Login = () => {
   /**
    * Manejar click en el botón de Google - Implementación manual con popup centrado
    */
-  const handleGoogleLoginClick = async () => {
+  const handleGoogleLoginClick = () => {
     setError('');
     setLoading(true);
 
-    try {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = `${window.location.origin}/google-callback.html`;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/google-callback.html`;
 
-      // Crear URL de autorización de Google
-      const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-      authUrl.searchParams.append('client_id', clientId);
-      authUrl.searchParams.append('redirect_uri', redirectUri);
-      authUrl.searchParams.append('response_type', 'token');
-      authUrl.searchParams.append('scope', 'openid email profile');
-      authUrl.searchParams.append('prompt', 'select_account');
+    // Crear URL de autorización de Google
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.append('client_id', clientId);
+    authUrl.searchParams.append('redirect_uri', redirectUri);
+    authUrl.searchParams.append('response_type', 'token');
+    authUrl.searchParams.append('scope', 'openid email profile');
+    authUrl.searchParams.append('prompt', 'select_account');
 
-      // Abrir popup centrado (500x600)
-      const popup = openCenteredPopup(authUrl.toString(), 'Login con Google', 500, 600);
+    // Abrir popup centrado (500x600) - directamente sin async/await
+    const popup = openCenteredPopup(authUrl.toString(), 'Login con Google', 500, 600);
 
-      if (!popup) {
-        setError('No se pudo abrir el popup. Verifica que los popups no estén bloqueados.');
-        setLoading(false);
-        return;
-      }
+    if (!popup || popup.closed) {
+      setError('No se pudo abrir el popup. Verifica que los popups no estén bloqueados.');
+      setLoading(false);
+      return;
+    }
 
-      // Escuchar el mensaje del popup
+    // Escuchar el mensaje del popup
       const handleMessage = async (event) => {
         // Verificar origen
         if (event.origin !== window.location.origin) return;
@@ -232,12 +231,6 @@ const Login = () => {
 
       // Guardar el timeout ID para limpiarlo cuando llegue el mensaje
       window._googleLoginTimeout = timeoutId;
-
-    } catch (err) {
-      console.error('❌ Error al iniciar Google Login:', err);
-      setError('Error al iniciar sesión con Google.');
-      setLoading(false);
-    }
   };
 
   return (
