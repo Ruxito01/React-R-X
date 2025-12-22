@@ -16,7 +16,7 @@
     ],
     "rewrites": [
         {
-            "source": "/((?!api|google-callback.html).*)",
+            "source": "/((?!api).*)",
             "destination": "/index.html"
         }
     ]

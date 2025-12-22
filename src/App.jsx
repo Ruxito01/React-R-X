@@ -16,6 +16,9 @@ import Vehiculos from "./pages/Vehiculos";
 import Rutas from "./pages/Rutas";
 import Comunidades from "./pages/Comunidades";
 
+// Callback de Google OAuth (redirect - compatible con Edge)
+import GoogleCallback from "./pages/GoogleCallback";
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
@@ -28,6 +31,9 @@ function App() {
               Muestra la página larga de bienvenida (Intro + Login + Descarga)
             */}
             <Route path="/" element={<LandingPage />} />
+
+            {/* Callback de Google OAuth - NO protegida */}
+            <Route path="/google-callback" element={<GoogleCallback />} />
 
             {/* RUTAS INTERNAS (Protegidas): 
               Usan MainLayout y requieren autenticación de ADMIN
