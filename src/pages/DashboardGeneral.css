@@ -1,0 +1,691 @@
+/* Dashboard General - Estilos */
+
+.dashboard-general-container {
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 100px 20px 20px 20px;
+    /* Aumentar padding superior para evitar solapamiento con navbar */
+}
+
+.dashboard-general-header {
+    text-align: center;
+    padding: 30px 0;
+}
+
+.dashboard-general-header h1 {
+    color: #FF6610;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0;
+}
+
+/* Estados de carga y error */
+.dashboard-general-loading,
+.dashboard-general-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    /* Quitar fondo para que el loader se vea sobre el fondo principal */
+    background: transparent;
+    border-radius: 16px;
+    margin: 20px auto;
+    max-width: 500px;
+}
+
+/* Skeleton / Shimmer Effect */
+.skeleton {
+    background: #f0f0f0;
+    background-image: linear-gradient(90deg,
+            #f0f0f0 0px,
+            #e8e8e8 190px,
+            #f0f0f0 400px);
+    background-size: 1000px 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.skeleton-card-value {
+    width: 60px;
+    height: 30px;
+    display: block;
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+/* Animación de entrada Dashboard */
+.dashboard-animate-enter {
+    animation: dashboardFadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes dashboardFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-general-error {
+    color: #e53935;
+}
+
+.dashboard-general-error button {
+    margin-top: 20px;
+    padding: 10px 24px;
+    background: #FF6610;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.dashboard-general-error button:hover {
+    background: #e05a00;
+    background: #e05a00;
+}
+
+/* Tarjetas Resumen Stats */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto 30px auto;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.icon-users {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.icon-routes {
+    background: #E8F5E9;
+    color: #388E3C;
+}
+
+.icon-communities {
+    background: #F3E5F5;
+    color: #7B1FA2;
+}
+
+.icon-vehicles {
+    background: #FFF3E0;
+    color: #FF6610;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Contenido principal */
+.dashboard-general-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    /* Aumentar gap para separación visual interna */
+    margin-bottom: 40px;
+}
+
+.dashboard-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Tarjetas (secciones internas con contorno) */
+.dashboard-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #FF6610;
+}
+
+.card-icon {
+    font-size: 24px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Tacometro - Usuarios en linea */
+.tacometro-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.tacometro-svg {
+    width: 180px;
+    height: 110px;
+}
+
+.tacometro-progress {
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.tacometro-numero {
+    font-size: 24px;
+    font-weight: 700;
+    fill: #FF6610;
+}
+
+.tacometro-label {
+    font-size: 11px;
+    fill: #666;
+}
+
+.big-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #FF6610;
+}
+
+.total-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.usuarios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.usuario-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: #f8f8f8;
+    border-radius: 8px;
+}
+
+.usuario-avatar {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.usuario-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #FF6610;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #4CAF50;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.usuario-nombre {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Rutas recientes */
+.rutas-count {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Tabla de rutas */
+.rutas-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.rutas-tabla thead {
+    background: #FF6610;
+    color: white;
+}
+
+.rutas-tabla th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.rutas-tabla th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.rutas-tabla th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.rutas-tabla tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.rutas-tabla tbody tr:hover {
+    background: #f8f8f8;
+}
+
+.rutas-tabla tbody tr:last-child {
+    border-bottom: none;
+}
+
+.rutas-tabla td {
+    padding: 10px 12px;
+}
+
+.ruta-nombre {
+    font-weight: 600;
+    color: #333;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ruta-codigo {
+    color: #FF6610;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.ruta-estado {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ruta-estado[data-estado="programado"],
+.ruta-estado[data-estado="PROGRAMADO"] {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.ruta-estado[data-estado="en_curso"],
+.ruta-estado[data-estado="EN_CURSO"] {
+    background: #E8F5E9;
+    color: #388E3C;
+}
+
+.ruta-estado[data-estado="finalizado"],
+.ruta-estado[data-estado="FINALIZADO"] {
+    background: #F3E5F5;
+    color: #7B1FA2;
+}
+
+.ruta-estado[data-estado="cancelado"],
+.ruta-estado[data-estado="CANCELADO"] {
+    background: #FFEBEE;
+    color: #D32F2F;
+}
+
+.ruta-fecha {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Gráfico de picos - Viajes por día */
+.grafico-picos {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.grafico-titulo {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.grafico-container {
+    position: relative;
+}
+
+.picos-svg {
+    width: 100%;
+    height: 80px;
+}
+
+.grafico-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 0 4px;
+}
+
+.grafico-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.label-cantidad {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #FF6610;
+}
+
+.label-dia {
+    font-size: 0.75rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.label-fecha {
+    font-size: 0.65rem;
+    color: #999;
+}
+
+/* Comunidades - Lista con miembros */
+.comunidades-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comunidad-card {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 14px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.comunidad-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.comunidad-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.comunidad-foto {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.comunidad-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.foto-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #FF6610, #ff8c42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.comunidad-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.comunidad-nombre {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.comunidad-miembros-count {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+/* Fotos de miembros apiladas */
+.miembros-stack {
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+}
+
+.miembro-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-left: -10px;
+    overflow: hidden;
+    background: #FF6610;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.miembro-avatar:first-child {
+    margin-left: 0;
+}
+
+.miembro-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.miembro-more {
+    background: #666;
+    font-size: 0.7rem;
+}
+
+.sin-miembros {
+    color: #999;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Tipos de vehiculos - Grafico de barras */
+.tipos-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tipo-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tipo-nombre {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.tipo-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 28px;
+    background: #f0f0f0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.tipo-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6610, #ff8c42);
+    border-radius: 14px;
+    min-width: 20px;
+    transition: width 0.5s ease;
+}
+
+.tipo-count {
+    font-weight: 600;
+    color: #333;
+    padding-right: 12px;
+}
+
+/* Sin datos */
+.no-data {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+
+    .comunidades-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-general-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .comunidades-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .big-number {
+        font-size: 2.5rem;
+    }
+}

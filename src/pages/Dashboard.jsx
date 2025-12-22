@@ -13,186 +13,147 @@ const Dashboard = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
 
-  // Datos mock para la tabla de usuarios con datos específicos de gráficos
-  const usuarios = [
-    { 
-      id: 0,
-      nombre: 'Sofía García', 
-      distancia: 520, 
-      rutasMes: 15, 
-      vehiculos: 2,
-      categorias: { urbano: 60, rural: 25, montaña: 15 },
-      rutasPorDia: [
-        { dia: '1', valor: 5 },
-        { dia: '5', valor: 8 },
-        { dia: '10', valor: 12 },
-        { dia: '15', valor: 15 },
-        { dia: '20', valor: 20 },
-        { dia: '25', valor: 25 },
-        { dia: '30', valor: 30 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 15 },
-        { dia: 'M', valor: 25 },
-        { dia: 'X', valor: 12 },
-        { dia: 'J', valor: 8 },
-        { dia: 'V', valor: 18 },
-        { dia: 'S', valor: 35 },
-      ]
-    },
-    { 
-      id: 1,
-      nombre: 'Carlos Méndez', 
-      distancia: 480, 
-      rutasMes: 12, 
-      vehiculos: 1,
-      categorias: { urbano: 40, rural: 35, montaña: 25 },
-      rutasPorDia: [
-        { dia: '1', valor: 3 },
-        { dia: '5', valor: 6 },
-        { dia: '10', valor: 9 },
-        { dia: '15', valor: 12 },
-        { dia: '20', valor: 15 },
-        { dia: '25', valor: 18 },
-        { dia: '30', valor: 22 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 12 },
-        { dia: 'M', valor: 18 },
-        { dia: 'X', valor: 20 },
-        { dia: 'J', valor: 15 },
-        { dia: 'V', valor: 22 },
-        { dia: 'S', valor: 28 },
-      ]
-    },
-    { 
-      id: 2,
-      nombre: 'María Torres', 
-      distancia: 450, 
-      rutasMes: 14, 
-      vehiculos: 3,
-      categorias: { urbano: 50, rural: 30, montaña: 20 },
-      rutasPorDia: [
-        { dia: '1', valor: 4 },
-        { dia: '5', valor: 7 },
-        { dia: '10', valor: 11 },
-        { dia: '15', valor: 14 },
-        { dia: '20', valor: 18 },
-        { dia: '25', valor: 22 },
-        { dia: '30', valor: 26 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 18 },
-        { dia: 'M', valor: 22 },
-        { dia: 'X', valor: 15 },
-        { dia: 'J', valor: 12 },
-        { dia: 'V', valor: 20 },
-        { dia: 'S', valor: 30 },
-      ]
-    },
-    { 
-      id: 3,
-      nombre: 'Ricardo Rodríguez', 
-      distancia: 420, 
-      rutasMes: 11, 
-      vehiculos: 2,
-      categorias: { urbano: 45, rural: 40, montaña: 15 },
-      rutasPorDia: [
-        { dia: '1', valor: 2 },
-        { dia: '5', valor: 5 },
-        { dia: '10', valor: 8 },
-        { dia: '15', valor: 11 },
-        { dia: '20', valor: 14 },
-        { dia: '25', valor: 17 },
-        { dia: '30', valor: 20 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 10 },
-        { dia: 'M', valor: 15 },
-        { dia: 'X', valor: 18 },
-        { dia: 'J', valor: 14 },
-        { dia: 'V', valor: 16 },
-        { dia: 'S', valor: 25 },
-      ]
-    },
-    { 
-      id: 4,
-      nombre: 'Ana Jiménez', 
-      distancia: 380, 
-      rutasMes: 10, 
-      vehiculos: 1,
-      categorias: { urbano: 55, rural: 25, montaña: 20 },
-      rutasPorDia: [
-        { dia: '1', valor: 3 },
-        { dia: '5', valor: 5 },
-        { dia: '10', valor: 7 },
-        { dia: '15', valor: 10 },
-        { dia: '20', valor: 13 },
-        { dia: '25', valor: 16 },
-        { dia: '30', valor: 19 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 14 },
-        { dia: 'M', valor: 16 },
-        { dia: 'X', valor: 12 },
-        { dia: 'J', valor: 10 },
-        { dia: 'V', valor: 15 },
-        { dia: 'S', valor: 20 },
-      ]
-    },
-    { 
-      id: 5,
-      nombre: 'Pedro Sánchez', 
-      distancia: 350, 
-      rutasMes: 9, 
-      vehiculos: 2,
-      categorias: { urbano: 35, rural: 45, montaña: 20 },
-      rutasPorDia: [
-        { dia: '1', valor: 2 },
-        { dia: '5', valor: 4 },
-        { dia: '10', valor: 6 },
-        { dia: '15', valor: 9 },
-        { dia: '20', valor: 11 },
-        { dia: '25', valor: 14 },
-        { dia: '30', valor: 17 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 11 },
-        { dia: 'M', valor: 13 },
-        { dia: 'X', valor: 10 },
-        { dia: 'J', valor: 9 },
-        { dia: 'V', valor: 12 },
-        { dia: 'S', valor: 18 },
-      ]
-    },
-    { 
-      id: 6,
-      nombre: 'Laura Ramírez', 
-      distancia: 320, 
-      rutasMes: 8, 
-      vehiculos: 1,
-      categorias: { urbano: 48, rural: 32, montaña: 20 },
-      rutasPorDia: [
-        { dia: '1', valor: 1 },
-        { dia: '5', valor: 3 },
-        { dia: '10', valor: 5 },
-        { dia: '15', valor: 8 },
-        { dia: '20', valor: 10 },
-        { dia: '25', valor: 12 },
-        { dia: '30', valor: 15 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 9 },
-        { dia: 'M', valor: 12 },
-        { dia: 'X', valor: 8 },
-        { dia: 'J', valor: 7 },
-        { dia: 'V', valor: 11 },
-        { dia: 'S', valor: 16 },
-      ]
-    },
-  ];
+  // Estados para la carga de usuarios desde el backend
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const selectedUser = usuarios[selectedUserIndex];
+  // Datos mock para gráficos (no disponibles en backend)
+  const datosMockGraficos = {
+    categorias: { urbano: 50, rural: 30, montaña: 20 },
+    rutasPorDia: [
+      { dia: '1', valor: 3 },
+      { dia: '5', valor: 6 },
+      { dia: '10', valor: 9 },
+      { dia: '15', valor: 12 },
+      { dia: '20', valor: 16 },
+      { dia: '25', valor: 20 },
+      { dia: '30', valor: 24 },
+    ],
+    distanciaSemanal: [
+      { dia: 'L', valor: 12 },
+      { dia: 'M', valor: 18 },
+      { dia: 'X', valor: 15 },
+      { dia: 'J', valor: 10 },
+      { dia: 'V', valor: 20 },
+      { dia: 'S', valor: 25 },
+    ]
+  };
+
+  // Función para cargar usuarios
+  const fetchUsuarios = async (mostrarLoading = true) => {
+    try {
+      if (mostrarLoading && usuarios.length === 0) {
+        setLoading(true);
+      }
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/usuario`);
+      if (!response.ok) throw new Error('Error al cargar usuarios');
+      const data = await response.json();
+      
+      // Mapear datos del backend al formato del dashboard
+      const usuariosMapeados = data.map((u, index) => ({
+        id: u.id,
+        nombre: `${u.nombre} ${u.apellido}`,
+        email: u.email,
+        distancia: Math.floor(Math.random() * 500) + 100, // Mock
+        rutasMes: Math.floor(Math.random() * 20) + 5, // Mock
+        vehiculos: 0,
+        categorias: { 
+          urbano: 30 + Math.floor(Math.random() * 40), 
+          rural: 20 + Math.floor(Math.random() * 30), 
+          montaña: 10 + Math.floor(Math.random() * 20) 
+        },
+        rutasPorDia: datosMockGraficos.rutasPorDia.map(d => ({
+          ...d, 
+          valor: d.valor + Math.floor(Math.random() * 5)
+        })),
+        distanciaSemanal: datosMockGraficos.distanciaSemanal.map(d => ({
+          ...d, 
+          valor: d.valor + Math.floor(Math.random() * 10)
+        }))
+      }));
+      
+      setUsuarios(usuariosMapeados);
+      setError(null);
+    } catch (err) {
+      console.error('Error cargando usuarios:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar usuarios inicial y polling cada 5 segundos
+  useEffect(() => {
+    fetchUsuarios(true);
+
+    // Polling cada 5 segundos
+    const intervalo = setInterval(() => {
+      fetchUsuarios(false);
+    }, 5000);
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // Si está cargando, mostrar indicador
+  if (loading) {
+    return (
+      <div className="dashboard-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+        <div className="dashboard-header">
+          <h1>DASHBOARD DE USUARIOS</h1>
+        </div>
+        <div className="dashboard-main-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center', color: '#666' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+            <p>Cargando usuarios...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si hay error, mostrarlo
+  if (error) {
+    return (
+      <div className="dashboard-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+        <div className="dashboard-header">
+          <h1>DASHBOARD DE USUARIOS</h1>
+        </div>
+        <div className="dashboard-main-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center', color: '#e53935' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠</div>
+            <p>Error: {error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay usuarios
+  if (usuarios.length === 0) {
+    return (
+      <div className="dashboard-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+        <div className="dashboard-header">
+          <h1>DASHBOARD DE USUARIOS</h1>
+        </div>
+        <div className="dashboard-main-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center', color: '#666' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>📋</div>
+            <p>No hay usuarios registrados</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedUser = usuarios[selectedUserIndex] || usuarios[0];
   const rutasporDia = selectedUser.rutasPorDia;
   const distanciaSemanal = selectedUser.distanciaSemanal;
 

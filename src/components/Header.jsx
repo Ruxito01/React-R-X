@@ -35,6 +35,12 @@ const Header = () => {
           
           <nav className="header-nav">
             <NavLink 
+              to="/general" 
+              className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+            >
+              General
+            </NavLink>
+            <NavLink 
               to="/dashboard" 
               className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
             >

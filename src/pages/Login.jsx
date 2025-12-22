@@ -63,7 +63,7 @@ const Login = () => {
 
       if (result.success) {
         console.log('✅ Login exitoso, redirigiendo al dashboard');
-        navigate('/dashboard');
+        navigate('/general');
       } else {
         console.log('❌ Login fallido:', result.message);
         setError(result.message);
@@ -197,7 +197,7 @@ const Login = () => {
         const authService = (await import('../services/authService')).default;
         authService.saveUser(usuario);
         console.log('Login con Google exitoso, redirigiendo al dashboard');
-        navigate('/dashboard');
+        navigate('/general');
 
       } catch (err) {
         console.error('Error inesperado:', err);

@@ -12,6 +12,7 @@ import LandingPage from "./pages/LandingPage";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import DashboardGeneral from "./pages/DashboardGeneral";
 import Vehiculos from "./pages/Vehiculos";
 import Rutas from "./pages/Rutas";
 import Comunidades from "./pages/Comunidades";
@@ -37,6 +38,7 @@ function App() {
                 <MainLayout />
               </ProtectedRoute>
             }>
+              <Route path="/general" element={<DashboardGeneral />} />
               <Route path="/home" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vehiculos" element={<Vehiculos />} />
