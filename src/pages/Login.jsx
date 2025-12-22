@@ -217,19 +217,21 @@ const Login = () => {
         } finally {
           setLoading(false);
           window.removeEventListener('message', handleMessage);
+          clearTimeout(window._googleLoginTimeout); // Clear timeout in finally block
         }
       };
 
       window.addEventListener('message', handleMessage);
 
-      // Verificar si el popup fue cerrado manualmente
-      const checkPopupClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkPopupClosed);
-          setLoading(false);
-          window.removeEventListener('message', handleMessage);
-        }
-      }, 500);
+      // Usar timeout en lugar de verificar popup.closed (evita error COOP)
+      // Si después de 2 minutos no hay respuesta, limpiar el estado
+      const timeoutId = setTimeout(() => {
+        setLoading(false);
+        window.removeEventListener('message', handleMessage);
+      }, 120000);
+
+      // Guardar el timeout ID para limpiarlo cuando llegue el mensaje
+      window._googleLoginTimeout = timeoutId;
 
     } catch (err) {
       console.error('❌ Error al iniciar Google Login:', err);
