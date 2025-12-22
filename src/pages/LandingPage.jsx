@@ -34,36 +34,22 @@ const LandingPage = () => {
   const descargaRef = useRef(null);
   const splineContainerRef = useRef(null); // Ref para el contenedor de Spline
   const introRef = useRef(null); // Ref para la sección intro
-  
-  // Estado para el efecto de paralaje 3D
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Efecto para el paralaje 3D en la sección intro
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const intro = introRef.current;
-      if (!intro) return;
+  // Estado para la franja activa (basado en posición del mouse)
+  const [activeStrip, setActiveStrip] = useState(-1);
 
-      // Obtener las dimensiones de la sección
-      const rect = intro.getBoundingClientRect();
-      
-      // Calcular la posición del mouse relativa al centro de la sección
-      const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
-      const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
-      
-      // Actualizar el estado con valores normalizados
-      setMousePosition({ x, y });
-    };
+  // Detecta qué franja está debajo del mouse
+  const handleMouseMove = (e) => {
+    const stripWidth = window.innerWidth / 5;
+    const stripIndex = Math.floor(e.clientX / stripWidth);
+    setActiveStrip(stripIndex);
+  };
 
-    const intro = introRef.current;
-    if (intro) {
-      intro.addEventListener('mousemove', handleMouseMove);
-      
-      return () => {
-        intro.removeEventListener('mousemove', handleMouseMove);
-      };
-    }
-  }, []);
+  // Cuando el mouse sale del contenedor
+  const handleMouseLeave = () => {
+    setActiveStrip(-1);
+  };
+
 
   // Efecto para evitar que el scroll haga zoom en el modelo 3D
   useEffect(() => {
@@ -118,27 +104,32 @@ const LandingPage = () => {
   }, []); // El array vacío [] asegura que esto se ejecute solo una vez
 
   return (
-    <div className="landing-container">
+    <div 
+      className="landing-container"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       
+      {/* --- FONDO FIJO INTERACTIVO (COMPARTIDO ENTRE INTRO Y LOGIN) --- */}
+      <div className="interactive-background">
+        {loginImages.map((img, index) => (
+          <div
+            key={index}
+            className={`background-strip ${activeStrip === index ? 'strip-active' : ''}`}
+            style={{ backgroundImage: `url(${img})` }}
+          />
+        ))}
+      </div>
+
       {/* --- SECCIÓN 1: INTRO --- */}
       <section 
         id="inicio" 
         className="landing-section" 
         ref={introRef}
-        style={{ 
-          backgroundImage: `url(${fondoIntro})`,
-          backgroundPosition: `calc(50% + ${mousePosition.x * 30}px) calc(50% + ${mousePosition.y * 30}px)`,
-          transition: 'background-position 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-        }}
       >
         {/* 6. Añadimos la clase 'animate-on-load' a cada elemento */}
         <img src={ruxLogo} alt="RUX Logo" className="intro-logo animate-on-load" />
         <h1 className="intro-title animate-on-load">Nuestra comunidad,<br/>rutas y memorias</h1>
-        
-        <a href="#login" className="ingresar-button animate-on-load">
-          <img src={iconoIngresar} alt="Ingresar" />
-          <span>Ingresar</span>
-        </a>
         
         <a href="#descarga" className="rux-movil-button animate-on-load">
           <img src={btnRuxMovil} alt="Descarga RÚX móvil" />
@@ -149,17 +140,6 @@ const LandingPage = () => {
       {/* 7. Asignamos la referencia 'loginRef' */}
       <section id="login" className="landing-section" ref={loginRef}>
         
-        {/* --- AÑADIMOS EL FONDO INTERACTIVO AQUÍ --- */}
-        <div className="interactive-background">
-          {loginImages.map((img, index) => (
-            <div
-              key={index}
-              className="background-strip"
-              style={{ backgroundImage: `url(${img})` }}
-            />
-          ))}
-        </div>
-        
         {/* El componente Login ahora se muestra por encima */}
         <Login /> 
       
@@ -167,7 +147,7 @@ const LandingPage = () => {
       
       {/* --- SECCIÓN 3: DESCARGA --- */}
       {/* 8. Asignamos la referencia 'descargaRef' */}
-      <section id="descarga" className="landing-section" style={{ backgroundImage: `url(${fondoDescarga})` }} ref={descargaRef}>
+      <section id="descarga" className="landing-section descarga-section" ref={descargaRef}>
         {/* Componente Starfield como fondo */}
         <Starfield />
         

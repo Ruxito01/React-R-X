@@ -80,9 +80,8 @@ const Starfield = () => {
 
     // Loop de animación
     const animate = () => {
-      // Fondo semitransparente para crear efecto de destello/trail sin bloquear la imagen
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Limpiar canvas completamente para ver el fondo
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Centro del canvas
       const cx = canvas.width / 2;
