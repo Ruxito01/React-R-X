@@ -1,0 +1,54 @@
+.estadisticas-container {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.estadisticas-titulo-principal {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+    border-left: 4px solid #FF6610;
+}
+
+.graficos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.grafico-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.grafico-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.grafico-card h4 {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.grafico-wrapper {
+    width: 100%;
+    height: 200px;
+}
+
+@media (max-width: 768px) {
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+}

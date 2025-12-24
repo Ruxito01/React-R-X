@@ -198,3 +198,111 @@
     height: 35px;
   }
 }
+
+/* Estilos para el dropdown de Administración */
+.nav-dropdown-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 160px;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(15, 15, 15, 0.99) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 102, 16, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 200;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.nav-dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.8rem 1.2rem;
+  color: #a0a0a0;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.dropdown-item:hover {
+  color: #FF6610;
+  background: rgba(255, 102, 16, 0.1);
+  border-left-color: #FF6610;
+}
+
+.dropdown-item.active {
+  color: #FF6610;
+  background: rgba(255, 102, 16, 0.15);
+  border-left-color: #FF6610;
+  font-weight: 600;
+}
+
+/* Responsive para dropdown */
+@media (max-width: 768px) {
+  .nav-dropdown-container {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .nav-dropdown-trigger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-dropdown-menu {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    margin-top: 0.3rem;
+    border-radius: 6px;
+  }
+
+  .nav-dropdown-menu.open {
+    transform: none;
+  }
+
+  .dropdown-item {
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+}

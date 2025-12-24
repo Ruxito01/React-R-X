@@ -153,10 +153,6 @@ function Comunidades() {
 
   return (
     <div className="comunidades-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
-      <div className="comunidades-header">
-        <h1>DASHBOARD DE COMUNIDADES</h1>
-      </div>
-
       <div className="comunidades-main-card">
         <div className="comunidades-grid">
           {/* SECCIÓN IZQUIERDA */}

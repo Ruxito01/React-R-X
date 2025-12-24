@@ -6,7 +6,7 @@
     background-position: bottom unset;
     background-repeat: repeat;
     background-attachment: scroll;
-    padding: 1.5rem;
+    padding: 100px 1.5rem 1.5rem 1.5rem;
     font-family: 'Inter', sans-serif;
     color: #333;
     position: relative;
@@ -90,6 +90,164 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     width: 100%;
+}
+
+/* Grid de 3 columnas - tablas mas pequeñas, mapa mas grande */
+.rutas-grid-3col {
+    display: grid;
+    grid-template-columns: 0.9fr 1fr 1.3fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+.rutas-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Header de tabla con badge */
+.table-header-bar {
+    background: #FF6610;
+    color: white;
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Scroll para tablas - Altura limitada para coincidir con mapa */
+.table-scroll-container {
+    height: 300px;
+    /* Altura fija para scroll */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #FF6610 #f0f0f0;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #FF6610;
+    border-radius: 3px;
+}
+
+/* Contenedor de filtros */
+.filtros-container {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+}
+
+.filtro-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.filtro-btn:hover {
+    border-color: #FF6610;
+    color: #FF6610;
+}
+
+.filtro-btn.active {
+    background: #FF6610;
+    color: white;
+    border-color: #FF6610;
+}
+
+.filtro-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: white;
+    cursor: pointer;
+}
+
+.filtro-select:focus {
+    outline: none;
+    border-color: #FF6610;
+}
+
+.filtro-input {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.filtro-input:focus {
+    outline: none;
+    border-color: #FF6610;
+}
+
+/* Tarjeta de mapa */
+.mapa-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.mapa-detalle-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.ruta-info-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.info-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
 }
 
 /* SECCIÓN IZQUIERDA - Diagonal desde arriba-izquierda */
@@ -556,4 +714,869 @@
     .route-number {
         font-size: 3rem;
     }
+}
+
+/* ====== NUEVOS ESTILOS ====== */
+
+/* Animacion de entrada */
+.rutas-animate-enter {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tarjetas de resumen */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 102, 16, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 102, 16, 0.15);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.rutas-icon {
+    background: linear-gradient(135deg, #FF6610 0%, #FF8844 100%);
+    color: white;
+}
+
+.activos-icon {
+    background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+    color: white;
+}
+
+.programados-icon {
+    background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+    color: white;
+}
+
+.km-icon {
+    background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
+    color: white;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* Skeleton loading */
+.skeleton-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.skeleton-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-stat-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeleton-line {
+    height: 16px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+.skeleton-table-large {
+    height: 400px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Panel de detalles del viaje */
+.viaje-detalle-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+    min-height: 250px;
+}
+
+.viaje-info-panel {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.viaje-nombre {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #FF6610;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #FF6610;
+}
+
+.viaje-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.viaje-label {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.viaje-value {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.viaje-participantes {
+    font-size: 1.2rem;
+    color: #FF6610;
+}
+
+.viaje-codigo {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.codigo-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF6610 0%, #FF8844 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-top: 0.5rem;
+}
+
+/* Contenedor vertical del mapa */
+.mapa-detalle-container-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Info de la ruta */
+.ruta-info-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.ruta-info-mini .info-item {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.ruta-info-mini .info-item.full-width {
+    width: 100%;
+}
+
+.ruta-info-mini .info-item.organizador {
+    background: rgba(255, 102, 16, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid #FF6610;
+}
+
+.ruta-info-mini .info-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.ruta-info-mini .info-value {
+    color: #333;
+    font-weight: 600;
+}
+
+/* Apartado expandible de detalles del viaje */
+.viaje-detalles-expandible {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.expandible-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    background: linear-gradient(135deg, #FF6610 0%, #FF8844 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.expandible-header:hover {
+    background: linear-gradient(135deg, #e55a0e 0%, #e57730 100%);
+}
+
+.expandible-content {
+    padding: 0.75rem;
+    background: #fafafa;
+}
+
+.viaje-organizador {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, rgba(255, 102, 16, 0.1) 0%, rgba(255, 136, 68, 0.1) 100%);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #FF6610;
+}
+
+.organizador-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.organizador-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #FF6610;
+}
+
+.viaje-fecha {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+.fecha-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.fecha-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #FF6610;
+}
+
+.participantes-lista {
+    background: white;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.participantes-titulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.participantes-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.participante-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.participante-item:last-child {
+    border-bottom: none;
+}
+
+.participante-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6610 0%, #FF8844 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.participante-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.participante-nombre {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.participante-estado {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    width: fit-content;
+    text-transform: capitalize;
+}
+
+.participante-estado.ingresa {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.participante-estado.programado,
+.participante-estado.pendiente {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.participante-estado.cancela {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.participante-estado.registrado {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.participante-estado.finaliza {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.sin-participantes {
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+    padding: 0.5rem;
+    margin: 0;
+}
+
+/* Lista de puntos dentro del expandible */
+.puntos-lista-expandible {
+    margin-top: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.puntos-titulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.puntos-items-scroll {
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.punto-item-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0;
+}
+
+.punto-icono-mini {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.punto-icono-mini.inicio {
+    background: #4CAF50;
+}
+
+.punto-icono-mini.servicio {
+    background: #FF6610;
+}
+
+.punto-icono-mini.paso {
+    background: #00BCD4;
+}
+
+.punto-icono-mini.destino {
+    background: #1a1a1a;
+}
+
+.punto-texto {
+    font-size: 0.75rem;
+    color: #333;
+}
+
+.punto-texto small {
+    color: #888;
+}
+
+
+/* Contenedor de Google Maps */
+.google-mapa-container {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e0e0e0;
+    min-height: 220px;
+}
+
+/* Shimmer para el mapa */
+.mapa-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #e8e8e8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 10;
+    border-radius: 8px;
+}
+
+.mapa-shimmer .shimmer-animation {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 100%);
+    animation: shimmer 1.5s infinite;
+}
+
+.mapa-shimmer .shimmer-text {
+    position: relative;
+    z-index: 1;
+    color: #888;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mapa-shimmer .shimmer-text::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #FF6610;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mapa-controles {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    align-items: center;
+}
+
+.control-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+.mapa-control-select {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.mapa-control-select:focus {
+    outline: none;
+}
+
+.mapa-control-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.mapa-control-btn:hover {
+    background: #f0f0f0;
+}
+
+.mapa-control-btn.active {
+    background: #FF6610;
+    color: white;
+}
+
+/* Mapa */
+.viaje-mapa-panel {
+    position: relative;
+    min-height: 200px;
+}
+
+.mapa-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.mapa-svg {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.mapa-tooltip {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    z-index: 10;
+}
+
+.mapa-leyenda {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+.mapa-leyenda span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.leyenda-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.leyenda-dot.servicio {
+    background: #FF6610;
+}
+
+.leyenda-dot.paso {
+    background: #FFB380;
+}
+
+.mapa-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    gap: 1rem;
+}
+
+/* Lista de Puntos de Ruta (estilo Flutter) */
+.puntos-lista-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.punto-item {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.punto-icono {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    z-index: 2;
+}
+
+.punto-icono.inicio {
+    background: #4CAF50;
+}
+
+.punto-icono.servicio {
+    background: #FF6610;
+}
+
+.punto-icono.paso {
+    background: #00BCD4;
+}
+
+.punto-icono.destino {
+    background: #1a1a1a;
+}
+
+.punto-linea {
+    position: absolute;
+    left: 15px;
+    top: 36px;
+    width: 2px;
+    height: calc(100% + 4px);
+    background: #e0e0e0;
+    z-index: 1;
+}
+
+.punto-item:last-of-type .punto-linea,
+.punto-item.destino .punto-linea {
+    display: none;
+}
+
+.punto-info {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 32px;
+    justify-content: center;
+}
+
+.punto-nombre {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.punto-subtitulo {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.puntos-leyenda {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+    justify-content: center;
+}
+
+.puntos-leyenda span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+
+/* Responsive para stats */
+@media (max-width: 1200px) {
+    .rutas-grid-3col {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rutas-grid-3col .rutas-column:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 1024px) {
+    .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .viaje-detalle-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .rutas-grid-3col {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-container {
+        flex-direction: column;
+    }
+
+    .filtro-input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .table-scroll-container {
+        max-height: 200px;
+    }
+}
+
+/* Estilos para celda de nombre de ruta con creador */
+.ruta-cell-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.ruta-nombre {
+    font-weight: 500;
+}
+
+.ruta-creador-sub {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 2px;
 }
