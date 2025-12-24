@@ -9,8 +9,14 @@ const GOOGLE_MAPS_API_KEY = 'AIzaSyD6DCBHsbUm6TcGBM6GoRt21utQQBrbOaQ';
 
 const Rutas = () => {
   // Estados de datos
+  // Estados de datos - TABLAS Y MAPA (Se congelan al seleccionar)
   const [rutas, setRutas] = useState([]);
   const [viajes, setViajes] = useState([]);
+
+  // Estados de datos - ESTADISTICAS (Siempre vivas)
+  const [rutasReal, setRutasReal] = useState([]);
+  const [viajesReal, setViajesReal] = useState([]);
+  
   const [puntosRuta, setPuntosRuta] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -19,6 +25,7 @@ const Rutas = () => {
   const [rutaSeleccionada, setRutaSeleccionada] = useState(null);
   const [viajeSeleccionado, setViajeSeleccionado] = useState(null);
   const [mostrarTodosViajes, setMostrarTodosViajes] = useState(true);
+  const [isUserSelection, setIsUserSelection] = useState(false); // Nuevo: controla si el usuario intervino
   
   // Filtros de viajes
   const [filtroEstado, setFiltroEstado] = useState('todos');
@@ -36,6 +43,9 @@ const Rutas = () => {
   const [mapaCargando, setMapaCargando] = useState(true);
   const [googleLoaded, setGoogleLoaded] = useState(false);
   
+  // Estado para el centro del mapa (controlado manualmente para evitar recentrados automaticos)
+  const [mapCenter, setMapCenter] = useState(null);
+  
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   // Scroll al inicio
@@ -43,21 +53,9 @@ const Rutas = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Cargar datos iniciales y configurar auto-refresh
-  useEffect(() => {
-    cargarDatos();
-    
-    // Auto-refresh cada 5 segundos
-    const intervalId = setInterval(() => {
-      // Solo recargar si no hay una interacción activa que podría romperse
-      // Por ejemplo, si el mapa está cargando, mejor esperar
-      cargarDatos(false); // false indica que es background update (no mostrar spinner global)
-    }, 5000);
 
-    return () => clearInterval(intervalId);
-  }, []);
 
-  const cargarDatos = async (mostrarSpinner = true) => {
+  const cargarDatos = useCallback(async (mostrarSpinner = true) => {
     try {
       if (mostrarSpinner) setCargando(true);
       const [rutasRes, viajesRes] = await Promise.all([
@@ -71,38 +69,93 @@ const Rutas = () => {
       const rutasData = await rutasRes.json();
       const viajesData = await viajesRes.json();
       
-      setRutas(rutasData);
-      setViajes(viajesData);
-      setError(null);
+      // 1. Siempre actualizar datos "Reales" para estadisticas
+      setRutasReal(rutasData);
+      setViajesReal(viajesData);
       
-      // Seleccionar primera ruta y viaje por defecto
-      if (rutasData.length > 0) {
-        const primeraRuta = rutasData[0];
-        setRutaSeleccionada(primeraRuta);
-        setMostrarTodosViajes(false);
-        
-        // Cargar puntos de la primera ruta
-        try {
-          const puntosRes = await fetch(`${API_BASE_URL}/puntoruta/ruta/${primeraRuta.id}`);
-          if (puntosRes.ok) {
-            const puntos = await puntosRes.json();
-            const puntosOrdenados = puntos.sort((a, b) => a.ordenSecuencia - b.ordenSecuencia);
-            setPuntosRuta(puntosOrdenados);
-          }
-        } catch (e) {
-          console.error('Error al cargar puntos iniciales:', e);
-        }
-        
-        // Seleccionar primer viaje de esa ruta
-        const viajesDeLaRuta = viajesData.filter(v => v.ruta?.id === primeraRuta.id);
-        if (viajesDeLaRuta.length > 0) {
-          setViajeSeleccionado(viajesDeLaRuta[0]);
+      // 2. ACTUALIZAR TABLA DE VIAJES (Siempre, para reflejar cambios de estado rapido)
+      setViajes(viajesData);
+      
+      // Si hay un viaje seleccionado, actualizar su informacion (para que el panel de detalles muestre estado nuevo)
+      if (viajeSeleccionado) {
+        const viajeActualizado = viajesData.find(v => v.id === viajeSeleccionado.id);
+        if (viajeActualizado) {
+          setViajeSeleccionado(viajeActualizado);
         }
       }
+
+      // 3. Logica de actualizacion de TABLA DE RUTAS y MAPA
+      // Esta la mantenemos mas "quieta" si el usuario esta interactuando para evitar saltos en la tabla de rutas
+      const debeActualizarRutas = mostrarSpinner || !isUserSelection || mostrarTodosViajes;
+
+      if (debeActualizarRutas) {
+         setRutas(rutasData);
+
+         // Logica de seleccion por defecto (Solo si no hay nada seleccionado aun)
+         if (!rutaSeleccionada && rutasData.length > 0) {
+            const primeraRuta = rutasData[0];
+            setRutaSeleccionada(primeraRuta);
+            setMostrarTodosViajes(true); // Mostrar todos los viajes por defecto
+            
+            // Establecer centro inicial
+            if (primeraRuta.latitudInicio && primeraRuta.longitudInicio) {
+              setMapCenter({
+                lat: parseFloat(primeraRuta.latitudInicio),
+                lng: parseFloat(primeraRuta.longitudInicio)
+              });
+            }
+            
+            // Cargar puntos
+            cargarPuntos(primeraRuta.id);
+            
+            // Seleccionar primer viaje
+            const viajesDeLaRuta = viajesData.filter(v => v.ruta?.id === primeraRuta.id);
+            if (viajesDeLaRuta.length > 0) {
+              setViajeSeleccionado(viajesDeLaRuta[0]);
+            }
+         } else if (rutaSeleccionada) {
+            // Actualizar objeto de ruta seleccionada si cambio algo (distancia, etc)
+            const rutaActualizada = rutasData.find(r => r.id === rutaSeleccionada.id);
+            if (rutaActualizada) {
+               setRutaSeleccionada(rutaActualizada); 
+            }
+         }
+      } 
+      
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      if (mostrarSpinner) setError(err.message);
     } finally {
-      setCargando(false);
+      if (mostrarSpinner) setCargando(false);
+    }
+  }, [isUserSelection, mostrarTodosViajes, rutaSeleccionada, viajeSeleccionado]);
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    cargarDatos(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Configurar auto-refresh
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      cargarDatos(false);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [cargarDatos]);
+
+  const cargarPuntos = async (rutaId) => {
+    try {
+      const puntosRes = await fetch(`${API_BASE_URL}/puntoruta/ruta/${rutaId}`);
+      if (puntosRes.ok) {
+        const puntos = await puntosRes.json();
+        const puntosOrdenados = puntos.sort((a, b) => a.ordenSecuencia - b.ordenSecuencia);
+        setPuntosRuta(puntosOrdenados);
+      }
+    } catch (e) {
+      console.error('Error al cargar puntos:', e);
     }
   };
 
@@ -149,8 +202,17 @@ const Rutas = () => {
   }, []);
 
   const seleccionarRuta = async (ruta) => {
+    setIsUserSelection(true); // Marcar como seleccion manual
     setRutaSeleccionada(ruta);
     setMostrarTodosViajes(false);
+    
+    // Centrar mapa
+    if (ruta.latitudInicio && ruta.longitudInicio) {
+       setMapCenter({
+         lat: parseFloat(ruta.latitudInicio),
+         lng: parseFloat(ruta.longitudInicio)
+       });
+    }
     
     // Cargar puntos de la ruta
     try {
@@ -170,15 +232,49 @@ const Rutas = () => {
     }
   };
 
-  const seleccionarViaje = (viaje) => {
+  const seleccionarViaje = async (viaje) => {
+    setIsUserSelection(true); // Marcar como seleccion manual
     setViajeSeleccionado(viaje);
     // Expandir detalles automáticamente al seleccionar
     setExpandirDetallesViaje(true);
+    
+    // Si el viaje tiene ruta y es diferente a la actual, actualizar mapa
+    if (viaje.ruta && viaje.ruta.id !== rutaSeleccionada?.id) {
+       setRutaSeleccionada(viaje.ruta);
+       
+       // Centrar mapa
+       if (viaje.ruta.latitudInicio && viaje.ruta.longitudInicio) {
+          setMapCenter({
+            lat: parseFloat(viaje.ruta.latitudInicio),
+            lng: parseFloat(viaje.ruta.longitudInicio)
+          });
+       }
+       
+       // Cargar puntos de la ruta del viaje
+       try {
+         const res = await fetch(`${API_BASE_URL}/puntoruta/ruta/${viaje.ruta.id}`);
+         if (res.ok) {
+           const puntos = await res.json();
+           const puntosOrdenados = puntos.sort((a, b) => a.ordenSecuencia - b.ordenSecuencia);
+           setPuntosRuta(puntosOrdenados);
+           
+           // Recalcular ruta en mapa
+           if (googleLoaded) {
+             calcularRuta(viaje.ruta, puntosOrdenados);
+           }
+         }
+       } catch (err) {
+         console.error('Error al cargar puntos de ruta del viaje:', err);
+       }
+    }
   };
   
   const verTodosViajes = () => {
+    setIsUserSelection(false); // Volver a modo "ver todo" (permite updates)
     setMostrarTodosViajes(true);
     setViajeSeleccionado(null);
+    // Al volver a "ver todos", forzamos una recarga inmediata para tener datos frescos
+    cargarDatos(false);
   };
 
   // Filtrado de viajes
@@ -219,11 +315,12 @@ const Rutas = () => {
   });
 
   // Calcular estadisticas
-  const totalViajes = viajes.length;
-  const viajesActivos = viajes.filter(v => v.estado === 'en_curso').length;
-  const viajesProgramados = viajes.filter(v => v.estado === 'programado').length;
-  const totalParticipantes = viajes.reduce((sum, v) => sum + (v.participantes?.length || 0), 0);
-  const kmTotales = viajes.reduce((sum, v) => sum + (parseFloat(v.ruta?.distanciaEstimadaKm) || 0), 0);
+  // Calcular estadisticas (USAR DATOS 'REAL' PARA QUE SIEMPRE SE ACTUALICEN)
+  const totalViajes = viajesReal.length > 0 ? viajesReal.length : viajes.length;
+  const viajesActivos = (viajesReal.length > 0 ? viajesReal : viajes).filter(v => v.estado === 'en_curso').length;
+  const viajesProgramados = (viajesReal.length > 0 ? viajesReal : viajes).filter(v => v.estado === 'programado').length;
+  const totalParticipantes = (viajesReal.length > 0 ? viajesReal : viajes).reduce((sum, v) => sum + (v.participantes?.length || 0), 0);
+  const kmTotales = (rutasReal.length > 0 ? rutasReal : rutas).reduce((sum, r) => sum + (parseFloat(r.distanciaEstimadaKm) || 0), 0);
 
   // Formatear fecha
   const formatearFecha = (fechaStr) => {
@@ -318,7 +415,7 @@ const Rutas = () => {
             </svg>
           </div>
           <div className="stat-content">
-            <span className="stat-value">{rutas.length}</span>
+            <span className="stat-value">{rutasReal.length > 0 ? rutasReal.length : rutas.length}</span>
             <span className="stat-label">Total Rutas</span>
           </div>
         </div>
@@ -437,7 +534,7 @@ const Rutas = () => {
               </div>
             </div>
             {/* Gráfico 1: Top Rutas (Debajo de la tabla de Rutas) */}
-            <GraficoTopRutas rutas={rutas} viajes={viajes} />
+            <GraficoTopRutas rutas={rutasReal.length > 0 ? rutasReal : rutas} viajes={viajesReal.length > 0 ? viajesReal : viajes} />
           </div>
 
           {/* COLUMNA 2: Tabla de Viajes */}
@@ -519,7 +616,7 @@ const Rutas = () => {
               </div>
             </div>
             {/* Gráfico 2: Tendencia (Debajo de la tabla de Viajes) */}
-            <GraficoTendencia viajes={viajes} />
+            <GraficoTendencia viajes={viajesReal.length > 0 ? viajesReal : viajes} />
           </div>
 
           {/* COLUMNA 3: Mapa y Detalles */}
@@ -636,7 +733,14 @@ const Rutas = () => {
                             </span>
                             <div className="puntos-items-scroll">
                               {/* Punto de INICIO */}
-                              <div className="punto-item-mini inicio">
+                              <div 
+                                className="punto-item-mini inicio"
+                                onClick={() => rutaSeleccionada?.latitudInicio && setMapCenter({
+                                  lat: parseFloat(rutaSeleccionada.latitudInicio),
+                                  lng: parseFloat(rutaSeleccionada.longitudInicio)
+                                })}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <div className="punto-icono-mini inicio">
                                   <svg viewBox="0 0 24 24" fill="white" width="10" height="10">
                                     <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
@@ -649,7 +753,15 @@ const Rutas = () => {
                               {puntosRuta.map((punto, i) => {
                                 const isServicio = punto.tipoPunto === 'servicio' || punto.tipoPunto === 'SS';
                                 return (
-                                  <div key={punto.id} className={`punto-item-mini ${isServicio ? 'servicio' : 'paso'}`}>
+                                  <div 
+                                    key={punto.id} 
+                                    className={`punto-item-mini ${isServicio ? 'servicio' : 'paso'}`}
+                                    onClick={() => punto.latitud && setMapCenter({
+                                      lat: parseFloat(punto.latitud),
+                                      lng: parseFloat(punto.longitud)
+                                    })}
+                                    style={{ cursor: 'pointer' }}
+                                  >
                                     <div className={`punto-icono-mini ${isServicio ? 'servicio' : 'paso'}`}>
                                       {punto.ordenSecuencia || i + 1}
                                     </div>
@@ -662,7 +774,14 @@ const Rutas = () => {
                               })}
                               
                               {/* Punto de DESTINO */}
-                              <div className="punto-item-mini destino">
+                              <div 
+                                className="punto-item-mini destino"
+                                onClick={() => rutaSeleccionada?.latitudFin && setMapCenter({
+                                  lat: parseFloat(rutaSeleccionada.latitudFin),
+                                  lng: parseFloat(rutaSeleccionada.longitudFin)
+                                })}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <div className="punto-icono-mini destino">
                                   <svg viewBox="0 0 24 24" fill="white" width="10" height="10">
                                     <path d="M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
@@ -699,9 +818,9 @@ const Rutas = () => {
                     >
                       <GoogleMap
                         mapContainerStyle={{ width: '100%', height: '220px', borderRadius: '8px' }}
-                        center={{
-                          lat: rutaSeleccionada.latitudInicio ? parseFloat(rutaSeleccionada.latitudInicio) : -2.1710,
-                          lng: rutaSeleccionada.longitudInicio ? parseFloat(rutaSeleccionada.longitudInicio) : -79.9224
+                        center={mapCenter || {
+                          lat: rutaSeleccionada?.latitudInicio ? parseFloat(rutaSeleccionada.latitudInicio) : -2.1710,
+                          lng: rutaSeleccionada?.longitudInicio ? parseFloat(rutaSeleccionada.longitudInicio) : -79.9224
                         }}
                         zoom={12}
                         mapTypeId={tipoMapa}
@@ -732,6 +851,10 @@ const Rutas = () => {
                               strokeWeight: 2
                             }}
                             title="Inicio"
+                            onClick={() => setMapCenter({
+                              lat: parseFloat(rutaSeleccionada.latitudInicio),
+                              lng: parseFloat(rutaSeleccionada.longitudInicio)
+                            })}
                           />
                         )}
                         
@@ -754,6 +877,10 @@ const Rutas = () => {
                                 strokeWeight: 2
                               }}
                               title={punto.nombre || `Punto ${i + 1}`}
+                              onClick={() => setMapCenter({
+                                lat: parseFloat(punto.latitud),
+                                lng: parseFloat(punto.longitud)
+                              })}
                             />
                           );
                         })}
@@ -774,6 +901,10 @@ const Rutas = () => {
                               strokeWeight: 2
                             }}
                             title="Destino"
+                            onClick={() => setMapCenter({
+                              lat: parseFloat(rutaSeleccionada.latitudFin),
+                              lng: parseFloat(rutaSeleccionada.longitudFin)
+                            })}
                           />
                         )}
                         
