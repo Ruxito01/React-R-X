@@ -93,11 +93,11 @@ const DashboardGeneral = () => {
     return () => clearInterval(intervalo);
   }, []);
 
-  // Calcular usuarios en linea (ultimaActividad en ultimos 5 minutos)
+  // Calcular usuarios en linea (ultimaActividad en ultimos 30 segundos)
   const usuariosEnLinea = usuarios.filter(u => {
     if (!u.ultimaActividad) return false;
-    const hace5Min = new Date(Date.now() - 5 * 60 * 1000);
-    return new Date(u.ultimaActividad) > hace5Min;
+    const hace30Seg = new Date(Date.now() - 30 * 1000);
+    return new Date(u.ultimaActividad) > hace30Seg;
   });
 
   // Filtrar viajes de los ultimos 7 dias
