@@ -90,7 +90,7 @@ const DashboardGeneral = () => {
     }, 5000);
 
     // Limpiar intervalo al desmontar
-    return () => clearInterval(intervalo);
+    return () => clearInterval(intervalId);
   }, []);
 
   // Calcular usuarios en linea (ultimaActividad en ultimos 5 minutos)
