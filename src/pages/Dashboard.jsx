@@ -40,6 +40,18 @@ const Dashboard = () => {
     ]
   };
 
+  // Cargar usuarios inicial y polling cada 5 segundos
+  useEffect(() => {
+    fetchUsuarios();
+    
+    // Auto-refresh cada 5 segundos
+    const intervalId = setInterval(() => {
+        fetchUsuarios(false); // false para evitar mostrar el loader cada vez
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   // Función para cargar usuarios con datos reales
   const fetchUsuarios = async (mostrarLoading = true) => {
     try {
@@ -182,9 +194,6 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="dashboard-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
-        <div className="dashboard-header">
-          <h1>DASHBOARD DE USUARIOS</h1>
-        </div>
         <div className="dashboard-main-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
           <div style={{ textAlign: 'center', color: '#e53935' }}>
             <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠</div>

@@ -210,9 +210,6 @@ const Vehiculos = () => {
 
   return (
     <div className="vehiculos-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
-      <div className="vehiculos-header">
-        <h1>DASHBOARD DE VEHÍCULOS</h1>
-      </div>
 
       {/* Contenedor principal tipo tarjeta */}
       <div className="vehiculos-main-card">

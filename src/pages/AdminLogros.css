@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Importa los estilos base de AdminMarcas */
+@import './AdminMarcas.css';
+
+/* Estilos especificos para Logros */
+.td-icono {
+    width: 70px;
+    text-align: center;
+}
+
+.icono-preview {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f5f5f5;
+    padding: 4px;
+}
+
+.icono-placeholder {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-radius: 8px;
+    color: #bbb;
+    margin: 0 auto;
+}
+
+.td-descripcion {
+    max-width: 200px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.td-criterio {
+    max-width: 150px;
+}
+
+.criterio-code {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.modal-logro {
+    max-width: 550px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-hint {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .td-descripcion {
+        display: none;
+    }
+
+    .td-criterio {
+        display: none;
+    }
+
+    .icono-preview,
+    .icono-placeholder {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .admin-table th:nth-child(4),
+    .admin-table td:nth-child(4),
+    .admin-table th:nth-child(5),
+    .admin-table td:nth-child(5) {
+        display: none;
+    }
+}
