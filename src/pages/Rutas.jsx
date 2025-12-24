@@ -5,7 +5,7 @@ import './Rutas.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-const GOOGLE_MAPS_API_KEY = 'AIzaSyD6DCBHsbUm6TcGBM6GoRt21utQQBrbOaQ';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const Rutas = () => {
   // Estados de datos
