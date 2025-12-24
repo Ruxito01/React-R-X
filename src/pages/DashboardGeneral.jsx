@@ -80,13 +80,13 @@ const DashboardGeneral = () => {
     }
   };
 
-  // Cargar datos inicial y polling cada 5 segundos
+  // Cargar datos iniciales y configurar auto-refresh
   useEffect(() => {
-    fetchData(true);
+    fetchData();
 
-    // Polling cada 5 segundos
-    const intervalo = setInterval(() => {
-      fetchData(false);
+    // Auto-refresh cada 5 segundos
+    const intervalId = setInterval(() => {
+      fetchData(false); // background update
     }, 5000);
 
     // Limpiar intervalo al desmontar
@@ -137,7 +137,7 @@ const DashboardGeneral = () => {
   const viajesPorDia = obtenerViajesPorDia();
   const maxViajesDia = Math.max(...viajesPorDia.map(d => d.cantidad), 1);
 
-  // Calcular conteo de vehículos por tipo
+  // Calcular conteo de vehiculos por tipo
   const getVehiculosCount = (tipoId) => {
     return vehiculos.filter(v => v.tipoVehiculo?.id === tipoId && v.estado === 'en_posesion').length;
   };

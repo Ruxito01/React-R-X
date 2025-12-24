@@ -1,25 +1,37 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './Header.css';
 import logo from '../assets/rux-logo.png';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Verifica si alguna ruta de admin está activa
+  const isAdminActive = location.pathname.startsWith('/admin');
+
+  // Cierra el dropdown si se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setAdminDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = (e) => {
-    // Obtener la posición del botón para centrar la expansión
     const rect = e.currentTarget.getBoundingClientRect();
     setButtonPosition({
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2
     });
-    
-    // Iniciar animación
     setIsLoggingOut(true);
-    
-    // Navegar rápido para que la página tenga tiempo de hacer fade-in
     setTimeout(() => {
       navigate('/');
     }, 250);
@@ -64,6 +76,61 @@ const Header = () => {
             >
               Comunidades
             </NavLink>
+            
+            {/* Dropdown de Administración */}
+            <div 
+              className="nav-dropdown-container" 
+              ref={dropdownRef}
+              onMouseEnter={() => setAdminDropdownOpen(true)}
+              onMouseLeave={() => setAdminDropdownOpen(false)}
+            >
+              <button 
+                className={`nav-item nav-dropdown-trigger ${isAdminActive ? 'active' : ''}`}
+                onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
+              >
+                Administración
+                <svg 
+                  className={`dropdown-arrow ${adminDropdownOpen ? 'open' : ''}`} 
+                  width="12" 
+                  height="12" 
+                  viewBox="0 0 12 12" 
+                  fill="none"
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              <div className={`nav-dropdown-menu ${adminDropdownOpen ? 'open' : ''}`}>
+                <NavLink 
+                  to="/admin/marcas" 
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => setAdminDropdownOpen(false)}
+                >
+                  Marcas
+                </NavLink>
+                <NavLink 
+                  to="/admin/modelos" 
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => setAdminDropdownOpen(false)}
+                >
+                  Modelos
+                </NavLink>
+                <NavLink 
+                  to="/admin/tipos-vehiculo" 
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => setAdminDropdownOpen(false)}
+                >
+                  Tipos Vehiculo
+                </NavLink>
+                <NavLink 
+                  to="/admin/logros" 
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => setAdminDropdownOpen(false)}
+                >
+                  Logros
+                </NavLink>
+              </div>
+            </div>
           </nav>
 
           <div className="header-actions">
@@ -82,7 +149,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Overlay de transición */}
       {isLoggingOut && (
         <div 
           className="logout-transition-overlay"
@@ -97,3 +163,4 @@ const Header = () => {
 };
 
 export default Header;
+

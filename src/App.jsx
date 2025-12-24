@@ -17,6 +17,12 @@ import Vehiculos from "./pages/Vehiculos";
 import Rutas from "./pages/Rutas";
 import Comunidades from "./pages/Comunidades";
 
+// Pantallas de Administracion
+import AdminMarcas from "./pages/AdminMarcas";
+import AdminModelos from "./pages/AdminModelos";
+import AdminLogros from "./pages/AdminLogros";
+import AdminTiposVehiculo from "./pages/AdminTiposVehiculo";
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
@@ -44,6 +50,12 @@ function App() {
               <Route path="/vehiculos" element={<Vehiculos />} />
               <Route path="/rutas" element={<Rutas />} />
               <Route path="/comunidades" element={<Comunidades />} />
+              
+              {/* Rutas de Administracion */}
+              <Route path="/admin/marcas" element={<AdminMarcas />} />
+              <Route path="/admin/modelos" element={<AdminModelos />} />
+              <Route path="/admin/logros" element={<AdminLogros />} />
+              <Route path="/admin/tipos-vehiculo" element={<AdminTiposVehiculo />} />
             </Route>
           </Routes>
         </Router>
