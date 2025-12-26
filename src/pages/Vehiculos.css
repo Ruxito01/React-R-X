@@ -263,6 +263,7 @@
 }
 
 /* Tabla de Vehículos con animación */
+/* Tabla de Vehiculos - Estilo Unificado Sticky */
 .vehicles-table-card {
     background: #ffffff;
     border-radius: 12px;
@@ -274,6 +275,7 @@
     flex-direction: column;
     flex: 1;
     min-height: 400px;
+    /* Altura minima fija */
 }
 
 @keyframes fadeZoomInTable {
@@ -288,44 +290,94 @@
     }
 }
 
+.table-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 350px;
+    /* Altura base para scroll */
+    scrollbar-width: thin;
+    scrollbar-color: #FF6610 #f0f0f0;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background: #FF6610;
+    border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #e55a0e;
+}
+
 .vehicles-table {
     width: 100%;
-    border-collapse: collapse;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    border-collapse: separate;
+    /* Sticky */
+    border-spacing: 0;
 }
 
 .vehicles-table thead {
     background: #FF6610;
     color: white;
-    flex-shrink: 0;
-}
-
-.vehicles-table tbody {
-    flex: 1;
-    overflow-y: auto;
-    display: block;
-}
-
-.vehicles-table thead,
-.vehicles-table tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .vehicles-table th {
-    padding: 0.8rem;
+    padding: 12px;
     text-align: left;
     font-weight: 700;
     font-size: 0.9rem;
     letter-spacing: 0.3px;
     border-right: 1px solid rgba(255, 255, 255, 0.3);
+    background: #FF6610;
+    /* Fondo solido para scroll */
 }
 
 .vehicles-table th:last-child {
     border-right: none;
+}
+
+/* Headers ordenables */
+.th-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.th-sortable:hover {
+    background: #e55a0e;
+}
+
+.sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    vertical-align: middle;
+    margin-left: 4px;
+    color: white;
+}
+
+.sort-icon.active {
+    opacity: 1;
+}
+
+.sort-icon svg {
+    width: 8px;
+    height: 6px;
 }
 
 .vehicles-table tbody tr {
@@ -335,13 +387,12 @@
 
 .vehicles-table tbody tr:hover {
     background: #fff8f5;
-    transform: scale(1.01);
+    /* Remover scale que da problemas en tablas */
 }
 
 .vehicles-table tbody tr.selected-row {
     background: #ffe8d6 !important;
     border-left: 4px solid #FF6610;
-    box-shadow: 0 2px 8px rgba(255, 102, 16, 0.2);
 }
 
 .row-light {
@@ -353,10 +404,11 @@
 }
 
 .vehicles-table td {
-    padding: 0.7rem 0.8rem;
+    padding: 10px 12px;
     color: #333;
     font-size: 0.95rem;
     border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .vehicles-table td:last-child {

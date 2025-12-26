@@ -102,6 +102,13 @@ const Header = () => {
               
               <div className={`nav-dropdown-menu ${adminDropdownOpen ? 'open' : ''}`}>
                 <NavLink 
+                  to="/admin/usuarios"
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => setAdminDropdownOpen(false)}
+                >
+                  Usuarios
+                </NavLink>
+                <NavLink 
                   to="/admin/marcas" 
                   className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
                   onClick={() => setAdminDropdownOpen(false)}

@@ -13,6 +13,32 @@ const Vehiculos = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
 
+  // Estado para ordenamiento
+  const [ordenamiento, setOrdenamiento] = useState({ columna: 'nombre', direccion: 'asc' });
+
+  // Función de ordenamiento
+  const ordenarPor = (columna) => {
+    setOrdenamiento(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Componente IconoOrden
+  const IconoOrden = ({ columna }) => {
+    const activo = ordenamiento.columna === columna;
+    return (
+      <span className={`sort-icon ${activo ? 'active' : ''}`}>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 0L10 5H0L5 0Z" opacity={activo && ordenamiento.direccion === 'asc' ? 1 : 0.3} />
+        </svg>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 10L0 5H10L5 10Z" opacity={activo && ordenamiento.direccion === 'desc' ? 1 : 0.3} />
+        </svg>
+      </span>
+    );
+  };
+
   // Datos mock para vehículos
   const vehiculos = [
     { 
@@ -259,31 +285,75 @@ const Vehiculos = () => {
 
           {/* Tabla de Vehículos */}
           <div className="vehicles-table-card">
-            <table className="vehicles-table">
-              <thead>
-                <tr>
-                  <th className="header-orange">LISTA DE VEHÍCULOS</th>
-                  <th className="header-orange">Distancia (Km)</th>
-                  <th className="header-orange">Viajes (Mes)</th>
-                  <th className="header-orange">Tipo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vehiculos.map((vehiculo, index) => (
-                  <tr 
-                    key={index} 
-                    className={`${index % 2 === 0 ? 'row-light' : 'row-white'} ${selectedVehicleIndex === index ? 'selected-row' : ''}`}
-                    onClick={() => setSelectedVehicleIndex(index)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <td className="vehicle-name">{vehiculo.nombre}</td>
-                    <td>{vehiculo.distancia}</td>
-                    <td>{vehiculo.viajesMes}</td>
-                    <td>{vehiculo.tipo}</td>
+            <div className="table-scroll-container">
+              <table className="vehicles-table">
+                <thead>
+                  <tr>
+                    <th className="th-sortable header-orange" onClick={() => ordenarPor('nombre')}>
+                      LISTA DE VEHÍCULOS <IconoOrden columna="nombre" />
+                    </th>
+                    <th className="th-sortable header-orange" onClick={() => ordenarPor('distancia')}>
+                      Distancia (Km) <IconoOrden columna="distancia" />
+                    </th>
+                    <th className="th-sortable header-orange" onClick={() => ordenarPor('viajes')}>
+                      Viajes (Mes) <IconoOrden columna="viajes" />
+                    </th>
+                    <th className="th-sortable header-orange" onClick={() => ordenarPor('tipo')}>
+                      Tipo <IconoOrden columna="tipo" />
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {[...vehiculos].sort((a, b) => {
+                    const { columna, direccion } = ordenamiento;
+                    let valorA, valorB;
+                    
+                    switch (columna) {
+                      case 'nombre':
+                        valorA = a.nombre.toLowerCase();
+                        valorB = b.nombre.toLowerCase();
+                        break;
+                      case 'distancia':
+                        valorA = a.distancia;
+                        valorB = b.distancia;
+                        break;
+                      case 'viajes':
+                        valorA = a.viajesMes;
+                        valorB = b.viajesMes;
+                        break;
+                      case 'tipo':
+                        valorA = a.tipo.toLowerCase();
+                        valorB = b.tipo.toLowerCase();
+                        break;
+                      default:
+                        return 0;
+                    }
+                    
+                    if (typeof valorA === 'string') {
+                      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+                    }
+                    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
+                  }).map((vehiculo) => {
+                    // Encontrar el indice original para mantener la seleccion correcta
+                    // ya que vehiculos es la fuente de verdad del indice seleccionado
+                    const originalIndex = vehiculos.findIndex(v => v.id === vehiculo.id);
+                    return (
+                      <tr 
+                        key={vehiculo.id} 
+                        className={`${originalIndex % 2 === 0 ? 'row-light' : 'row-white'} ${selectedVehicleIndex === originalIndex ? 'selected-row' : ''}`}
+                        onClick={() => setSelectedVehicleIndex(originalIndex)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td className="vehicle-name">{vehiculo.nombre}</td>
+                        <td>{vehiculo.distancia}</td>
+                        <td>{vehiculo.viajesMes}</td>
+                        <td>{vehiculo.tipo}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             <div className="table-footer">
               Datos actuales {getFechaActual()} - Click para ver detalles
             </div>

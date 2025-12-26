@@ -1,24 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'; // 1. Importamos useEffect, useRef y useState
-import Spline from '@splinetool/react-spline'; // Importamos Spline
-import './LandingPage.css'; // CSS para esta página
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Spline from '@splinetool/react-spline';
+import './LandingPage.css';
 
-// ¡Importa el componente del cuadro de Login que ya hicimos!
+// Componentes
 import Login from './Login'; 
-
-// Importa el Footer completo
 import Footer from '../components/Footer';
-
-// Importa el componente Starfield
 import Starfield from '../components/Starfield';
 
-// Importa tus imágenes
-import fondoIntro from '../assets/fondo-intro.jpg';
+// Imagenes
 import ruxLogo from '../assets/rux-logo.png';
 import btnRuxMovil from '../assets/btn-rux-movil.png';
-import iconoIngresar from '../assets/icono-ingresar.svg';
-import fondoDescarga from '../assets/fondo-descarga.jpg';
 
-// --- AÑADIMOS LAS 5 IMÁGENES DEL LOGIN ---
+// Imagenes de fondo del login
 import img1 from '../assets/login-bg-1.jpg';
 import img2 from '../assets/login-bg-2.jpg';
 import img3 from '../assets/login-bg-3.jpg';
@@ -28,17 +22,46 @@ import img5 from '../assets/login-bg-5.jpg';
 const loginImages = [img1, img2, img3, img4, img5];
 
 const LandingPage = () => {
+  const navigate = useNavigate();
 
-  // 2. Creamos "referencias" para los elementos que vamos a animar al scrollear
+  // Referencias para animaciones
   const loginRef = useRef(null);
   const descargaRef = useRef(null);
-  const splineContainerRef = useRef(null); // Ref para el contenedor de Spline
-  const introRef = useRef(null); // Ref para la sección intro
+  const splineContainerRef = useRef(null);
+  const introRef = useRef(null);
 
-  // Estado para la franja activa (basado en posición del mouse)
+  // Estado para la franja activa (basado en posicion del mouse)
   const [activeStrip, setActiveStrip] = useState(-1);
 
-  // Detecta qué franja está debajo del mouse
+  // Detectar callback de Google OAuth y navegar inmediatamente al dashboard
+  useEffect(() => {
+    const hash = window.location.hash;
+    
+    // Si hay token en el hash, guardar y navegar inmediatamente al dashboard
+    if (hash && hash.includes('access_token')) {
+      // Guardar token para que el dashboard lo procese
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      
+      if (accessToken) {
+        sessionStorage.setItem('google_access_token', accessToken);
+        sessionStorage.setItem('show_loading_screen', 'true');
+        
+        // Limpiar el hash de la URL y flag pendiente
+        window.history.replaceState(null, '', window.location.pathname);
+        sessionStorage.removeItem('google_auth_pending');
+        
+        // Navegar inmediatamente al dashboard (sin mostrar loading aqui)
+        navigate('/general', { replace: true });
+        return;
+      }
+    }
+    
+    // Limpiar flag pendiente si no hay token
+    sessionStorage.removeItem('google_auth_pending');
+  }, [navigate]);
+
+  // Detecta que franja esta debajo del mouse
   const handleMouseMove = (e) => {
     const stripWidth = window.innerWidth / 5;
     const stripIndex = Math.floor(e.clientX / stripWidth);
@@ -50,58 +73,45 @@ const LandingPage = () => {
     setActiveStrip(-1);
   };
 
-
   // Efecto para evitar que el scroll haga zoom en el modelo 3D
   useEffect(() => {
     const container = splineContainerRef.current;
     if (container) {
-      // Función para detener la propagación del evento wheel al canvas de Spline
       const stopWheelPropagation = (e) => {
         e.stopPropagation();
       };
-      
-      // Añadimos el listener en la fase de captura (true) para interceptar el evento antes de que llegue al canvas
       container.addEventListener('wheel', stopWheelPropagation, true);
-      
       return () => {
         container.removeEventListener('wheel', stopWheelPropagation, true);
       };
     }
   }, []);
 
-  // 3. Este es el efecto que "observa" los elementos
+  // Efecto que observa los elementos para animaciones
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target); // Animamos solo una vez
+            observer.unobserve(entry.target);
           }
         });
       },
-      {
-        threshold: 0.1 // El elemento se considera visible si un 10% de él está en pantalla
-      }
+      { threshold: 0.1 }
     );
 
-    // --- 4. CORRECCIÓN PARA EL LINTER ---
-    // Guardamos los elementos actuales en variables locales
     const currentLoginEl = loginRef.current;
     const currentDescargaEl = descargaRef.current;
 
-    // Y ahora usamos esas variables locales para observar
     if (currentLoginEl) observer.observe(currentLoginEl);
     if (currentDescargaEl) observer.observe(currentDescargaEl);
 
-    // 5. Limpiamos el observador al salir
     return () => {
-      // Usamos las mismas variables locales en la limpieza
-      // Esto elimina el warning porque estas variables no cambian
       if (currentLoginEl) observer.unobserve(currentLoginEl);
       if (currentDescargaEl) observer.unobserve(currentDescargaEl);
     };
-  }, []); // El array vacío [] asegura que esto se ejecute solo una vez
+  }, []);
 
   return (
     <div 
@@ -121,40 +131,32 @@ const LandingPage = () => {
         ))}
       </div>
 
-      {/* --- SECCIÓN 1: INTRO --- */}
+      {/* --- SECCION 1: INTRO --- */}
       <section 
         id="inicio" 
         className="landing-section" 
         ref={introRef}
       >
-        {/* 6. Añadimos la clase 'animate-on-load' a cada elemento */}
         <img src={ruxLogo} alt="RUX Logo" className="intro-logo animate-on-load" />
         <h1 className="intro-title animate-on-load">Nuestra comunidad,<br/>rutas y memorias</h1>
         
         <a href="#descarga" className="rux-movil-button animate-on-load">
-          <img src={btnRuxMovil} alt="Descarga RÚX móvil" />
+          <img src={btnRuxMovil} alt="Descarga RUX movil" />
         </a>
       </section>
 
-      {/* --- SECCIÓN 2: LOGIN --- */}
-      {/* 7. Asignamos la referencia 'loginRef' */}
+      {/* --- SECCION 2: LOGIN --- */}
       <section id="login" className="landing-section" ref={loginRef}>
-        
-        {/* El componente Login ahora se muestra por encima */}
         <Login /> 
-      
       </section>
       
-      {/* --- SECCIÓN 3: DESCARGA --- */}
-      {/* 8. Asignamos la referencia 'descargaRef' */}
+      {/* --- SECCION 3: DESCARGA --- */}
       <section id="descarga" className="landing-section descarga-section" ref={descargaRef}>
-        {/* Componente Starfield como fondo */}
         <Starfield />
         
         <div className="descarga-content">
-          <h2 className="descarga-title">¡Descarga la app!</h2>
+          <h2 className="descarga-title">Descarga la app!</h2>
           
-          {/* INTEGRACIÓN DE SPLINE */}
           <div 
             ref={splineContainerRef}
             className="spline-container" 
@@ -162,7 +164,6 @@ const LandingPage = () => {
           >
              <Spline scene="https://prod.spline.design/6jtnp7KECFtDfGRb/scene.splinecode" />
              
-             {/* Elemento para cubrir la marca de agua de Spline */}
              <div className="spline-watermark-cover">
                 <span>RUX App</span>
              </div>

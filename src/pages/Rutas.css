@@ -437,7 +437,7 @@
     height: 28px;
 }
 
-/* Tabla de Rutas */
+/* Tabla de Rutas - Estilo Unificado Sticky */
 .routes-table-card {
     background: #ffffff;
     border-radius: 12px;
@@ -449,6 +449,8 @@
     flex-direction: column;
     flex: 1;
     min-height: 250px;
+    height: 100%;
+    /* Asegurar altura completa */
 }
 
 @keyframes slideInScaleUp {
@@ -463,44 +465,77 @@
     }
 }
 
+.table-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 300px;
+    /* Altura base, pero flex deberia manejarlo */
+    scrollbar-width: thin;
+    scrollbar-color: #FF6610 #f0f0f0;
+}
+
 .routes-table {
     width: 100%;
-    border-collapse: collapse;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    border-collapse: separate;
+    /* Necesario para sticky */
+    border-spacing: 0;
 }
 
 .routes-table thead {
     background: #FF6610;
     color: white;
-    flex-shrink: 0;
-}
-
-.routes-table tbody {
-    flex: 1;
-    overflow-y: auto;
-    display: block;
-}
-
-.routes-table thead,
-.routes-table tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .routes-table th {
-    padding: 0.8rem;
+    padding: 12px;
+    /* Un poco mas de padding */
     text-align: left;
     font-weight: 700;
     font-size: 0.9rem;
     letter-spacing: 0.3px;
     border-right: 1px solid rgba(255, 255, 255, 0.3);
+    background: #FF6610;
+    /* Fondo solido para cubrir al scrollear */
 }
 
 .routes-table th:last-child {
     border-right: none;
+}
+
+/* Headers ordenables */
+.th-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.th-sortable:hover {
+    background: #e55a0e;
+}
+
+.sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    vertical-align: middle;
+    margin-left: 4px;
+    color: white;
+}
+
+.sort-icon.active {
+    opacity: 1;
+}
+
+.sort-icon svg {
+    width: 8px;
+    height: 6px;
 }
 
 .routes-table tbody tr {
@@ -510,13 +545,12 @@
 
 .routes-table tbody tr:hover {
     background: #fff8f5;
-    transform: scale(1.01);
+    /* Eliminar transform scale que rompe layouts complejos en tablas */
 }
 
 .routes-table tbody tr.selected-route-row {
     background: #ffe8d6 !important;
     border-left: 4px solid #FF6610;
-    box-shadow: 0 2px 8px rgba(255, 102, 16, 0.2);
 }
 
 .route-row-light {
@@ -532,6 +566,7 @@
     color: #333;
     font-size: 0.95rem;
     border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .routes-table td:last-child {
@@ -816,18 +851,26 @@
     margin-top: 0.25rem;
 }
 
-/* Skeleton loading */
+/* Skeleton loading - Unified */
 .skeleton-card {
     background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Base styles for skeletons (static) */
+.skeleton-stat-icon,
+.skeleton-stat-content,
+.skeleton-line,
+.skeleton-table-large {
+    background: #f0f0f0;
+    position: relative;
+    overflow: hidden;
+    /* No border to prevent layout shift */
 }
 
 .skeleton-stat-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
 }
 
 .skeleton-stat-content {
@@ -839,9 +882,6 @@
 
 .skeleton-line {
     height: 16px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
     border-radius: 4px;
 }
 
@@ -851,19 +891,31 @@
 
 .skeleton-table-large {
     height: 400px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
     border-radius: 12px;
 }
 
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
+/* Unified Shimmer Animation */
+.skeleton-stat-icon::after,
+.skeleton-line::after,
+.skeleton-table-large::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    /* Subtle light beam gradient */
+    background-image: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    animation: shimmer 1.5s infinite;
+}
 
+@keyframes shimmer {
     100% {
-        background-position: 200% 0;
+        transform: translateX(100%);
     }
 }
 

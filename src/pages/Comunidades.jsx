@@ -6,6 +6,32 @@ function Comunidades() {
   const [selectedCommunityIndex, setSelectedCommunityIndex] = useState(0);
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
+  // Estado para ordenamiento
+  const [ordenamiento, setOrdenamiento] = useState({ columna: 'nombre', direccion: 'asc' });
+
+  // Función de ordenamiento
+  const ordenarPor = (columna) => {
+    setOrdenamiento(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Componente IconoOrden
+  const IconoOrden = ({ columna }) => {
+    const activo = ordenamiento.columna === columna;
+    return (
+      <span className={`sort-icon ${activo ? 'active' : ''}`}>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 0L10 5H0L5 0Z" opacity={activo && ordenamiento.direccion === 'asc' ? 1 : 0.3} />
+        </svg>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 10L0 5H10L5 10Z" opacity={activo && ordenamiento.direccion === 'desc' ? 1 : 0.3} />
+        </svg>
+      </span>
+    );
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -208,31 +234,74 @@ function Comunidades() {
 
             {/* Tabla de Comunidades */}
             <div className="communities-table-card">
-              <table className="communities-table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Miembros</th>
-                    <th>Actividad</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comunidades.map((comunidad, index) => (
-                    <tr
-                      key={index}
-                      className={`${index % 2 === 0 ? 'community-row-light' : 'community-row-white'} ${index === selectedCommunityIndex ? 'selected-community-row' : ''}`}
-                      onClick={() => setSelectedCommunityIndex(index)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td className="community-name-cell">{comunidad.nombre}</td>
-                      <td>{comunidad.miembros}</td>
-                      <td>{comunidad.actividad}</td>
-                      <td>{comunidad.estado}</td>
+              <div className="table-scroll-container">
+                <table className="communities-table">
+                  <thead>
+                    <tr>
+                      <th className="th-sortable" onClick={() => ordenarPor('nombre')}>
+                        Nombre <IconoOrden columna="nombre" />
+                      </th>
+                      <th className="th-sortable" onClick={() => ordenarPor('miembros')}>
+                        Miembros <IconoOrden columna="miembros" />
+                      </th>
+                      <th className="th-sortable" onClick={() => ordenarPor('actividad')}>
+                        Actividad <IconoOrden columna="actividad" />
+                      </th>
+                      <th className="th-sortable" onClick={() => ordenarPor('estado')}>
+                        Estado <IconoOrden columna="estado" />
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {[...comunidades].sort((a, b) => {
+                      const { columna, direccion } = ordenamiento;
+                      let valorA, valorB;
+                      
+                      switch (columna) {
+                        case 'nombre':
+                          valorA = a.nombre.toLowerCase();
+                          valorB = b.nombre.toLowerCase();
+                          break;
+                        case 'miembros':
+                          valorA = a.miembros;
+                          valorB = b.miembros;
+                          break;
+                        case 'actividad':
+                          valorA = a.actividad.toLowerCase();
+                          valorB = b.actividad.toLowerCase();
+                          break;
+                        case 'estado':
+                          valorA = a.estado.toLowerCase();
+                          valorB = b.estado.toLowerCase();
+                          break;
+                        default:
+                          return 0;
+                      }
+                      
+                      if (typeof valorA === 'string') {
+                        return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+                      }
+                      return direccion === 'asc' ? valorA - valorB : valorB - valorA;
+                    }).map((comunidad) => {
+                      // Mantener el indice original para la seleccion correcta
+                      const originalIndex = comunidades.findIndex(c => c.id === comunidad.id);
+                      return (
+                        <tr
+                          key={comunidad.id}
+                          className={`${originalIndex % 2 === 0 ? 'community-row-light' : 'community-row-white'} ${originalIndex === selectedCommunityIndex ? 'selected-community-row' : ''}`}
+                          onClick={() => setSelectedCommunityIndex(originalIndex)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <td className="community-name-cell">{comunidad.nombre}</td>
+                          <td>{comunidad.miembros}</td>
+                          <td>{comunidad.actividad}</td>
+                          <td>{comunidad.estado}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
               <div className="community-table-footer">
                 Datos actuales al 9 de diciembre - Click para ver detalles
               </div>

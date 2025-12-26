@@ -38,24 +38,34 @@
 }
 
 /* Skeleton / Shimmer Effect */
+/* Skeleton / Shimmer Effect - YouTube Style (Unified) */
 .skeleton {
     background: #f0f0f0;
-    background-image: linear-gradient(90deg,
-            #f0f0f0 0px,
-            #e8e8e8 190px,
-            #f0f0f0 400px);
-    background-size: 1000px 100%;
-    animation: shimmer 1.5s infinite linear;
     border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    /* No border to prevent layout shift */
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    /* Subtle light beam gradient */
+    background-image: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    animation: shimmer 1.5s infinite;
 }
 
 @keyframes shimmer {
-    0% {
-        background-position: -1000px 0;
-    }
-
     100% {
-        background-position: 1000px 0;
+        transform: translateX(100%);
     }
 }
 
@@ -216,13 +226,15 @@
 }
 
 /* Tarjetas (secciones internas con contorno) */
+/* Tarjetas (secciones internas con contorno) */
 .dashboard-card {
     background: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    height: 100%;
+    height: 450px;
+    /* Altura fija corta */
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
     display: flex;
@@ -240,6 +252,35 @@
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 2px solid #FF6610;
+    flex-shrink: 0;
+    /* Header no se encoge */
+}
+
+/* Área de scroll interna para tarjetas */
+.card-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+    /* Espacio para scrollbar */
+}
+
+.card-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card-scroll-area::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.card-scroll-area::-webkit-scrollbar-thumb {
+    background: #FF6610;
+    border-radius: 4px;
+}
+
+.card-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #e55a0e;
 }
 
 .card-icon {
@@ -357,13 +398,44 @@
 /* Tabla de rutas */
 .rutas-tabla {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    /* Cambiado para sticky */
+    border-spacing: 0;
     font-size: 0.9rem;
+}
+
+.table-scroll-container {
+    /* Altura para aprox 3 filas + header (45px * 3 + 45px = ~180px) */
+    max-height: 180px;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background: #FF6610;
+    border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #e55a0e;
 }
 
 .rutas-tabla thead {
     background: #FF6610;
     color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .rutas-tabla th {
@@ -371,6 +443,40 @@
     text-align: left;
     font-weight: 600;
     font-size: 0.85rem;
+    background: #FF6610;
+    /* Necesario para que no sea transparente al scrollear */
+}
+
+/* Headers ordenables */
+.th-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.th-sortable:hover {
+    background: #e55a0e;
+}
+
+.sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    vertical-align: middle;
+    margin-left: 4px;
+    color: white;
+}
+
+.sort-icon.active {
+    opacity: 1;
+}
+
+.sort-icon svg {
+    width: 8px;
+    height: 6px;
 }
 
 .rutas-tabla th:first-child {
@@ -382,67 +488,23 @@
 }
 
 .rutas-tabla tbody tr {
-    border-bottom: 1px solid #eee;
     transition: background 0.2s;
+}
+
+.rutas-tabla tbody tr td {
+    border-bottom: 1px solid #eee;
 }
 
 .rutas-tabla tbody tr:hover {
     background: #f8f8f8;
 }
 
-.rutas-tabla tbody tr:last-child {
+.rutas-tabla tbody tr:last-child td {
     border-bottom: none;
 }
 
 .rutas-tabla td {
     padding: 10px 12px;
-}
-
-.ruta-nombre {
-    font-weight: 600;
-    color: #333;
-    max-width: 150px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.ruta-codigo {
-    color: #FF6610;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.ruta-estado {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.ruta-estado[data-estado="programado"],
-.ruta-estado[data-estado="PROGRAMADO"] {
-    background: #E3F2FD;
-    color: #1976D2;
-}
-
-.ruta-estado[data-estado="en_curso"],
-.ruta-estado[data-estado="EN_CURSO"] {
-    background: #E8F5E9;
-    color: #388E3C;
-}
-
-.ruta-estado[data-estado="finalizado"],
-.ruta-estado[data-estado="FINALIZADO"] {
-    background: #F3E5F5;
-    color: #7B1FA2;
-}
-
-.ruta-estado[data-estado="cancelado"],
-.ruta-estado[data-estado="CANCELADO"] {
-    background: #FFEBEE;
-    color: #D32F2F;
 }
 
 .ruta-fecha {

@@ -22,6 +22,7 @@ import AdminMarcas from "./pages/AdminMarcas";
 import AdminModelos from "./pages/AdminModelos";
 import AdminLogros from "./pages/AdminLogros";
 import AdminTiposVehiculo from "./pages/AdminTiposVehiculo";
+import AdminUsuarios from "./pages/AdminUsuarios";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -56,6 +57,7 @@ function App() {
               <Route path="/admin/modelos" element={<AdminModelos />} />
               <Route path="/admin/logros" element={<AdminLogros />} />
               <Route path="/admin/tipos-vehiculo" element={<AdminTiposVehiculo />} />
+              <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             </Route>
           </Routes>
         </Router>

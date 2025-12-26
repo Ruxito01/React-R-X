@@ -34,6 +34,39 @@ const Rutas = () => {
   // Filtro de creador de rutas
   const [filtroCreador, setFiltroCreador] = useState('todos');
 
+  // Estados para ordenamiento
+  const [ordenRutas, setOrdenRutas] = useState({ columna: 'nombre', direccion: 'asc' });
+  const [ordenViajes, setOrdenViajes] = useState({ columna: 'fecha', direccion: 'desc' });
+  
+  // Funciones de ordenamiento
+  const ordenarRutasPor = (columna) => {
+    setOrdenRutas(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  const ordenarViajesPor = (columna) => {
+    setOrdenViajes(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  // Componente IconoOrden
+  const IconoOrden = ({ activo, direccion }) => {
+    return (
+      <span className={`sort-icon ${activo ? 'active' : ''}`}>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 0L10 5H0L5 0Z" opacity={activo && direccion === 'asc' ? 1 : 0.3} />
+        </svg>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 10L0 5H10L5 10Z" opacity={activo && direccion === 'desc' ? 1 : 0.3} />
+        </svg>
+      </span>
+    );
+  };
+
   // Estados del mapa
   const [mapRef, setMapRef] = useState(null);
   const [tipoMapa, setTipoMapa] = useState('roadmap');
@@ -294,6 +327,35 @@ const Rutas = () => {
     }
     
     return true;
+  }).sort((a, b) => {
+    const { columna, direccion } = ordenViajes;
+    let valorA, valorB;
+    
+    switch (columna) {
+      case 'ruta':
+        valorA = (a.ruta?.nombre || 'Sin nombre').toLowerCase();
+        valorB = (b.ruta?.nombre || 'Sin nombre').toLowerCase();
+        break;
+      case 'participantes':
+        valorA = a.participantes?.length || 0;
+        valorB = b.participantes?.length || 0;
+        break;
+      case 'estado':
+        valorA = (a.estado || '').toLowerCase();
+        valorB = (b.estado || '').toLowerCase();
+        break;
+      case 'fecha': // Opcional, aunque no esta en la tabla visible, util para orden default
+        valorA = new Date(a.fechaProgramada || a.fechaCreacion).getTime();
+        valorB = new Date(b.fechaProgramada || b.fechaCreacion).getTime();
+        break;
+      default:
+        return 0;
+    }
+    
+    if (typeof valorA === 'string') {
+      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+    }
+    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
   });
 
   // Lógica para filtro de creadores
@@ -312,6 +374,27 @@ const Rutas = () => {
     if (filtroCreador === 'todos') return true;
     if (!ruta.creador) return false;
     return ruta.creador.id === parseInt(filtroCreador);
+  }).sort((a, b) => {
+    const { columna, direccion } = ordenRutas;
+    let valorA, valorB;
+    
+    switch (columna) {
+      case 'nombre':
+        valorA = (a.nombre || 'Sin nombre').toLowerCase();
+        valorB = (b.nombre || 'Sin nombre').toLowerCase();
+        break;
+      case 'distancia':
+        valorA = parseFloat(a.distanciaEstimadaKm || 0);
+        valorB = parseFloat(b.distanciaEstimadaKm || 0);
+        break;
+      default:
+        return 0;
+    }
+    
+    if (typeof valorA === 'string') {
+      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+    }
+    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
   });
 
   // Calcular estadisticas
@@ -493,8 +576,12 @@ const Rutas = () => {
                 <table className="routes-table">
                   <thead>
                     <tr>
-                      <th className="header-orange">Nombre</th>
-                      <th className="header-orange">Distancia</th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarRutasPor('nombre')}>
+                        Nombre <IconoOrden activo={ordenRutas.columna === 'nombre'} direccion={ordenRutas.direccion} />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarRutasPor('distancia')}>
+                        Distancia <IconoOrden activo={ordenRutas.columna === 'distancia'} direccion={ordenRutas.direccion} />
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -581,9 +668,15 @@ const Rutas = () => {
                 <table className="routes-table">
                   <thead>
                     <tr>
-                      <th className="header-orange">Ruta</th>
-                      <th className="header-orange">Participantes</th>
-                      <th className="header-orange">Estado</th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('ruta')}>
+                        Ruta <IconoOrden activo={ordenViajes.columna === 'ruta'} direccion={ordenViajes.direccion} />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('participantes')}>
+                         Part. <IconoOrden activo={ordenViajes.columna === 'participantes'} direccion={ordenViajes.direccion} />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('estado')}>
+                        Estado <IconoOrden activo={ordenViajes.columna === 'estado'} direccion={ordenViajes.direccion} />
+                      </th>
                     </tr>
                   </thead>
                   <tbody>

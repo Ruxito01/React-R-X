@@ -1,0 +1,887 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from '@react-google-maps/api';
+import './AdminUsuarios.css';
+import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
+import TableImage from '../components/TableImage';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+const libraries = ['places']; // Define libraries outside to avoid re-renders
+
+const AdminUsuarios = () => {
+    // Cargar API de Google Maps globalmente para evitar parpadeos
+    const { isLoaded: googleLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+        libraries
+    });
+
+    // Estados principales
+    const [usuarios, setUsuarios] = useState([]);
+    const [usuariosConDatos, setUsuariosConDatos] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Estados de filtrado y ordenamiento
+    const [busqueda, setBusqueda] = useState('');
+    const [ordenamiento, setOrdenamiento] = useState({ columna: 'id', direccion: 'asc' });
+
+    // Estados del Modal
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+    const [activeTab, setActiveTab] = useState('info'); 
+    const [detallesExtra, setDetallesExtra] = useState({ rutas: [], viajes: [] });
+    const [cargandoDetalles, setCargandoDetalles] = useState(false);
+
+    // Cache simple
+    const [detallesCache, setDetallesCache] = useState({});
+
+    // Estados para vistas detalladas en modal y Mapa
+    const [viewMode, setViewMode] = useState('list'); // 'list', 'detail_ruta', 'detail_viaje'
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [puntosRutaDetalle, setPuntosRutaDetalle] = useState([]);
+    const [cargandoPuntos, setCargandoPuntos] = useState(false);
+    
+    // Map States inside Modal
+    const [mapCenter, setMapCenter] = useState({ lat: -0.180653, lng: -78.467834 });
+    const [directionsResponse, setDirectionsResponse] = useState(null);
+
+    // ... (Mantener lógica de carga de usuarios intacta, omitida por brevedad en reemplazo pero NO eliminar) ...
+    // NOTA: Para este replace solo reemplazamos la parte superior y lógica nueva del mapa, conservando el medio.
+    // Usaremos MultiReplace si no calza, pero replace_file_content permite reemplazar bloques. 
+    // Vamos a reemplazar desde Imports hasta antes de cargarDetallesUsuario para actualizar hook e imports.
+    // LUEGO reemplazar MapContainerView con la nueva logica de renderizado.
+    
+    // Mejor estrategia: Reemplazar imports y hook inicial
+    
+    // Cargar usuarios al inicio
+    useEffect(() => {
+        cargarDatosIniciales();
+        window.scrollTo(0, 0);
+    }, []);
+
+    const cargarDatosIniciales = async () => {
+        try {
+            setCargando(true);
+            const [usuariosRes, viajesRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/usuario`),
+                fetch(`${API_BASE_URL}/viaje`)
+            ]);
+
+            if (!usuariosRes.ok) throw new Error('Error al cargar usuarios');
+            
+            const usuariosData = await usuariosRes.json();
+            const viajesData = viajesRes.ok ? await viajesRes.json() : [];
+
+            const viajesPorUsuario = {};
+            viajesData.forEach(viaje => {
+                if (viaje.creadorId) {
+                    viajesPorUsuario[viaje.creadorId] = (viajesPorUsuario[viaje.creadorId] || 0) + 1;
+                }
+                if (viaje.participantes && Array.isArray(viaje.participantes)) {
+                    viaje.participantes.forEach(p => {
+                        const uid = p.usuario?.id || p.id?.usuarioId || p.usuarioId; 
+                        if (uid && uid !== viaje.creadorId) { 
+                             viajesPorUsuario[uid] = (viajesPorUsuario[uid] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            const usuariosEnriquecidos = usuariosData.map(u => ({
+                ...u,
+                viajesCount: viajesPorUsuario[u.id] || 0,
+                nombre: u.nombre || 'Sin Nombre',
+                apellido: u.apellido || '',
+                alias: u.alias || 'Usuario',
+                email: u.email || 'Sin Email'
+            }));
+
+            setUsuarios(usuariosEnriquecidos);
+            setUsuariosConDatos(usuariosEnriquecidos);
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError('No se pudieron cargar los datos.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const cargarDetallesUsuario = async (usuario) => {
+        if (detallesCache[usuario.id]) {
+            setDetallesExtra(detallesCache[usuario.id]);
+            return;
+        }
+
+        setCargandoDetalles(true);
+        try {
+            const [rutasRes, viajesRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/ruta`),
+                fetch(`${API_BASE_URL}/viaje`)
+            ]);
+
+            const rutasData = rutasRes.ok ? await rutasRes.json() : [];
+            const viajesData = viajesRes.ok ? await viajesRes.json() : [];
+
+            const rutasUsuario = rutasData.filter(r => r.creadorId === usuario.id || r.creador?.id === usuario.id);
+            const viajesUsuario = viajesData.filter(v => 
+                 v.creadorId === usuario.id || 
+                 (v.participantes && v.participantes.some(p => {
+                    const uid = p.usuario?.id || p.id?.usuarioId || p.usuarioId;
+                    return uid === usuario.id;
+                 }))
+            );
+
+            const detalles = { rutas: rutasUsuario, viajes: viajesUsuario };
+            setDetallesExtra(detalles);
+            setDetallesCache(prev => ({ ...prev, [usuario.id]: detalles }));
+
+        } catch (err) {
+            console.warn("Error cargando detalles extra", err);
+            setDetallesExtra({ rutas: [], viajes: [] });
+        } finally {
+            setCargandoDetalles(false);
+        }
+    };
+
+    const calcularRutaMapa = useCallback((ruta, puntos) => {
+        if (!window.google || !ruta?.latitudInicio || !ruta?.latitudFin) {
+             setDirectionsResponse(null);
+             return;
+        }
+
+        const directionsService = new window.google.maps.DirectionsService();
+        const origin = { lat: parseFloat(ruta.latitudInicio), lng: parseFloat(ruta.longitudInicio) };
+        const destination = { lat: parseFloat(ruta.latitudFin), lng: parseFloat(ruta.longitudFin) };
+
+        const waypoints = puntos
+            .filter(p => p.latitud && p.longitud)
+            .map(p => ({
+                 location: { lat: parseFloat(p.latitud), lng: parseFloat(p.longitud) },
+                 stopover: true
+            }));
+
+        directionsService.route({
+            origin,
+            destination,
+            waypoints,
+            travelMode: window.google.maps.TravelMode.DRIVING,
+            optimizeWaypoints: false
+        }, (result, status) => {
+            if (status === 'OK') {
+                setDirectionsResponse(result);
+            } else {
+                console.warn('Map direction error:', status);
+                setDirectionsResponse(null);
+            }
+        });
+    }, []);
+
+    // ... (rest of helper functions) ...
+
+    const cargarPuntosRuta = async (ruta) => {
+        if (!ruta) return;
+        setCargandoPuntos(true);
+        setDirectionsResponse(null);
+        
+        if (ruta.latitudInicio && ruta.longitudInicio) {
+            setMapCenter({
+                lat: parseFloat(ruta.latitudInicio),
+                lng: parseFloat(ruta.longitudInicio)
+            });
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/puntoruta/ruta/${ruta.id}`);
+            if (res.ok) {
+                const puntos = await res.json();
+                const puntosOrdenados = puntos.sort((a, b) => a.ordenSecuencia - b.ordenSecuencia);
+                setPuntosRutaDetalle(puntosOrdenados);
+                
+                if (googleLoaded) {
+                    calcularRutaMapa(ruta, puntosOrdenados);
+                }
+            } else {
+                setPuntosRutaDetalle([]);
+            }
+        } catch (e) {
+            console.error("Error cargando puntos", e);
+            setPuntosRutaDetalle([]);
+        } finally {
+            setCargandoPuntos(false);
+        }
+    };
+
+    useEffect(() => {
+        if (googleLoaded && selectedItem && puntosRutaDetalle.length > 0) {
+            const ruta = selectedItem.latitudInicio ? selectedItem : selectedItem.ruta;
+            if(ruta) calcularRutaMapa(ruta, puntosRutaDetalle);
+        }
+    }, [googleLoaded, selectedItem, puntosRutaDetalle, calcularRutaMapa]);
+
+    const handleRutaClick = (ruta) => {
+        setSelectedItem(ruta);
+        setViewMode('detail_ruta');
+        cargarPuntosRuta(ruta);
+    };
+
+    const handleViajeClick = (viaje) => {
+        setSelectedItem(viaje);
+        setViewMode('detail_viaje');
+        if (viaje.ruta?.id) {
+             cargarPuntosRuta(viaje.ruta); 
+        }
+    };
+
+    const handleBackToList = () => {
+        setViewMode('list');
+        setSelectedItem(null);
+        setPuntosRutaDetalle([]);
+        setDirectionsResponse(null);
+    };
+
+    const abrirModal = (usuario) => {
+        setUsuarioSeleccionado(usuario);
+        setModalAbierto(true);
+        setActiveTab('info');
+        setViewMode('list');
+        cargarDetallesUsuario(usuario);
+    };
+
+    const cerrarModal = () => {
+        setModalAbierto(false);
+        setUsuarioSeleccionado(null);
+        setDetallesExtra({ rutas: [], viajes: [] });
+        setViewMode('list');
+        setSelectedItem(null);
+        setDirectionsResponse(null);
+    };
+
+    // Sub-componentes para vistas detalladas
+    const MapContainerView = () => {
+        if (!googleLoaded) return <div className="detail-map-container" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>Cargando mapa...</div>;
+
+        const rutaActual = selectedItem ? (selectedItem.latitudInicio ? selectedItem : selectedItem.ruta) : null;
+
+        return (
+            <div className="detail-map-container">
+                <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                    center={mapCenter}
+                    zoom={13}
+                    options={{
+                        disableDefaultUI: false,
+                        zoomControl: true,
+                        streetViewControl: false,
+                        mapTypeControl: false
+                    }}
+                >
+                    {/* Marcador Inicio */}
+                    {rutaActual?.latitudInicio && (
+                         <Marker
+                            position={{ lat: parseFloat(rutaActual.latitudInicio), lng: parseFloat(rutaActual.longitudInicio) }}
+                            icon={{
+                                path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
+                                scale: 8,
+                                fillColor: '#4CAF50',
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 2
+                            }}
+                            title="Inicio"
+                         />
+                    )}
+
+                    {/* Puntos Intermedios */}
+                    {puntosRutaDetalle.map((p, i) => {
+                         const isServicio = p.tipoPunto === 'servicio' || p.tipoPunto === 'SS';
+                         if(!p.latitud) return null;
+                         return (
+                            <Marker
+                                key={p.id || i}
+                                position={{ lat: parseFloat(p.latitud), lng: parseFloat(p.longitud) }}
+                                icon={{
+                                    path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
+                                    scale: 7,
+                                    fillColor: isServicio ? '#FF6610' : '#00BCD4',
+                                    fillOpacity: 1,
+                                    strokeColor: 'white',
+                                    strokeWeight: 2
+                                }}
+                                title={p.nombre}
+                            />
+                         );
+                    })}
+
+                    {/* Marcador Fin */}
+                    {rutaActual?.latitudFin && (
+                         <Marker
+                            position={{ lat: parseFloat(rutaActual.latitudFin), lng: parseFloat(rutaActual.longitudFin) }}
+                            icon={{
+                                path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
+                                scale: 8,
+                                fillColor: '#1a1a1a',
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 2
+                            }}
+                            title="Destino"
+                         />
+                    )}
+
+                    {directionsResponse && (
+                        <DirectionsRenderer 
+                            directions={directionsResponse}
+                            options={{ 
+                                suppressMarkers: true,
+                                polylineOptions: {
+                                    strokeColor: '#FF6610',
+                                    strokeOpacity: 0.9,
+                                    strokeWeight: 5
+                                }
+                            }} 
+                        />
+                    )}
+                </GoogleMap>
+            </div>
+        );
+    };
+
+    const RutaDetailView = ({ ruta, puntos, loadingPuntos, onBack }) => (
+        <div className="detail-view-container">
+            <div className="detail-header-row">
+                <button className="btn-back" onClick={onBack}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Volver
+                </button>
+                <h3>Detalle de Ruta</h3>
+            </div>
+            
+            <MapContainerView />
+
+            <div className="detail-cards-scroller with-map">
+                <h2 className="detail-title">{ruta.nombre || 'Sin nombre'}</h2>
+                
+                <div className="stats-grid-3">
+                    <div className="stat-box">
+                        <span className="stat-label">Distancia</span>
+                        <span className="stat-value">{ruta.distanciaEstimadaKm?.toFixed(1) || 0} km</span>
+                    </div>
+                    <div className="stat-box">
+                        <span className="stat-label">Duración</span>
+                        <span className="stat-value">{ruta.duracionEstimadaMinutos || 0} min</span>
+                    </div>
+                    <div className="stat-box">
+                        <span className="stat-label">Dificultad</span>
+                        <span className={`badge-dificultad ${ruta.nivelDificultad?.toLowerCase()}`}>
+                            {ruta.nivelDificultad || 'N/A'}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="detail-section">
+                    <h4>Descripción</h4>
+                    <p>{ruta.descripcion || 'Sin descripción'}</p>
+                </div>
+
+                <div className="detail-section">
+                     <h4>Privacidad</h4>
+                     <span className="badge-general">{ruta.privacidad}</span>
+                </div>
+
+                <div className="detail-section">
+                    <h4>Puntos de Ruta</h4>
+                    {loadingPuntos ? <ShimmerList /> : (
+                        <div className="points-timeline">
+                            {puntos.length > 0 ? puntos.map((p, idx) => (
+                                <div key={p.id || idx} className="timeline-item">
+                                    <div className={`timeline-dot ${idx === 0 ? 'start' : (idx === puntos.length - 1 ? 'end' : '')}`}></div>
+                                    <div className="timeline-content">
+                                        <span className="point-name">{p.nombre || `Punto ${p.ordenSecuencia}`}</span>
+                                        {p.tipoPunto === 'SS' && <span className="badge-service">Servicio</span>}
+                                    </div>
+                                </div>
+                            )) : <p className="text-muted">No hay puntos registrados.</p>}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    const ViajeDetailView = ({ viaje, puntos, onBack }) => {
+        const organizador = viaje.organizador || (viaje.creadorId === viaje.organizadorId ? viaje.creador : null);
+        const fecha = viaje.fechaProgramada ? new Date(viaje.fechaProgramada).toLocaleString() : 'Por definir';
+        
+        return (
+            <div className="detail-view-container">
+                <div className="detail-header-row">
+                    <button className="btn-back" onClick={onBack}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Volver
+                    </button>
+                    <h3>Detalle de Viaje</h3>
+                </div>
+
+                <MapContainerView />
+
+                <div className="detail-cards-scroller with-map">
+                    <div className="status-banner" style={{marginBottom: '1rem'}}>
+                         <span className={`badge-estado large ${viaje.estado?.toLowerCase()}`}>
+                             {viaje.estado === 'en_curso' ? 'En Curso Ahora' : viaje.estado}
+                         </span>
+                    </div>
+
+                    <h2 className="detail-title">
+                        {viaje.ruta?.nombre ? `Viaje: ${viaje.ruta.nombre}` : `Viaje #${viaje.id}`}
+                    </h2>
+
+                     <div className="detail-section-row">
+                        <div className="info-block">
+                             <span className="label-sm">Fecha Programada</span>
+                             <span className="value-md">{fecha}</span>
+                        </div>
+                        {organizador && (
+                            <div className="info-block">
+                                <span className="label-sm">Organizador</span>
+                                <div className="user-mini-row">
+                                     <div className="avatar-xs">{organizador.nombre?.charAt(0)}</div>
+                                     <span>{organizador.nombre} {organizador.apellido}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Código de Invitación */}
+                    {viaje.codigoInvitacion && (
+                        <div className="invite-box">
+                             <span className="invite-label">Código de Invitación:</span>
+                             <span className="invite-code">{viaje.codigoInvitacion}</span>
+                        </div>
+                    )}
+
+                    <div className="detail-section">
+                        <h4>Participantes ({viaje.participantes?.length || 0})</h4>
+                        <div className="participants-list">
+                            {viaje.participantes && viaje.participantes.length > 0 ? (
+                                viaje.participantes.map((p, idx) => {
+                                    const usuarioP = p.usuario || {};
+                                    return (
+                                        <div key={idx} className="participant-card">
+                                            <div className="participant-avatar">
+                                                {usuarioP.foto ? 
+                                                    <img src={usuarioP.foto} alt="av" /> :
+                                                    <div className="placeholder">{usuarioP.nombre?.charAt(0)}</div>
+                                                }
+                                            </div>
+                                            <div className="participant-info">
+                                                <span className="p-name">{usuarioP.nombre} {usuarioP.apellido}</span>
+                                                <span className="p-alias">@{usuarioP.alias}</span>
+                                            </div>
+                                            <div className="participant-status">
+                                                 {p.estado === 'ingresa' && <span className="badge-ingresa">Ingresó</span>}
+                                                 {p.estado === 'cancela' && <span className="badge-cancela">Canceló</span>}
+                                                 {/* Si es organizador */}
+                                                 {usuarioP.id === viaje.organizadorId && <span className="badge-role-sm">Org</span>}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : <p className="text-muted">No hay participantes.</p>}
+                        </div>
+                    </div>
+
+                    <div className="detail-section">
+                        <h4>Puntos de la Ruta</h4>
+                        {puntosRutaDetalle.length > 0 ? (
+                            <div className="points-summary">
+                                <span>{puntosRutaDetalle.length} puntos definidos. (Ver mapa arriba)</span>
+                            </div>
+                        ) : (
+                           <button className="btn-link" onClick={() => cargarPuntosRuta(viaje.ruta?.id ? viaje.ruta : null)}>
+                               Cargar Puntos de Ruta
+                           </button>
+                        )}
+                        {puntosRutaDetalle.length > 0 && (
+                            <div className="points-timeline compact">
+                                {puntosRutaDetalle.slice(0, 3).map((p, i) => (
+                                    <div key={i} className="timeline-item"><div className="timeline-dot small"></div><span>{p.nombre}</span></div>
+                                ))}
+                                {puntosRutaDetalle.length > 3 && <div className="timeline-item"><span>... y {puntosRutaDetalle.length - 3} más</span></div>}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Lógica de Ordenamiento y Filtrado
+    const ordenarPor = (columna) => {
+        setOrdenamiento(prev => ({
+            columna,
+            direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    const usuariosFiltrados = usuarios
+        .filter(u => {
+            const termino = busqueda.toLowerCase();
+            const nombreCompleto = `${u.nombre} ${u.apellido || ''}`.toLowerCase();
+            return (
+                nombreCompleto.includes(termino) ||
+                (u.alias && u.alias.toLowerCase().includes(termino)) ||
+                (u.email && u.email.toLowerCase().includes(termino))
+            );
+        })
+        .sort((a, b) => {
+            const { columna, direccion } = ordenamiento;
+            let valA = a[columna];
+            let valB = b[columna];
+
+            // Manejo especial para combinación nombre+apellido si se ordena por nombre
+            if (columna === 'nombre') {
+                valA = `${a.nombre} ${a.apellido || ''}`;
+                valB = `${b.nombre} ${b.apellido || ''}`;
+            }
+
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+
+            if (valA < valB) return direccion === 'asc' ? -1 : 1;
+            if (valA > valB) return direccion === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+    const IconoOrden = ({ columna }) => {
+        const activo = ordenamiento.columna === columna;
+        return (
+            <span className={`sort-icon ${activo ? 'active' : ''}`}>
+                <svg viewBox="0 0 10 10" fill="currentColor">
+                    <path d="M5 0L10 5H0L5 0Z" opacity={activo && ordenamiento.direccion === 'asc' ? 1 : 0.3} />
+                </svg>
+                <svg viewBox="0 0 10 10" fill="currentColor">
+                    <path d="M5 10L0 5H10L5 10Z" opacity={activo && ordenamiento.direccion === 'desc' ? 1 : 0.3} />
+                </svg>
+            </span>
+        );
+    };
+
+    // Componente Shimmer para listas
+    const ShimmerList = () => (
+        <div style={{ width: '100%' }}>
+            {[1, 2, 3].map(i => (
+                <div key={i} className="shimmer-block"></div>
+            ))}
+        </div>
+    );
+
+    // Componente Shimmer para Tabla
+    const TableShimmer = () => (
+        <>
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+                <tr key={item} className="row-white">
+                    <td><div className="shimmer-line" style={{ width: '20px' }}></div></td>
+                    <td className="avatar-cell"><div className="shimmer-avatar"></div></td>
+                    <td><div className="shimmer-line" style={{ width: '80%' }}></div></td>
+                    <td><div className="shimmer-line" style={{ width: '80%' }}></div></td>
+                    <td><div className="shimmer-line" style={{ width: '90%' }}></div></td>
+                    <td style={{ textAlign: 'center' }}><div className="shimmer-line" style={{ width: '30px', margin: '0 auto' }}></div></td>
+                    <td>
+                        <div className="shimmer-line" style={{ width: '24px' }}></div>
+                    </td>
+                </tr>
+            ))}
+        </>
+    );
+
+    // Componente Skeleton para toda la página
+    const SkeletonAdmin = () => (
+        <div className="admin-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+            <div className="admin-main-card skeleton-card">
+                 {/* Skeleton Header */}
+                <div className="admin-actions-bar" style={{ borderBottom: '1px solid #eee' }}>
+                    <div className="skeleton-line" style={{ width: '200px', height: '30px' }}></div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                         <div className="skeleton-line" style={{ width: '100px', height: '35px', borderRadius: '8px' }}></div>
+                         <div className="skeleton-line" style={{ width: '200px', height: '35px', borderRadius: '8px' }}></div>
+                    </div>
+                </div>
+
+                {/* Skeleton Table */}
+                <div className="admin-table-card" style={{ boxShadow: 'none' }}>
+                    <div className="skeleton-table-header"></div>
+                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                        <div key={i} className="skeleton-row"></div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    if (cargando) {
+        return <SkeletonAdmin />;
+    }
+
+    return (
+        <div className="admin-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+            <div className="admin-main-card">
+                {/* Header Actions */}
+                <div className="admin-actions-bar">
+                    <h2 style={{ margin: 0, color: '#FF6610' }}>Administración de Usuarios</h2>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button className="btn-refrescar" onClick={cargarDatosIniciales} disabled={cargando}>
+                            Refrescar
+                        </button>
+                        <div className="buscador-container">
+                            <input 
+                                type="text" 
+                                className="input-busqueda" 
+                                placeholder="Buscar..." 
+                                value={busqueda}
+                                onChange={(e) => setBusqueda(e.target.value)}
+                            />
+                            {busqueda && <button onClick={() => setBusqueda('')}>X</button>}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabla */}
+                <div className="admin-table-card">
+                    <div className="table-scroll-container">
+                        <table className="admin-table">
+                            <thead>
+                                <tr>
+                                    <th className="th-sortable" onClick={() => ordenarPor('id')}>ID <IconoOrden columna="id" /></th>
+                                    <th>Perfil</th>
+                                    <th className="th-sortable" onClick={() => ordenarPor('nombre')}>Nombre <IconoOrden columna="nombre" /></th>
+                                    <th className="th-sortable" onClick={() => ordenarPor('apellido')}>Apellido <IconoOrden columna="apellido" /></th>
+                                    <th className="th-sortable" onClick={() => ordenarPor('email')}>Email <IconoOrden columna="email" /></th>
+                                    <th className="th-sortable" onClick={() => ordenarPor('viajesCount')}>Viajes <IconoOrden columna="viajesCount" /></th>
+                                    <th>Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {cargando ? (
+                                    <TableShimmer />
+                                ) : (
+                                    usuariosFiltrados.map((usuario, index) => (
+                                        <tr key={usuario.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                                            <td>{usuario.id}</td>
+                                            <td className="avatar-cell">
+                                                {usuario.foto ? (
+                                                    <TableImage 
+                                                        src={usuario.foto} 
+                                                        alt={usuario.alias} 
+                                                        width="35px" 
+                                                        height="35px" 
+                                                        className="avatar-preview"
+                                                        style={{ borderRadius: '50%' }}
+                                                    />
+                                                ) : (
+                                                    <div className="avatar-placeholder">{usuario.alias?.charAt(0)}</div>
+                                                )}
+                                            </td>
+                                            <td style={{ fontWeight: '500' }}>{usuario.nombre}</td>
+                                            <td>{usuario.apellido}</td>
+                                            <td>{usuario.email}</td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span style={{ 
+                                                    background: '#fff0e6', 
+                                                    color: '#FF6610', 
+                                                    padding: '4px 12px', 
+                                                    borderRadius: '12px',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.9rem'
+                                                }}>
+                                                    {usuario.viajesCount}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button className="btn-editar" onClick={() => abrirModal(usuario)} title="Ver Detalles">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="table-footer">
+                        Total: {usuarios.length} usuarios
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal de Detalles */}
+            {modalAbierto && usuarioSeleccionado && (
+                <div className="modal-overlay" onClick={cerrarModal}>
+                    <div className="modal-content-large" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header-profile">
+                            <button className="modal-close-white" onClick={cerrarModal}>×</button>
+                            <img 
+                                src={usuarioSeleccionado.foto || 'https://via.placeholder.com/150'} 
+                                alt={usuarioSeleccionado.alias} 
+                                className="profile-avatar-large"
+                            />
+                            <div className="profile-info">
+                                <h2>{usuarioSeleccionado.nombre} {usuarioSeleccionado.apellido}</h2>
+                                <span className="alias">@{usuarioSeleccionado.alias}</span>
+                            </div>
+                        </div>
+
+                        <div className="modal-body-scroll">
+                            <div className="profile-tabs">
+                                <button 
+                                    className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('info')}
+                                >
+                                    Información
+                                </button>
+                                <button 
+                                    className={`tab-btn ${activeTab === 'rutas' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('rutas')}
+                                >
+                                    Rutas Creadas
+                                </button>
+                                <button 
+                                    className={`tab-btn ${activeTab === 'viajes' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('viajes')}
+                                >
+                                    Viajes
+                                </button>
+                            </div>
+
+                            <div className="tab-content">
+                                {activeTab === 'info' && (
+                                    <div className="details-grid">
+                                        <div className="detail-card">
+                                            <h4>Nombre Completo</h4>
+                                            <p>{usuarioSeleccionado.nombre} {usuarioSeleccionado.apellido}</p>
+                                        </div>
+                                        <div className="detail-card">
+                                            <h4>Alias / Nickname</h4>
+                                            <p>{usuarioSeleccionado.alias}</p>
+                                        </div>
+                                        <div className="detail-card">
+                                            <h4>Email</h4>
+                                            <p>{usuarioSeleccionado.email}</p>
+                                        </div>
+                                        <div className="detail-card">
+                                            <h4>ID Usuario</h4>
+                                            <p>{usuarioSeleccionado.id}</p>
+                                        </div>
+                                        <div className="detail-card">
+                                            <h4>Fecha Registro</h4>
+                                            <p>
+                                                {(usuarioSeleccionado.fecha_creacion || usuarioSeleccionado.fechaCreacion)
+                                                    ? new Date(usuarioSeleccionado.fecha_creacion || usuarioSeleccionado.fechaCreacion).toLocaleDateString()
+                                                    : 'No disponible'}
+                                            </p>
+                                        </div>
+                                        <div className="detail-card">
+                                            <h4>Rol</h4>
+                                            <p>{usuarioSeleccionado.rol || 'Usuario'}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'rutas' && (
+                                    viewMode === 'detail_ruta' && selectedItem ? (
+                                        <RutaDetailView 
+                                            ruta={selectedItem} 
+                                            puntos={puntosRutaDetalle} 
+                                            loadingPuntos={cargandoPuntos} 
+                                            onBack={handleBackToList}
+                                        />
+                                    ) : (
+                                        <div className="list-container">
+                                            {cargandoDetalles ? <ShimmerList /> : (
+                                                detallesExtra.rutas.length > 0 ? (
+                                                    <ul className="simple-list">
+                                                        {detallesExtra.rutas.map(r => (
+                                                            <li 
+                                                                key={r.id} 
+                                                                className="detail-list-item clickable"
+                                                                onClick={() => handleRutaClick(r)}
+                                                            >
+                                                                <div className="detail-row-main">
+                                                                    <strong>{r.nombre || 'Ruta sin nombre'}</strong>
+                                                                    <span className={`badge-dificultad ${r.nivelDificultad?.toLowerCase()}`}>
+                                                                        {r.nivelDificultad || 'N/A'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="detail-row-sub">
+                                                                    <span>{r.distanciaEstimadaKm?.toFixed(1)} km</span>
+                                                                    <span>•</span>
+                                                                    <span>{r.duracionEstimadaMinutos} min</span>
+                                                                </div>
+                                                                <div className="click-hint">Ver detalle &gt;</div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : <div className="empty-state">No ha creado rutas.</div>
+                                            )}
+                                        </div>
+                                    )
+                                )}
+
+                                {activeTab === 'viajes' && (
+                                    viewMode === 'detail_viaje' && selectedItem ? (
+                                        <ViajeDetailView 
+                                            viaje={selectedItem} 
+                                            puntos={puntosRutaDetalle} 
+                                            onBack={handleBackToList} 
+                                        />
+                                    ) : (
+                                        <div className="list-container">
+                                            {cargandoDetalles ? <ShimmerList /> : (
+                                                detallesExtra.viajes.length > 0 ? (
+                                                    <ul className="simple-list">
+                                                        {detallesExtra.viajes.map(v => (
+                                                            <li 
+                                                                key={v.id} 
+                                                                className="detail-list-item clickable"
+                                                                onClick={() => handleViajeClick(v)}
+                                                            >
+                                                                <div className="detail-row-main">
+                                                                    <strong>{v.ruta?.nombre || `Viaje #${v.id}`}</strong>
+                                                                    <span className={`badge-estado ${v.estado?.toLowerCase()}`}>
+                                                                        {v.estado || 'Desconocido'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="detail-row-sub">
+                                                                    <span>{v.fechaProgramada ? new Date(v.fechaProgramada).toLocaleString() : 'Por definir'}</span>
+                                                                    {v.creadorId === usuarioSeleccionado.id && (
+                                                                        <span className="badge-role">Organizador</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="click-hint">Ver participantes &gt;</div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : <div className="empty-state">No ha participado en viajes.</div>
+                                            )}
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default AdminUsuarios;

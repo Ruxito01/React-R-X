@@ -17,6 +17,64 @@ const Dashboard = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Estado para ordenamiento de tabla
+  const [ordenamiento, setOrdenamiento] = useState({ columna: 'distancia', direccion: 'desc' });
+  
+  // Funcion para cambiar ordenamiento
+  const ordenarPor = (columna) => {
+    setOrdenamiento(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'desc' ? 'asc' : 'desc'
+    }));
+  };
+  
+  // Componente icono de orden
+  const IconoOrden = ({ columna }) => {
+    const activo = ordenamiento.columna === columna;
+    return (
+      <span className={`sort-icon ${activo ? 'active' : ''}`}>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 0L10 5H0L5 0Z" opacity={activo && ordenamiento.direccion === 'asc' ? 1 : 0.3} />
+        </svg>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 10L0 5H10L5 10Z" opacity={activo && ordenamiento.direccion === 'desc' ? 1 : 0.3} />
+        </svg>
+      </span>
+    );
+  };
+  
+  // Ordenar usuarios segun estado
+  const usuariosOrdenados = [...usuarios].sort((a, b) => {
+    const { columna, direccion } = ordenamiento;
+    let valorA, valorB;
+    
+    switch (columna) {
+      case 'alias':
+        valorA = (a.alias || '').toLowerCase();
+        valorB = (b.alias || '').toLowerCase();
+        break;
+      case 'distancia':
+        valorA = a.distancia || 0;
+        valorB = b.distancia || 0;
+        break;
+      case 'rutasMes':
+        valorA = a.rutasMes || 0;
+        valorB = b.rutasMes || 0;
+        break;
+      case 'vehiculos':
+        valorA = a.vehiculos || 0;
+        valorB = b.vehiculos || 0;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (typeof valorA === 'string') {
+      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+    }
+    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
+  });
 
   // Datos mock para gráficos (no disponibles en backend)
   const datosMockGraficos = {
@@ -359,46 +417,59 @@ const Dashboard = () => {
 
           {/* Tabla de Usuarios */}
           <div className="users-table-card">
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th className="header-orange">USUARIO</th>
-                  <th className="header-orange">Alias</th>
-                  <th className="header-orange">Km</th>
-                  <th className="header-orange">Rutas</th>
-                  <th className="header-orange">Vehiculos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  // Skeleton rows durante la carga
-                  [...Array(8)].map((_, index) => (
-                    <tr key={`skeleton-${index}`} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
-                      <td><div className="skeleton" style={{ height: '16px', width: '80%' }}></div></td>
-                      <td><div className="skeleton" style={{ height: '16px', width: '60px' }}></div></td>
-                      <td><div className="skeleton" style={{ height: '16px', width: '40px' }}></div></td>
-                      <td><div className="skeleton" style={{ height: '16px', width: '30px' }}></div></td>
-                      <td><div className="skeleton" style={{ height: '16px', width: '30px' }}></div></td>
-                    </tr>
-                  ))
-                ) : (
-                  usuarios.map((usuario, index) => (
-                    <tr 
-                      key={index} 
-                      className={`${index % 2 === 0 ? 'row-light' : 'row-white'} ${selectedUserIndex === index ? 'selected-row' : ''}`}
-                      onClick={() => setSelectedUserIndex(index)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td className="user-name">{usuario.nombre}</td>
-                      <td style={{ color: '#FF6610', fontWeight: '600' }}>@{usuario.alias}</td>
-                      <td>{usuario.distancia}</td>
-                      <td>{usuario.rutasMes}</td>
-                      <td>{usuario.vehiculos}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            <div className="table-scroll-container">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th className="header-orange">USUARIO</th>
+                    <th className="header-orange th-sortable" onClick={() => ordenarPor('alias')}>
+                      Alias <IconoOrden columna="alias" />
+                    </th>
+                    <th className="header-orange th-sortable" onClick={() => ordenarPor('distancia')}>
+                      Km <IconoOrden columna="distancia" />
+                    </th>
+                    <th className="header-orange th-sortable" onClick={() => ordenarPor('rutasMes')}>
+                      Rutas <IconoOrden columna="rutasMes" />
+                    </th>
+                    <th className="header-orange th-sortable" onClick={() => ordenarPor('vehiculos')}>
+                      Vehiculos <IconoOrden columna="vehiculos" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    // Skeleton rows durante la carga
+                    [...Array(6)].map((_, index) => (
+                      <tr key={`skeleton-${index}`} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                        <td><div className="skeleton" style={{ height: '16px', width: '80%' }}></div></td>
+                        <td><div className="skeleton" style={{ height: '16px', width: '60px' }}></div></td>
+                        <td><div className="skeleton" style={{ height: '16px', width: '40px' }}></div></td>
+                        <td><div className="skeleton" style={{ height: '16px', width: '30px' }}></div></td>
+                        <td><div className="skeleton" style={{ height: '16px', width: '30px' }}></div></td>
+                      </tr>
+                    ))
+                  ) : (
+                    usuariosOrdenados.map((usuario, index) => {
+                      const originalIndex = usuarios.findIndex(u => u.id === usuario.id);
+                      return (
+                        <tr 
+                          key={usuario.id || index} 
+                          className={`${index % 2 === 0 ? 'row-light' : 'row-white'} ${selectedUserIndex === originalIndex ? 'selected-row' : ''}`}
+                          onClick={() => setSelectedUserIndex(originalIndex)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <td className="user-name">{usuario.nombre}</td>
+                          <td style={{ color: '#FF6610', fontWeight: '600' }}>@{usuario.alias}</td>
+                          <td>{usuario.distancia}</td>
+                          <td>{usuario.rutasMes}</td>
+                          <td>{usuario.vehiculos}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
             <div className="table-footer">
               Datos actuales {getFechaActual()} - Click para ver detalles
             </div>

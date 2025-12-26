@@ -25,6 +25,32 @@ const AdminModelos = () => {
 
   // Buscador
   const [busqueda, setBusqueda] = useState('');
+  
+  // Estado para ordenamiento
+  const [ordenamiento, setOrdenamiento] = useState({ columna: 'nombre', direccion: 'asc' });
+  
+  // Funcion para cambiar ordenamiento
+  const ordenarPor = (columna) => {
+    setOrdenamiento(prev => ({
+      columna,
+      direccion: prev.columna === columna && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  // Componente icono de orden
+  const IconoOrden = ({ columna }) => {
+    const activo = ordenamiento.columna === columna;
+    return (
+      <span className={`sort-icon ${activo ? 'active' : ''}`}>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 0L10 5H0L5 0Z" opacity={activo && ordenamiento.direccion === 'asc' ? 1 : 0.3} />
+        </svg>
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <path d="M5 10L0 5H10L5 10Z" opacity={activo && ordenamiento.direccion === 'desc' ? 1 : 0.3} />
+        </svg>
+      </span>
+    );
+  };
 
   // Cargar datos al montar
   useEffect(() => {
@@ -38,6 +64,8 @@ const AdminModelos = () => {
   const cargarDatos = async () => {
     try {
       setCargando(true);
+      
+      // Cargar modelos y marcas en paralelo (rapido)
       const [modelosRes, marcasRes] = await Promise.all([
         fetch(`${API_BASE_URL}/modelo`),
         fetch(`${API_BASE_URL}/marca`)
@@ -50,33 +78,92 @@ const AdminModelos = () => {
         marcasRes.json()
       ]);
       
-      // Cargar conteo de vehiculos para cada modelo
-      const modelosConConteo = await Promise.all(
-        modelosData.map(async (modelo) => {
+      // Mostrar datos inmediatamente (sin conteos)
+      const modelosIniciales = modelosData.map(m => ({ ...m, vehiculosCount: null }));
+      setModelos(modelosIniciales);
+      setMarcas(marcasData);
+      setError(null);
+      setCargando(false);
+      
+      // Cargar conteos en segundo plano (no bloquea la UI)
+      cargarConteosEnBackground(modelosData);
+      
+    } catch (err) {
+      setError(err.message);
+      setCargando(false);
+    }
+  };
+  
+  // Cargar conteos de vehiculos en segundo plano
+  const cargarConteosEnBackground = async (modelosData) => {
+    // Cargar de a lotes de 5 para no saturar el servidor
+    const BATCH_SIZE = 5;
+    const modelosActualizados = [...modelosData.map(m => ({ ...m, vehiculosCount: null }))];
+    
+    for (let i = 0; i < modelosData.length; i += BATCH_SIZE) {
+      const batch = modelosData.slice(i, i + BATCH_SIZE);
+      
+      const conteos = await Promise.all(
+        batch.map(async (modelo) => {
           try {
             const countRes = await fetch(`${API_BASE_URL}/modelo/${modelo.id}/count-vehiculos`);
-            const count = countRes.ok ? await countRes.json() : 0;
-            return { ...modelo, vehiculosCount: count };
+            return countRes.ok ? await countRes.json() : 0;
           } catch {
-            return { ...modelo, vehiculosCount: 0 };
+            return 0;
           }
         })
       );
       
-      setModelos(modelosConConteo);
-      setMarcas(marcasData);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCargando(false);
+      // Actualizar modelos con los conteos obtenidos
+      batch.forEach((modelo, idx) => {
+        const modeloIdx = modelosActualizados.findIndex(m => m.id === modelo.id);
+        if (modeloIdx !== -1) {
+          modelosActualizados[modeloIdx] = { 
+            ...modelosActualizados[modeloIdx], 
+            vehiculosCount: conteos[idx] 
+          };
+        }
+      });
+      
+      // Actualizar estado parcialmente
+      setModelos([...modelosActualizados]);
     }
   };
 
-  // Filtrar modelos por marca y busqueda
+  // Filtrar y ordenar modelos por marca y busqueda
   const modelosFiltrados = modelos
     .filter(m => filtroMarca === 'todas' || m.marcaId === parseInt(filtroMarca))
-    .filter(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+    .filter(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+    .sort((a, b) => {
+      const { columna, direccion } = ordenamiento;
+      let valorA, valorB;
+      
+      switch (columna) {
+        case 'id':
+          valorA = a.id || 0;
+          valorB = b.id || 0;
+          break;
+        case 'nombre':
+          valorA = (a.nombre || '').toLowerCase();
+          valorB = (b.nombre || '').toLowerCase();
+          break;
+        case 'marca':
+          valorA = (a.marcaNombre || '').toLowerCase();
+          valorB = (b.marcaNombre || '').toLowerCase();
+          break;
+        case 'vehiculos':
+          valorA = a.vehiculosCount || 0;
+          valorB = b.vehiculosCount || 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (typeof valorA === 'string') {
+        return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+      }
+      return direccion === 'asc' ? valorA - valorB : valorB - valorA;
+    });
 
   const abrirModalCrear = () => {
     setModeloEditando(null);
@@ -239,59 +326,70 @@ const AdminModelos = () => {
               {marcas.length > 0 && !busqueda && <button onClick={abrirModalCrear}>Crear primer modelo</button>}
             </div>
           ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Marca</th>
-                  <th>Vehiculos</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modelosFiltrados.map((modelo, index) => {
-                  const tieneVehiculos = (modelo.vehiculosCount || 0) > 0;
-                  return (
-                    <tr key={modelo.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
-                      <td className="td-id">{modelo.id}</td>
-                      <td className="td-nombre">{modelo.nombre}</td>
-                      <td className="td-marca">
-                        <span className="marca-badge">{modelo.marcaNombre}</span>
-                      </td>
-                      <td className="td-count">
-                        <span className={tieneVehiculos ? 'count-badge active' : 'count-badge'}>
-                          {modelo.vehiculosCount || 0}
-                        </span>
-                      </td>
-                      <td className="td-acciones">
-                        <button 
-                          className={`btn-editar ${tieneVehiculos ? 'btn-disabled' : ''}`}
-                          onClick={() => !tieneVehiculos && abrirModalEditar(modelo)} 
-                          title={tieneVehiculos ? 'No se puede editar: tiene vehiculos asociados' : 'Editar'}
-                          disabled={tieneVehiculos}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className={`btn-eliminar ${tieneVehiculos ? 'btn-disabled' : ''}`}
-                          onClick={() => !tieneVehiculos && setConfirmandoEliminar(modelo.id)}
-                          title={tieneVehiculos ? 'No se puede eliminar: tiene vehiculos asociados' : 'Eliminar'}
-                          disabled={tieneVehiculos}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="table-scroll-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th className="th-sortable" onClick={() => ordenarPor('id')}>
+                      ID <IconoOrden columna="id" />
+                    </th>
+                    <th className="th-sortable" onClick={() => ordenarPor('nombre')}>
+                      Nombre <IconoOrden columna="nombre" />
+                    </th>
+                    <th className="th-sortable" onClick={() => ordenarPor('marca')}>
+                      Marca <IconoOrden columna="marca" />
+                    </th>
+                    <th className="th-sortable" onClick={() => ordenarPor('vehiculos')}>
+                      Vehiculos <IconoOrden columna="vehiculos" />
+                    </th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modelosFiltrados.map((modelo, index) => {
+                    const conteoListo = modelo.vehiculosCount !== null;
+                    const tieneVehiculos = conteoListo && modelo.vehiculosCount > 0;
+                    return (
+                      <tr key={modelo.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                        <td className="td-id">{modelo.id}</td>
+                        <td className="td-nombre">{modelo.nombre}</td>
+                        <td className="td-marca">
+                          <span className="marca-badge">{modelo.marcaNombre}</span>
+                        </td>
+                        <td className="td-count">
+                          <span className={tieneVehiculos ? 'count-badge active' : 'count-badge'}>
+                            {conteoListo ? modelo.vehiculosCount : '...'}
+                          </span>
+                        </td>
+                        <td className="td-acciones">
+                          <button 
+                            className={`btn-editar ${tieneVehiculos || !conteoListo ? 'btn-disabled' : ''}`}
+                            onClick={() => conteoListo && !tieneVehiculos && abrirModalEditar(modelo)} 
+                            title={!conteoListo ? 'Cargando...' : (tieneVehiculos ? 'No se puede editar: tiene vehiculos asociados' : 'Editar')}
+                            disabled={tieneVehiculos || !conteoListo}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                          </button>
+                          <button 
+                            className={`btn-eliminar ${tieneVehiculos || !conteoListo ? 'btn-disabled' : ''}`}
+                            onClick={() => conteoListo && !tieneVehiculos && setConfirmandoEliminar(modelo.id)}
+                            title={!conteoListo ? 'Cargando...' : (tieneVehiculos ? 'No se puede eliminar: tiene vehiculos asociados' : 'Eliminar')}
+                            disabled={tieneVehiculos || !conteoListo}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
           <div className="table-footer">
             {busqueda && `Buscando "${busqueda}" | `}
