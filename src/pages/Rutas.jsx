@@ -815,7 +815,7 @@ const Rutas = () => {
                         className="expandible-header"
                         onClick={() => setExpandirDetallesViaje(!expandirDetallesViaje)}
                       >
-                        <span>Detalles del Viaje</span>
+                        <span>{expandirDetallesViaje ? 'Cerrar Detalles (Ver Mapa)' : 'Detalles del Viaje'}</span>
                         <svg 
                           viewBox="0 0 24 24" 
                           width="18" 
@@ -968,7 +968,7 @@ const Rutas = () => {
                   )}
                   
                   {/* Mapa de Google Maps */}
-                  <div className="google-mapa-container">
+                  <div className="google-mapa-container" style={{ display: expandirDetallesViaje ? 'none' : 'block' }}>
                     {/* Shimmer mientras carga */}
                     {(mapaCargando || !googleLoaded) && (
                       <div className="mapa-shimmer">
