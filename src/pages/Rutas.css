@@ -139,9 +139,9 @@
 
 /* Tabla de rutas - 6 filas de alto */
 .table-scroll-rutas {
-    height: 335px !important;
-    min-height: 335px !important;
-    max-height: 335px !important;
+    height: 400px !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
     flex: none !important;
 }
 
