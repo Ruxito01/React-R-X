@@ -2,21 +2,34 @@ import React, { useState, useEffect } from 'react';
 import './Vehiculos.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const Vehiculos = () => {
-  // Scroll to top cuando el componente se monta
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-  // Estado para el vehículo seleccionado
+const Vehiculos = () => {
+  // Estados para datos del backend
+  const [vehiculos, setVehiculos] = useState([]);
+  const [vehiculosRaw, setVehiculosRaw] = useState([]);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
+  const [marcas, setMarcas] = useState([]);
+  const [modelos, setModelos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Estado para el vehiculo seleccionado
   const [selectedVehicleIndex, setSelectedVehicleIndex] = useState(0);
-  const [hoveredPoint, setHoveredPoint] = useState(null);
-  const [hoveredBar, setHoveredBar] = useState(null);
 
   // Estado para ordenamiento
   const [ordenamiento, setOrdenamiento] = useState({ columna: 'nombre', direccion: 'asc' });
 
-  // Función de ordenamiento
+  // Estados para filtrado
+  const [tipoFiltro, setTipoFiltro] = useState('todos'); // todos, alias, tipo, propietario
+  const [valorFiltro, setValorFiltro] = useState('');
+
+  // Scroll to top al montar
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Funcion de ordenamiento
   const ordenarPor = (columna) => {
     setOrdenamiento(prev => ({
       columna,
@@ -39,193 +52,70 @@ const Vehiculos = () => {
     );
   };
 
-  // Datos mock para vehículos
-  const vehiculos = [
-    { 
-      id: 0,
-      nombre: 'Mountain Bike Pro',
-      tipo: 'Bicicleta',
-      distancia: 850,
-      viajesMes: 28,
-      categorias: { urbano: 45, rural: 30, montaña: 25 },
-      usoMensual: [
-        { dia: '1', valor: 10 },
-        { dia: '5', valor: 15 },
-        { dia: '10', valor: 22 },
-        { dia: '15', valor: 28 },
-        { dia: '20', valor: 35 },
-        { dia: '25', valor: 42 },
-        { dia: '30', valor: 50 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 25 },
-        { dia: 'M', valor: 32 },
-        { dia: 'X', valor: 28 },
-        { dia: 'J', valor: 22 },
-        { dia: 'V', valor: 30 },
-        { dia: 'S', valor: 45 },
-      ]
-    },
-    { 
-      id: 1,
-      nombre: 'Toyota Corolla 2022',
-      tipo: 'Automóvil',
-      distancia: 1250,
-      viajesMes: 35,
-      categorias: { urbano: 60, rural: 25, montaña: 15 },
-      usoMensual: [
-        { dia: '1', valor: 8 },
-        { dia: '5', valor: 14 },
-        { dia: '10', valor: 20 },
-        { dia: '15', valor: 26 },
-        { dia: '20', valor: 32 },
-        { dia: '25', valor: 38 },
-        { dia: '30', valor: 45 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 35 },
-        { dia: 'M', valor: 40 },
-        { dia: 'X', valor: 38 },
-        { dia: 'J', valor: 32 },
-        { dia: 'V', valor: 42 },
-        { dia: 'S', valor: 50 },
-      ]
-    },
-    { 
-      id: 2,
-      nombre: 'Urban E-Bike',
-      tipo: 'Bicicleta Eléctrica',
-      distancia: 720,
-      viajesMes: 32,
-      categorias: { urbano: 75, rural: 15, montaña: 10 },
-      usoMensual: [
-        { dia: '1', valor: 12 },
-        { dia: '5', valor: 18 },
-        { dia: '10', valor: 25 },
-        { dia: '15', valor: 32 },
-        { dia: '20', valor: 38 },
-        { dia: '25', valor: 44 },
-        { dia: '30', valor: 52 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 28 },
-        { dia: 'M', valor: 35 },
-        { dia: 'X', valor: 30 },
-        { dia: 'J', valor: 25 },
-        { dia: 'V', valor: 32 },
-        { dia: 'S', valor: 40 },
-      ]
-    },
-    { 
-      id: 3,
-      nombre: 'Honda CRV 2023',
-      tipo: 'SUV',
-      distancia: 980,
-      viajesMes: 25,
-      categorias: { urbano: 50, rural: 35, montaña: 15 },
-      usoMensual: [
-        { dia: '1', valor: 6 },
-        { dia: '5', valor: 10 },
-        { dia: '10', valor: 15 },
-        { dia: '15', valor: 20 },
-        { dia: '20', valor: 25 },
-        { dia: '25', valor: 30 },
-        { dia: '30', valor: 35 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 30 },
-        { dia: 'M', valor: 35 },
-        { dia: 'X', valor: 32 },
-        { dia: 'J', valor: 28 },
-        { dia: 'V', valor: 38 },
-        { dia: 'S', valor: 45 },
-      ]
-    },
-    { 
-      id: 4,
-      nombre: 'City Scooter 150',
-      tipo: 'Motocicleta',
-      distancia: 650,
-      viajesMes: 30,
-      categorias: { urbano: 70, rural: 20, montaña: 10 },
-      usoMensual: [
-        { dia: '1', valor: 9 },
-        { dia: '5', valor: 14 },
-        { dia: '10', valor: 19 },
-        { dia: '15', valor: 24 },
-        { dia: '20', valor: 29 },
-        { dia: '25', valor: 34 },
-        { dia: '30', valor: 40 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 22 },
-        { dia: 'M', valor: 28 },
-        { dia: 'X', valor: 25 },
-        { dia: 'J', valor: 20 },
-        { dia: 'V', valor: 26 },
-        { dia: 'S', valor: 35 },
-      ]
-    },
-    { 
-      id: 5,
-      nombre: 'Road Bike Elite',
-      tipo: 'Bicicleta',
-      distancia: 920,
-      viajesMes: 26,
-      categorias: { urbano: 40, rural: 45, montaña: 15 },
-      usoMensual: [
-        { dia: '1', valor: 7 },
-        { dia: '5', valor: 12 },
-        { dia: '10', valor: 17 },
-        { dia: '15', valor: 22 },
-        { dia: '20', valor: 27 },
-        { dia: '25', valor: 32 },
-        { dia: '30', valor: 38 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 26 },
-        { dia: 'M', valor: 32 },
-        { dia: 'X', valor: 28 },
-        { dia: 'J', valor: 24 },
-        { dia: 'V', valor: 30 },
-        { dia: 'S', valor: 42 },
-      ]
-    },
-    { 
-      id: 6,
-      nombre: 'Mazda 3 Sedan',
-      tipo: 'Automóvil',
-      distancia: 1100,
-      viajesMes: 22,
-      categorias: { urbano: 65, rural: 25, montaña: 10 },
-      usoMensual: [
-        { dia: '1', valor: 5 },
-        { dia: '5', valor: 9 },
-        { dia: '10', valor: 13 },
-        { dia: '15', valor: 17 },
-        { dia: '20', valor: 21 },
-        { dia: '25', valor: 25 },
-        { dia: '30', valor: 30 },
-      ],
-      distanciaSemanal: [
-        { dia: 'L', valor: 32 },
-        { dia: 'M', valor: 38 },
-        { dia: 'X', valor: 35 },
-        { dia: 'J', valor: 30 },
-        { dia: 'V', valor: 40 },
-        { dia: 'S', valor: 48 },
-      ]
-    },
-  ];
+  // Cargar datos del backend
+  const fetchData = async (mostrarLoading = true) => {
+    try {
+      if (mostrarLoading && vehiculos.length === 0) {
+        setLoading(true);
+      }
 
-  const selectedVehicle = vehiculos[selectedVehicleIndex];
-  const usoMensual = selectedVehicle.usoMensual;
-  const distanciaSemanal = selectedVehicle.distanciaSemanal;
+      const [vehiculosRes, tiposRes, marcasRes, modelosRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/vehiculo`),
+        fetch(`${API_BASE_URL}/tipovehiculo`),
+        fetch(`${API_BASE_URL}/marca`),
+        fetch(`${API_BASE_URL}/modelo`)
+      ]);
 
-  const maxValorLineas = Math.max(...usoMensual.map(d => d.valor));
-  const maxValorBarras = Math.max(...distanciaSemanal.map(d => d.valor));
+      if (!vehiculosRes.ok) throw new Error('Error al cargar vehiculos');
 
-  // Función para obtener la fecha actual en español
+      const vehiculosData = await vehiculosRes.json();
+      const tiposData = tiposRes.ok ? await tiposRes.json() : [];
+      const marcasData = marcasRes.ok ? await marcasRes.json() : [];
+      const modelosData = modelosRes.ok ? await modelosRes.json() : [];
+
+      // Guardar datos raw para estadisticas
+      setVehiculosRaw(vehiculosData);
+      setMarcas(marcasData);
+      setModelos(modelosData);
+
+      // Mapear vehiculos - marca y modelo vienen como strings directos
+      const vehiculosMapeados = vehiculosData.map(v => ({
+        id: v.id,
+        nombre: v.alias || `${v.marca || ''} ${v.modelo || ''}`.trim() || 'Sin nombre',
+        tipo: v.tipoVehiculo?.nombre || 'Sin tipo',
+        tipoId: v.tipoVehiculo?.id || v.tipo_vehiculo_id,
+        marca: v.marca || 'Sin marca',
+        modelo: v.modelo || 'Sin modelo',
+        modeloId: v.modelo_id,
+        estado: v.estado,
+        propietario: v.usuario ? `${v.usuario.nombre} ${v.usuario.apellido || ''}`.trim() : 'Sin propietario',
+        propietarioId: v.usuario?.id || v.usuario_id,
+        foto: v.url_foto || v.urlImagen
+      }));
+
+      setVehiculos(vehiculosMapeados);
+      setTiposVehiculo(tiposData);
+      setError(null);
+    } catch (err) {
+      console.error('Error cargando datos:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos iniciales y auto-refresh
+  useEffect(() => {
+    fetchData(true);
+    
+    const intervalo = setInterval(() => {
+      fetchData(false);
+    }, 5000);
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // Funcion para obtener la fecha actual en español
   const getFechaActual = () => {
     const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const fecha = new Date();
@@ -234,469 +124,753 @@ const Vehiculos = () => {
     return `al ${dia} de ${mes}`;
   };
 
+  // Calcular estadisticas para tarjetas resumen
+  const totalVehiculos = vehiculos.length;
+  const vehiculosActivos = vehiculos.filter(v => v.estado === 'en_posesion').length;
+  const totalTipos = tiposVehiculo.length;
+  const totalMarcas = marcas.length;
+
+  // Obtener listas unicas para los selectores
+  const tiposUnicos = [...new Set(vehiculos.map(v => v.tipo))].filter(Boolean).sort();
+  const propietariosUnicos = [...new Set(vehiculos.map(v => v.propietario))].filter(Boolean).sort();
+
+  // Filtrar vehiculos segun el filtro seleccionado
+  const vehiculosFiltrados = vehiculos.filter(v => {
+    if (tipoFiltro === 'todos' || !valorFiltro) return true;
+    
+    const busqueda = valorFiltro.toLowerCase();
+    switch (tipoFiltro) {
+      case 'alias':
+        return v.nombre.toLowerCase().includes(busqueda);
+      case 'tipo':
+        return v.tipo.toLowerCase().includes(busqueda);
+      case 'propietario':
+        return v.propietario.toLowerCase().includes(busqueda);
+      default:
+        return true;
+    }
+  });
+
+  // Ordenar vehiculos filtrados
+  const vehiculosOrdenados = [...vehiculosFiltrados].sort((a, b) => {
+    const { columna, direccion } = ordenamiento;
+    let valorA, valorB;
+    
+    switch (columna) {
+      case 'nombre':
+        valorA = a.nombre.toLowerCase();
+        valorB = b.nombre.toLowerCase();
+        break;
+      case 'tipo':
+        valorA = a.tipo.toLowerCase();
+        valorB = b.tipo.toLowerCase();
+        break;
+      case 'propietario':
+        valorA = a.propietario.toLowerCase();
+        valorB = b.propietario.toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    if (typeof valorA === 'string') {
+      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
+    }
+    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
+  });
+
+  // Limpiar filtro al cambiar tipo
+  const handleTipoFiltroChange = (nuevoTipo) => {
+    setTipoFiltro(nuevoTipo);
+    setValorFiltro('');
+  };
+
+  const selectedVehicle = vehiculos[selectedVehicleIndex] || vehiculos[0];
+
+  // Calcular distribucion por tipo para graficos
+  const getDistribucionTipos = () => {
+    const distribucion = {};
+    vehiculos.forEach(v => {
+      if (v.tipo) {
+        distribucion[v.tipo] = (distribucion[v.tipo] || 0) + 1;
+      }
+    });
+    return distribucion;
+  };
+
+  const distribucionTipos = getDistribucionTipos();
+  const totalParaDistribucion = vehiculos.length || 1;
+
+  // Calcular usuarios con mas vehiculos (para el podio)
+  const getUsuariosConMasVehiculos = () => {
+    const usuarioCount = {};
+    vehiculosRaw.forEach(v => {
+      if (v.usuario) {
+        const userId = v.usuario.id;
+        if (!usuarioCount[userId]) {
+          usuarioCount[userId] = {
+            id: userId,
+            nombre: v.usuario.nombre || 'Usuario',
+            apellido: v.usuario.apellido || '',
+            alias: v.usuario.alias || '',
+            foto: v.usuario.foto,
+            cantidad: 0
+          };
+        }
+        usuarioCount[userId].cantidad++;
+      }
+    });
+    return Object.values(usuarioCount)
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 3);
+  };
+
+  const top3Usuarios = getUsuariosConMasVehiculos();
+
+  // Calcular relacion marca-modelo-tipo
+  const getRelacionMarcaModeloTipo = () => {
+    const relacion = {};
+    vehiculosRaw.forEach(v => {
+      const marca = v.marca || 'Sin marca';
+      const modelo = v.modelo || 'Sin modelo';
+      const tipo = v.tipoVehiculo?.nombre || 'Sin tipo';
+      
+      if (!relacion[marca]) {
+        relacion[marca] = { total: 0, modelos: {}, tipos: {} };
+      }
+      relacion[marca].total++;
+      relacion[marca].modelos[modelo] = (relacion[marca].modelos[modelo] || 0) + 1;
+      relacion[marca].tipos[tipo] = (relacion[marca].tipos[tipo] || 0) + 1;
+    });
+    return Object.entries(relacion)
+      .map(([marca, data]) => ({
+        marca,
+        total: data.total,
+        cantidadModelos: Object.keys(data.modelos).length,
+        cantidadTipos: Object.keys(data.tipos).length,
+        modelos: data.modelos,
+        tipos: data.tipos
+      }))
+      .sort((a, b) => b.total - a.total);
+  };
+
+  const relacionMarcaModeloTipo = getRelacionMarcaModeloTipo();
+  const maxTotalMarca = Math.max(...relacionMarcaModeloTipo.map(m => m.total), 1);
+
+  if (error) {
+    return (
+      <div className="vehiculos-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+        <div className="vehiculos-main-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center', color: '#e53935' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠</div>
+            <p>Error: {error}</p>
+            <button onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="vehiculos-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+      
+      {/* Tarjetas Resumen */}
+      <div className="stats-summary dashboard-animate-enter">
+        <div className="stat-card">
+          <div className="stat-icon icon-vehicles">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7B1FA2" strokeWidth="2">
+              <rect x="1" y="3" width="15" height="13"/>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">
+              {loading ? <span className="skeleton skeleton-card-value"></span> : totalVehiculos}
+            </span>
+            <span className="stat-label">Total Vehiculos</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon icon-active">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#388E3C" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">
+              {loading ? <span className="skeleton skeleton-card-value"></span> : vehiculosActivos}
+            </span>
+            <span className="stat-label">Vehiculos Activos</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon icon-types">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1976D2" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">
+              {loading ? <span className="skeleton skeleton-card-value"></span> : totalTipos}
+            </span>
+            <span className="stat-label">Tipos de Vehiculo</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon icon-km">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6610" strokeWidth="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">
+              {loading ? <span className="skeleton skeleton-card-value"></span> : totalMarcas}
+            </span>
+            <span className="stat-label">Marcas</span>
+          </div>
+        </div>
+      </div>
 
-      {/* Contenedor principal tipo tarjeta */}
-      <div className="vehiculos-main-card">
+      {/* Contenedor principal */}
+      <div className="vehiculos-main-card dashboard-animate-enter">
         <div className="vehiculos-grid">
-        {/* SECCIÓN IZQUIERDA: Vehículo destacado + Tabla */}
-        <div className="left-section">
-          {/* Vehículo Destacado - Diseño Horizontal */}
-          <div className="featured-vehicle-card">
-            <div className="card-title">VEHÍCULO SELECCIONADO</div>
-            <div className="featured-content-horizontal">
-              {/* Icono del vehículo */}
-              <div className="vehicle-icon-circle">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="50" cy="50" r="47" stroke="#FF6610" strokeWidth="4" fill="none"/>
-                  <text x="70" y="56" fontSize="9" fill="#FF6610" fontWeight="600">km</text>
-                  {/* Bicicleta/Vehículo genérico */}
-                  <circle cx="35" cy="65" r="8" stroke="#FF6610" strokeWidth="3" fill="none"/>
-                  <circle cx="65" cy="65" r="8" stroke="#FF6610" strokeWidth="3" fill="none"/>
-                  <path d="M35 65 L45 45 L55 45 L65 65" stroke="#FF6610" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M45 45 L50 35 L58 35" stroke="#FF6610" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M50 45 L50 55" stroke="#FF6610" strokeWidth="3" strokeLinecap="round"/>
-                </svg>
-              </div>
-
-              {/* Sección central: distancia + barras + label */}
-              <div className="center-stats-section">
-                <div className="distance-with-bars">
-                  <div className="distance-number">{selectedVehicle.distancia} km</div>
-                  <div className="vertical-bars-group">
-                    <div className="v-bar medium"></div>
-                    <div className="v-bar tall"></div>
-                  </div>
+          {/* SECCION IZQUIERDA: Vehiculo destacado + Tabla */}
+          <div className="left-section">
+            {/* Vehiculo Destacado */}
+            <div className="featured-vehicle-card">
+              <div className="card-title">VEHICULO SELECCIONADO</div>
+              <div className="featured-content-horizontal">
+                {/* Icono del vehiculo */}
+                <div className="vehicle-icon-circle">
+                  {loading ? (
+                    <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: '50%' }}></div>
+                  ) : (
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="50" cy="50" r="47" stroke="#FF6610" strokeWidth="4" fill="none"/>
+                      <circle cx="35" cy="65" r="8" stroke="#FF6610" strokeWidth="3" fill="none"/>
+                      <circle cx="65" cy="65" r="8" stroke="#FF6610" strokeWidth="3" fill="none"/>
+                      <path d="M35 65 L45 45 L55 45 L65 65" stroke="#FF6610" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M45 45 L50 35 L58 35" stroke="#FF6610" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M50 45 L50 55" stroke="#FF6610" strokeWidth="3" strokeLinecap="round"/>
+                    </svg>
+                  )}
                 </div>
-                <div className="participation-label">Viajes Realizados</div>
-              </div>
 
-              {/* Número de viajes con mini barras */}
-              <div className="number-fifteen-section">
-                <div className="fifteen-number">{selectedVehicle.viajesMes}</div>
-                <div className="mini-bars-group">
-                  <div className="mini-bar short"></div>
-                  <div className="mini-bar tall"></div>
+                {/* Seccion central: nombre y tipo */}
+                <div className="center-stats-section">
+                  <div className="distance-with-bars">
+                    {loading ? (
+                      <div className="skeleton" style={{ height: '30px', width: '180px' }}></div>
+                    ) : (
+                      <div className="distance-number" style={{ fontSize: '1.8rem' }}>{selectedVehicle?.nombre || 'Sin nombre'}</div>
+                    )}
+                    <div className="vertical-bars-group">
+                      <div className="v-bar medium"></div>
+                      <div className="v-bar tall"></div>
+                    </div>
+                  </div>
+                  <div className="participation-label">{selectedVehicle?.tipo || 'Sin tipo'} - {selectedVehicle?.marca || ''}</div>
+                </div>
+
+                {/* Propietario */}
+                <div className="number-fifteen-section" style={{ flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#666', fontWeight: '600' }}>Propietario</div>
+                  {loading ? (
+                    <div className="skeleton" style={{ height: '24px', width: '100px' }}></div>
+                  ) : (
+                    <div style={{ fontSize: '1rem', fontWeight: '700', color: '#1a1a1a', textAlign: 'center' }}>
+                      {selectedVehicle?.propietario || 'Sin propietario'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Tabla de Vehículos */}
-          <div className="vehicles-table-card">
-            <div className="table-scroll-container">
-              <table className="vehicles-table">
-                <thead>
-                  <tr>
-                    <th className="th-sortable header-orange" onClick={() => ordenarPor('nombre')}>
-                      LISTA DE VEHÍCULOS <IconoOrden columna="nombre" />
-                    </th>
-                    <th className="th-sortable header-orange" onClick={() => ordenarPor('distancia')}>
-                      Distancia (Km) <IconoOrden columna="distancia" />
-                    </th>
-                    <th className="th-sortable header-orange" onClick={() => ordenarPor('viajes')}>
-                      Viajes (Mes) <IconoOrden columna="viajes" />
-                    </th>
-                    <th className="th-sortable header-orange" onClick={() => ordenarPor('tipo')}>
-                      Tipo <IconoOrden columna="tipo" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...vehiculos].sort((a, b) => {
-                    const { columna, direccion } = ordenamiento;
-                    let valorA, valorB;
-                    
-                    switch (columna) {
-                      case 'nombre':
-                        valorA = a.nombre.toLowerCase();
-                        valorB = b.nombre.toLowerCase();
-                        break;
-                      case 'distancia':
-                        valorA = a.distancia;
-                        valorB = b.distancia;
-                        break;
-                      case 'viajes':
-                        valorA = a.viajesMes;
-                        valorB = b.viajesMes;
-                        break;
-                      case 'tipo':
-                        valorA = a.tipo.toLowerCase();
-                        valorB = b.tipo.toLowerCase();
-                        break;
-                      default:
-                        return 0;
-                    }
-                    
-                    if (typeof valorA === 'string') {
-                      return direccion === 'asc' ? valorA.localeCompare(valorB) : valorB.localeCompare(valorA);
-                    }
-                    return direccion === 'asc' ? valorA - valorB : valorB - valorA;
-                  }).map((vehiculo) => {
-                    // Encontrar el indice original para mantener la seleccion correcta
-                    // ya que vehiculos es la fuente de verdad del indice seleccionado
-                    const originalIndex = vehiculos.findIndex(v => v.id === vehiculo.id);
-                    return (
-                      <tr 
-                        key={vehiculo.id} 
-                        className={`${originalIndex % 2 === 0 ? 'row-light' : 'row-white'} ${selectedVehicleIndex === originalIndex ? 'selected-row' : ''}`}
-                        onClick={() => setSelectedVehicleIndex(originalIndex)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <td className="vehicle-name">{vehiculo.nombre}</td>
-                        <td>{vehiculo.distancia}</td>
-                        <td>{vehiculo.viajesMes}</td>
-                        <td>{vehiculo.tipo}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <div className="table-footer">
-              Datos actuales {getFechaActual()} - Click para ver detalles
-            </div>
-          </div>
-        </div>
-
-        {/* SECCIÓN DERECHA: Gráficos */}
-        <div className="right-section">
-          {/* Gráfico de Barras Horizontales */}
-          <div className="chart-card">
-            <div className="chart-title">Distribución de terreno</div>
-            <div className="horizontal-bars-chart" style={{ position: 'relative', padding: '20px 15px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {/* Barra Urbano */}
-                <div style={{ position: 'relative' }}>
-                  <div style={{ 
-                    fontSize: '12px', 
-                    fontWeight: '600', 
-                    color: '#333', 
-                    marginBottom: '5px',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}>
-                    <span>Urbano</span>
-                    <span style={{ color: '#FF6610' }}>{selectedVehicle.categorias.urbano}%</span>
-                  </div>
-                  <div style={{ 
-                    width: '100%', 
-                    height: '28px', 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    <div 
-                      style={{ 
-                        width: `${selectedVehicle.categorias.urbano}%`, 
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #FF6610 0%, #FF8844 100%)',
-                        borderRadius: '8px',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1.1)';
-                        setHoveredPoint('urbano');
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1)';
-                        setHoveredPoint(null);
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                {/* Barra Rural */}
-                <div style={{ position: 'relative' }}>
-                  <div style={{ 
-                    fontSize: '12px', 
-                    fontWeight: '600', 
-                    color: '#333', 
-                    marginBottom: '5px',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}>
-                    <span>Rural</span>
-                    <span style={{ color: '#FFB380' }}>{selectedVehicle.categorias.rural}%</span>
-                  </div>
-                  <div style={{ 
-                    width: '100%', 
-                    height: '28px', 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    <div 
-                      style={{ 
-                        width: `${selectedVehicle.categorias.rural}%`, 
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #FFB380 0%, #FFC999 100%)',
-                        borderRadius: '8px',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1.1)';
-                        setHoveredPoint('rural');
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1)';
-                        setHoveredPoint(null);
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                {/* Barra Montaña */}
-                <div style={{ position: 'relative' }}>
-                  <div style={{ 
-                    fontSize: '12px', 
-                    fontWeight: '600', 
-                    color: '#333', 
-                    marginBottom: '5px',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}>
-                    <span>Montaña</span>
-                    <span style={{ color: '#FFD4B8' }}>{selectedVehicle.categorias.montaña}%</span>
-                  </div>
-                  <div style={{ 
-                    width: '100%', 
-                    height: '28px', 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    <div 
-                      style={{ 
-                        width: `${selectedVehicle.categorias.montaña}%`, 
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #FFD4B8 0%, #FFE5D4 100%)',
-                        borderRadius: '8px',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1.1)';
-                        setHoveredPoint('montaña');
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scaleY(1)';
-                        setHoveredPoint(null);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              {hoveredPoint && (
-                <div className="chart-tooltip">
-                  {hoveredPoint === 'urbano' && `Urbano: ${selectedVehicle.categorias.urbano}%`}
-                  {hoveredPoint === 'rural' && `Rural: ${selectedVehicle.categorias.rural}%`}
-                  {hoveredPoint === 'montaña' && `Montaña: ${selectedVehicle.categorias.montaña}%`}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Gráfico Radial - Distancia Semanal */}
-          <div className="chart-card">
-            <div className="chart-title-bold">DISTANCIA SEMANAL (KM)</div>
-            <div className="radial-chart" style={{ position: 'relative', padding: '10px' }}>
-              <svg viewBox="0 0 200 200" style={{ width: '100%', height: 'auto' }}>
-                <defs>
-                  <linearGradient id="radialGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#FF6610" stopOpacity="0.5"/>
-                    <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
-                  </linearGradient>
-                </defs>
-                
-                {/* Círculos de fondo (guías) */}
-                {[20, 40, 60, 80, 100].map((percent) => (
-                  <circle
-                    key={percent}
-                    cx="100"
-                    cy="100"
-                    r={percent * 0.6}
-                    fill="none"
-                    stroke="#f0f0f0"
-                    strokeWidth="1"
-                  />
-                ))}
-                
-                {/* Polígono del área de datos */}
-                <path
-                  d={(() => {
-                    // Calcular los puntos del polígono hexagonal
-                    const points = distanciaSemanal.map((dato, i) => {
-                      const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-                      const radius = (dato.valor / maxValorBarras) * 60;
-                      const x = 100 + radius * Math.cos(angle);
-                      const y = 100 + radius * Math.sin(angle);
-                      return `${x},${y}`;
-                    });
-                    return `M ${points.join(' L ')} Z`;
-                  })()}
-                  fill="url(#radialGradient)"
-                  stroke="#FF6610"
-                  strokeWidth="2"
-                />
-                
-                {/* Puntos de datos */}
-                {distanciaSemanal.map((dato, i) => {
-                  const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-                  const radius = (dato.valor / maxValorBarras) * 60;
-                  const x = 100 + radius * Math.cos(angle);
-                  const y = 100 + radius * Math.sin(angle);
-                  
-                  return (
-                    <g key={i}>
-                      <circle
-                        cx={x}
-                        cy={y}
-                        r="4"
-                        fill="#FF6610"
-                        stroke="#fff"
-                        strokeWidth="2"
-                        style={{ cursor: 'pointer' }}
-                        onMouseEnter={() => setHoveredBar(i)}
-                        onMouseLeave={() => setHoveredBar(null)}
+            {/* Tabla de Vehiculos con Filtros */}
+            <div className="vehicles-table-card">
+              {/* Contenedor de Filtros */}
+              <div className="filtros-vehiculos-container">
+                <div className="filtro-tipo-selector">
+                  <label className="filtro-label">Filtrar por:</label>
+                  <div className="filtro-radio-group">
+                    <label className={`filtro-radio-option ${tipoFiltro === 'todos' ? 'active' : ''}`}>
+                      <input 
+                        type="radio" 
+                        name="tipoFiltro" 
+                        value="todos"
+                        checked={tipoFiltro === 'todos'}
+                        onChange={() => handleTipoFiltroChange('todos')}
                       />
-                    </g>
-                  );
-                })}
-                
-                {/* Labels de días */}
-                {distanciaSemanal.map((dato, i) => {
-                  const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
-                  const labelRadius = 75;
-                  const x = 100 + labelRadius * Math.cos(angle);
-                  const y = 100 + labelRadius * Math.sin(angle);
-                  
-                  return (
-                    <text
-                      key={i}
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dy=".3em"
-                      fontSize="11"
-                      fontWeight="700"
-                      fill="#333"
-                    >
-                      {dato.dia}
-                    </text>
-                  );
-                })}
-              </svg>
-              {hoveredBar !== null && (
-                <div className="chart-tooltip">
-                  {distanciaSemanal[hoveredBar].dia}: {distanciaSemanal[hoveredBar].valor} km
+                      Todos
+                    </label>
+                    <label className={`filtro-radio-option ${tipoFiltro === 'alias' ? 'active' : ''}`}>
+                      <input 
+                        type="radio" 
+                        name="tipoFiltro" 
+                        value="alias"
+                        checked={tipoFiltro === 'alias'}
+                        onChange={() => handleTipoFiltroChange('alias')}
+                      />
+                      Alias
+                    </label>
+                    <label className={`filtro-radio-option ${tipoFiltro === 'tipo' ? 'active' : ''}`}>
+                      <input 
+                        type="radio" 
+                        name="tipoFiltro" 
+                        value="tipo"
+                        checked={tipoFiltro === 'tipo'}
+                        onChange={() => handleTipoFiltroChange('tipo')}
+                      />
+                      Tipo
+                    </label>
+                    <label className={`filtro-radio-option ${tipoFiltro === 'propietario' ? 'active' : ''}`}>
+                      <input 
+                        type="radio" 
+                        name="tipoFiltro" 
+                        value="propietario"
+                        checked={tipoFiltro === 'propietario'}
+                        onChange={() => handleTipoFiltroChange('propietario')}
+                      />
+                      Propietario
+                    </label>
+                  </div>
                 </div>
-              )}
+                
+                {/* Campo de busqueda segun el tipo seleccionado */}
+                {tipoFiltro !== 'todos' && (
+                  <div className="filtro-valor-container">
+                    {tipoFiltro === 'alias' && (
+                      <input
+                        type="text"
+                        className="filtro-input"
+                        placeholder="Buscar por alias del vehiculo..."
+                        value={valorFiltro}
+                        onChange={(e) => setValorFiltro(e.target.value)}
+                      />
+                    )}
+                    
+                    {tipoFiltro === 'tipo' && (
+                      <div className="filtro-combo-container">
+                        <input
+                          type="text"
+                          className="filtro-input"
+                          placeholder="Escribir o seleccionar tipo..."
+                          value={valorFiltro}
+                          onChange={(e) => setValorFiltro(e.target.value)}
+                          list="tipos-list"
+                        />
+                        <datalist id="tipos-list">
+                          {tiposUnicos.map(tipo => (
+                            <option key={tipo} value={tipo} />
+                          ))}
+                        </datalist>
+                        <select 
+                          className="filtro-select-combo"
+                          value={valorFiltro}
+                          onChange={(e) => setValorFiltro(e.target.value)}
+                        >
+                          <option value="">Seleccionar...</option>
+                          {tiposUnicos.map(tipo => (
+                            <option key={tipo} value={tipo}>{tipo}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    
+                    {tipoFiltro === 'propietario' && (
+                      <div className="filtro-combo-container">
+                        <input
+                          type="text"
+                          className="filtro-input"
+                          placeholder="Escribir o seleccionar propietario..."
+                          value={valorFiltro}
+                          onChange={(e) => setValorFiltro(e.target.value)}
+                          list="propietarios-list"
+                        />
+                        <datalist id="propietarios-list">
+                          {propietariosUnicos.map(prop => (
+                            <option key={prop} value={prop} />
+                          ))}
+                        </datalist>
+                        <select 
+                          className="filtro-select-combo"
+                          value={valorFiltro}
+                          onChange={(e) => setValorFiltro(e.target.value)}
+                        >
+                          <option value="">Seleccionar...</option>
+                          {propietariosUnicos.map(prop => (
+                            <option key={prop} value={prop}>{prop}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    
+                    {valorFiltro && (
+                      <button 
+                        className="filtro-limpiar-btn"
+                        onClick={() => setValorFiltro('')}
+                        title="Limpiar filtro"
+                      >
+                        X
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Contador de resultados */}
+                <div className="filtro-contador">
+                  {vehiculosFiltrados.length} de {vehiculos.length} vehiculos
+                </div>
+              </div>
+              
+              <div className="table-scroll-container">
+                <table className="vehicles-table">
+                  <thead>
+                    <tr>
+                      <th className="th-sortable header-orange" onClick={() => ordenarPor('nombre')}>
+                        VEHICULO <IconoOrden columna="nombre" />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarPor('tipo')}>
+                        Tipo <IconoOrden columna="tipo" />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarPor('propietario')}>
+                        Propietario <IconoOrden columna="propietario" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      [...Array(6)].map((_, index) => (
+                        <tr key={`skeleton-${index}`} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                          <td><div className="skeleton" style={{ height: '16px', width: '80%' }}></div></td>
+                          <td><div className="skeleton" style={{ height: '16px', width: '60px' }}></div></td>
+                          <td><div className="skeleton" style={{ height: '16px', width: '100px' }}></div></td>
+                        </tr>
+                      ))
+                    ) : (
+                      vehiculosOrdenados.map((vehiculo) => {
+                        const originalIndex = vehiculos.findIndex(v => v.id === vehiculo.id);
+                        return (
+                          <tr 
+                            key={vehiculo.id} 
+                            className={`${originalIndex % 2 === 0 ? 'row-light' : 'row-white'} ${selectedVehicleIndex === originalIndex ? 'selected-row' : ''}`}
+                            onClick={() => setSelectedVehicleIndex(originalIndex)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <td className="vehicle-name">{vehiculo.nombre}</td>
+                            <td>{vehiculo.tipo}</td>
+                            <td>{vehiculo.propietario}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="table-footer">
+                Datos actuales {getFechaActual()} - Click para ver detalles
+              </div>
+            </div>
+          </div>
+
+          {/* SECCION DERECHA: Graficos */}
+          <div className="right-section">
+            {/* Grafico de Barras - Distribucion por Tipo */}
+            <div className="chart-card">
+              <div className="chart-title">Distribucion por Tipo de Vehiculo</div>
+              <div className="horizontal-bars-chart" style={{ position: 'relative', padding: '20px 15px' }}>
+                {loading ? (
+                  <div className="skeleton" style={{ height: '150px', width: '100%' }}></div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '180px', overflowY: 'auto', paddingRight: '8px' }}>
+                    {Object.entries(distribucionTipos).map(([tipo, cantidad], index) => {
+                      const porcentaje = (cantidad / totalParaDistribucion) * 100;
+                      const colores = ['#FF6610', '#FF8844', '#FFB380', '#FFD4B8', '#FFE8D6'];
+                      return (
+                        <div key={tipo} style={{ position: 'relative' }}>
+                          <div style={{ 
+                            fontSize: '12px', 
+                            fontWeight: '600', 
+                            color: '#333', 
+                            marginBottom: '5px',
+                            display: 'flex',
+                            justifyContent: 'space-between'
+                          }}>
+                            <span>{tipo}</span>
+                            <span style={{ color: colores[index] }}>{cantidad} ({porcentaje.toFixed(0)}%)</span>
+                          </div>
+                          <div style={{ 
+                            width: '100%', 
+                            height: '28px', 
+                            backgroundColor: '#f5f5f5', 
+                            borderRadius: '8px',
+                            overflow: 'hidden'
+                          }}>
+                            <div style={{ 
+                              width: `${porcentaje}%`, 
+                              height: '100%',
+                              background: `linear-gradient(90deg, ${colores[index]} 0%, ${colores[index]}cc 100%)`,
+                              borderRadius: '8px',
+                              transition: 'all 0.3s ease'
+                            }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Grafico: Vehiculos por Marca - Barras simples */}
+            <div className="chart-card">
+              <div className="chart-title-bold">VEHICULOS POR MARCA</div>
+              <div style={{ padding: '1rem', maxHeight: '290px', overflowY: 'auto' }}>
+                {loading ? (
+                  <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
+                ) : relacionMarcaModeloTipo.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(() => {
+                      const maxTotal = Math.max(...relacionMarcaModeloTipo.map(m => m.total), 1);
+                      const colores = ['#FF6610', '#FF8C42', '#FFA366', '#FFB88C', '#FFCEB3', '#E65100', '#EF6C00', '#F57C00', '#FB8C00', '#FF9800'];
+                      
+                      return relacionMarcaModeloTipo.map((item, i) => {
+                        const porcentaje = (item.total / maxTotal) * 100;
+                        return (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* Nombre de marca */}
+                            <div style={{ 
+                              width: '80px', 
+                              fontSize: '0.8rem', 
+                              fontWeight: '600', 
+                              color: '#333',
+                              textAlign: 'right',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {item.marca}
+                            </div>
+                            
+                            {/* Barra */}
+                            <div style={{ flex: 1, height: '24px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
+                              <div style={{
+                                width: `${porcentaje}%`,
+                                height: '100%',
+                                background: colores[i % colores.length],
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-end',
+                                paddingRight: '8px',
+                                minWidth: '40px',
+                                transition: 'width 0.4s ease'
+                              }}>
+                                <span style={{ 
+                                  fontSize: '0.75rem', 
+                                  fontWeight: '700', 
+                                  color: '#fff',
+                                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                                }}>
+                                  {item.total}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                ) : (
+                  <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                    Sin datos
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Gráfico de Barras Agrupadas - Uso Mensual */}
-        <div className="chart-card chart-card-full-width">
-          <div className="chart-title-bold">USO DEL VEHÍCULO ESTE MES</div>
-          <div className="grouped-bar-chart" style={{ position: 'relative', padding: '20px 10px' }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'flex-end', 
-              justifyContent: 'space-around',
-              height: '250px',
-              borderBottom: '2px solid #e0e0e0',
-              gap: '8px',
-              paddingBottom: '10px'
-            }}>
-              {usoMensual.map((dato, i) => {
-                const heightPercent = (dato.valor / maxValorLineas) * 100;
-                const minHeight = 20; // Altura mínima en píxeles para que siempre sean visibles
-                const calculatedHeight = Math.max((heightPercent / 100) * 240, minHeight); // 240px es el 100% del contenedor (250 - 10 de padding)
-                return (
-                  <div 
-                    key={i} 
-                    style={{ 
-                      flex: 1,
+        {/* Top 3 Usuarios con mas vehiculos - Podio */}
+        <div className="chart-card chart-card-full-width" style={{ marginTop: '1rem', overflow: 'hidden' }}>
+          <div className="chart-title-bold">TOP 3 USUARIOS CON MAS VEHICULOS</div>
+          <div style={{ padding: '1rem' }}>
+            {loading ? (
+              <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
+            ) : top3Usuarios.length > 0 ? (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'flex-end',
+                gap: '16px',
+                height: '180px',
+                paddingTop: '10px'
+              }}>
+                {/* Segundo lugar */}
+                {top3Usuarios[1] && (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    order: 1
+                  }}>
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '50%',
+                      background: '#C0C0C0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '6px',
+                      border: '2px solid #A8A8A8',
+                      overflow: 'hidden'
+                    }}>
+                      {top3Usuarios[1].foto ? (
+                        <img src={top3Usuarios[1].foto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#fff' }}>
+                          {top3Usuarios[1].nombre.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ 
+                      background: 'linear-gradient(180deg, #C0C0C0 0%, #A8A8A8 100%)',
+                      width: '70px',
+                      height: '60px',
+                      borderRadius: '6px 6px 0 0',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      position: 'relative'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '100%',
-                        maxWidth: '30px',
-                        height: `${calculatedHeight}px`,
-                        background: `linear-gradient(180deg, #FF6610 0%, #FFB380 100%)`,
-                        borderRadius: '4px 4px 0 0',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        boxShadow: '0 2px 4px rgba(255, 102, 16, 0.2)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(255, 102, 16, 0.4)';
-                        setHoveredPoint(`bar-${i}`);
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(255, 102, 16, 0.2)';
-                        setHoveredPoint(null);
-                      }}
-                    >
-                      {/* Barra de acento superior */}
-                      <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '3px',
-                        background: '#FF4400',
-                        borderRadius: '4px 4px 0 0'
-                      }} />
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: '700'
+                    }}>
+                      <span style={{ fontSize: '1.5rem' }}>2</span>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.75rem' }}>@{top3Usuarios[1].alias || top3Usuarios[1].nombre}</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#C0C0C0' }}>{top3Usuarios[1].cantidad} vehiculos</div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-            {/* Labels de días */}
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-around',
-              marginTop: '10px',
-              gap: '8px'
-            }}>
-              {usoMensual.map((dato, i) => (
-                <div 
-                  key={i}
-                  style={{ 
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    color: '#666'
-                  }}
-                >
-                  {dato.dia}
-                </div>
-              ))}
-            </div>
-            {hoveredPoint && hoveredPoint.startsWith('bar-') && (
-              <div className="chart-tooltip">
-                Día {usoMensual[parseInt(hoveredPoint.split('-')[1])].dia}: {usoMensual[parseInt(hoveredPoint.split('-')[1])].valor} viajes
+                )}
+
+                {/* Primer lugar */}
+                {top3Usuarios[0] && (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    order: 2
+                  }}>
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      borderRadius: '50%',
+                      background: '#FFD700',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '6px',
+                      border: '3px solid #FFA500',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 8px rgba(255, 215, 0, 0.4)'
+                    }}>
+                      {top3Usuarios[0].foto ? (
+                        <img src={top3Usuarios[0].foto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>
+                          {top3Usuarios[0].nombre.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ 
+                      background: 'linear-gradient(180deg, #FFD700 0%, #FFA500 100%)',
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '6px 6px 0 0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: '700',
+                      boxShadow: '0 2px 8px rgba(255, 165, 0, 0.3)'
+                    }}>
+                      <span style={{ fontSize: '1.8rem' }}>1</span>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                      <div style={{ fontWeight: '700', fontSize: '0.8rem' }}>@{top3Usuarios[0].alias || top3Usuarios[0].nombre}</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#FF6610' }}>{top3Usuarios[0].cantidad} vehiculos</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tercer lugar */}
+                {top3Usuarios[2] && (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    order: 3
+                  }}>
+                    <div style={{
+                      width: '45px',
+                      height: '45px',
+                      borderRadius: '50%',
+                      background: '#CD7F32',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '6px',
+                      border: '2px solid #A0522D',
+                      overflow: 'hidden'
+                    }}>
+                      {top3Usuarios[2].foto ? (
+                        <img src={top3Usuarios[2].foto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#fff' }}>
+                          {top3Usuarios[2].nombre.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ 
+                      background: 'linear-gradient(180deg, #CD7F32 0%, #A0522D 100%)',
+                      width: '60px',
+                      height: '45px',
+                      borderRadius: '6px 6px 0 0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: '700'
+                    }}>
+                      <span style={{ fontSize: '1.3rem' }}>3</span>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.7rem' }}>@{top3Usuarios[2].alias || top3Usuarios[2].nombre}</div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#CD7F32' }}>{top3Usuarios[2].cantidad} vehiculos</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                Sin datos de usuarios
               </div>
             )}
           </div>
-        </div>
         </div>
       </div>
     </div>

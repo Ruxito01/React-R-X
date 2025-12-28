@@ -8,27 +8,28 @@
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    background: #f8f8f8;
+    background: var(--bg-secondary);
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
 }
 
 .filtro-container label {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #666;
+    color: var(--text-secondary);
     white-space: nowrap;
 }
 
 .filtro-container select {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.9rem;
-    background: white;
+    background: var(--bg-card);
     cursor: pointer;
     min-width: 180px;
+    color: var(--text-primary);
 }
 
 .filtro-container select:focus {

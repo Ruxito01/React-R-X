@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleMap, LoadScript, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
 import { GraficoTopRutas, GraficoTendencia, GraficoEstado } from '../components/EstadisticasRutas';
+import { useTheme } from '../context/ThemeContext';
 import './Rutas.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
@@ -8,6 +9,89 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const Rutas = () => {
+  const { theme } = useTheme();
+
+  // Estilos de mapa oscuro
+  const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#263c3f" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#6b9a76" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#38414e" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212a37" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [{ color: "#746855" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#1f2835" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#f3d19c" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2f3948" }],
+    },
+    {
+      featureType: "transit.station",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#17263c" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#515c6d" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#17263c" }],
+    },
+  ];
   // Estados de datos
   // Estados de datos - TABLAS Y MAPA (Se congelan al seleccionar)
   const [rutas, setRutas] = useState([]);
@@ -33,6 +117,17 @@ const Rutas = () => {
   
   // Filtro de creador de rutas
   const [filtroCreador, setFiltroCreador] = useState('todos');
+  const [busquedaNombreRuta, setBusquedaNombreRuta] = useState('');
+
+  // Filtros de fecha para viajes
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
+  
+  // Filtro de organizador de viajes
+  const [filtroOrganizador, setFiltroOrganizador] = useState('todos');
+
+  // Tipo de filtro activo (radio buttons)
+  const [tipoFiltro, setTipoFiltro] = useState('todos');
 
   // Estados para ordenamiento
   const [ordenRutas, setOrdenRutas] = useState({ columna: 'nombre', direccion: 'asc' });
@@ -268,11 +363,11 @@ const Rutas = () => {
   const seleccionarViaje = async (viaje) => {
     setIsUserSelection(true); // Marcar como seleccion manual
     setViajeSeleccionado(viaje);
-    // Expandir detalles automáticamente al seleccionar
+    // Expandir detalles automaticamente al seleccionar
     setExpandirDetallesViaje(true);
     
-    // Si el viaje tiene ruta y es diferente a la actual, actualizar mapa
-    if (viaje.ruta && viaje.ruta.id !== rutaSeleccionada?.id) {
+    // Si el viaje tiene ruta, SIEMPRE actualizar el mapa (incluso si es la misma ruta)
+    if (viaje.ruta) {
        setRutaSeleccionada(viaje.ruta);
        
        // Centrar mapa
@@ -310,6 +405,9 @@ const Rutas = () => {
     cargarDatos(false);
   };
 
+  // Validar si las fechas son invalidas (debe estar antes del filtrado)
+  const fechasInvalidas = fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta);
+
   // Filtrado de viajes
   const viajesFiltrados = viajes.filter(viaje => {
     // Filtro por ruta seleccionada
@@ -317,13 +415,34 @@ const Rutas = () => {
       if ((viaje.ruta?.id || viaje.rutaId) !== rutaSeleccionada.id) return false;
     }
     
-    // Filtro por estado
-    if (filtroEstado !== 'todos' && viaje.estado !== filtroEstado) return false;
+    // Filtro por estado (solo si tipoFiltro es 'estado')
+    if (tipoFiltro === 'estado' && filtroEstado !== 'todos' && viaje.estado !== filtroEstado) return false;
     
-    // Filtro por busqueda de nombre
+    // Filtro por busqueda de nombre (siempre activo)
     if (busquedaRuta.trim()) {
       const nombreRuta = viaje.ruta?.nombre?.toLowerCase() || '';
       if (!nombreRuta.includes(busquedaRuta.toLowerCase())) return false;
+    }
+    
+    // Filtro por fecha (solo si tipoFiltro es 'fechas')
+    if (tipoFiltro === 'fechas' && !fechasInvalidas) {
+      if (fechaDesde) {
+        const fechaViaje = new Date(viaje.fechaProgramada || viaje.fechaCreacion);
+        const fechaDesdeDate = new Date(fechaDesde);
+        fechaDesdeDate.setHours(0, 0, 0, 0);
+        if (fechaViaje < fechaDesdeDate) return false;
+      }
+      if (fechaHasta) {
+        const fechaViaje = new Date(viaje.fechaProgramada || viaje.fechaCreacion);
+        const fechaHastaDate = new Date(fechaHasta);
+        fechaHastaDate.setHours(23, 59, 59, 999);
+        if (fechaViaje > fechaHastaDate) return false;
+      }
+    }
+    
+    // Filtro por organizador (solo si tipoFiltro es 'organizador')
+    if (tipoFiltro === 'organizador' && filtroOrganizador !== 'todos') {
+      if (!viaje.organizador || viaje.organizador.id !== parseInt(filtroOrganizador)) return false;
     }
     
     return true;
@@ -370,10 +489,36 @@ const Rutas = () => {
     return Array.from(creadores).map(c => JSON.parse(c));
   }, [rutas]);
 
+  // Lógica para filtro de organizadores de viajes
+  const organizadoresUnicos = React.useMemo(() => {
+    const organizadores = new Set();
+    viajes.forEach(viaje => {
+      if (viaje.organizador) {
+        const nombreCompleto = `${viaje.organizador.nombre || ''} ${viaje.organizador.apellido || ''}`.trim();
+        if (nombreCompleto) organizadores.add(JSON.stringify({ id: viaje.organizador.id, nombre: nombreCompleto }));
+      }
+    });
+    return Array.from(organizadores).map(o => JSON.parse(o));
+  }, [viajes]);
+
+  // Función para limpiar filtros de fecha
+  const limpiarFiltrosFecha = () => {
+    setFechaDesde('');
+    setFechaHasta('');
+  };
+
   const rutasFiltradas = rutas.filter(ruta => {
-    if (filtroCreador === 'todos') return true;
-    if (!ruta.creador) return false;
-    return ruta.creador.id === parseInt(filtroCreador);
+    // Filtro por creador
+    if (filtroCreador !== 'todos') {
+      if (!ruta.creador) return false;
+      if (ruta.creador.id !== parseInt(filtroCreador)) return false;
+    }
+    // Filtro por nombre
+    if (busquedaNombreRuta.trim()) {
+      const nombreRuta = ruta.nombre?.toLowerCase() || '';
+      if (!nombreRuta.includes(busquedaNombreRuta.toLowerCase())) return false;
+    }
+    return true;
   }).sort((a, b) => {
     const { columna, direccion } = ordenRutas;
     let valorA, valorB;
@@ -555,13 +700,12 @@ const Rutas = () => {
                 <span className="badge-count">{rutas.length}</span>
               </div>
 
-              {/* Filtro de Creador */}
+              {/* Filtro de Creador y Busqueda */}
               <div className="filtros-container">
                 <select
-                  className="filtro-select w-100"
+                  className="filtro-select"
                   value={filtroCreador}
                   onChange={(e) => setFiltroCreador(e.target.value)}
-                  style={{ width: '100%' }}
                 >
                   <option value="todos">Todos los creadores</option>
                   {creadoresUnicos.map(creador => (
@@ -570,9 +714,16 @@ const Rutas = () => {
                     </option>
                   ))}
                 </select>
+                <input 
+                  type="text"
+                  className="filtro-input"
+                  placeholder="Buscar por nombre..."
+                  value={busquedaNombreRuta}
+                  onChange={(e) => setBusquedaNombreRuta(e.target.value)}
+                />
               </div>
               
-              <div className="table-scroll-container">
+              <div className="table-scroll-container table-scroll-rutas">
                 <table className="routes-table">
                   <thead>
                     <tr>
@@ -624,95 +775,7 @@ const Rutas = () => {
             <GraficoTopRutas rutas={rutasReal.length > 0 ? rutasReal : rutas} viajes={viajesReal.length > 0 ? viajesReal : viajes} />
           </div>
 
-          {/* COLUMNA 2: Tabla de Viajes */}
-          <div className="rutas-column">
-            <div className="routes-table-card">
-              <div className="table-header-bar">
-                <span>
-                  {mostrarTodosViajes 
-                    ? 'TODOS LOS VIAJES' 
-                    : `VIAJES DE: ${rutaSeleccionada?.nombre || ''}`}
-                </span>
-                <span className="badge-count">{viajesFiltrados.length}</span>
-              </div>
-              
-              {/* Filtros */}
-              <div className="filtros-container">
-                <button 
-                  className={`filtro-btn ${mostrarTodosViajes ? 'active' : ''}`}
-                  onClick={verTodosViajes}
-                >
-                  Ver Todos
-                </button>
-                <select 
-                  className="filtro-select"
-                  value={filtroEstado}
-                  onChange={(e) => setFiltroEstado(e.target.value)}
-                >
-                  <option value="todos">Todos estados</option>
-                  <option value="en_curso">En Curso</option>
-                  <option value="programado">Programados</option>
-                  <option value="finalizado">Finalizados</option>
-                  <option value="cancelado">Cancelados</option>
-                </select>
-                <input 
-                  type="text"
-                  className="filtro-input"
-                  placeholder="Buscar ruta..."
-                  value={busquedaRuta}
-                  onChange={(e) => setBusquedaRuta(e.target.value)}
-                />
-              </div>
-              
-              <div className="table-scroll-container">
-                <table className="routes-table">
-                  <thead>
-                    <tr>
-                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('ruta')}>
-                        Ruta <IconoOrden activo={ordenViajes.columna === 'ruta'} direccion={ordenViajes.direccion} />
-                      </th>
-                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('participantes')}>
-                         Part. <IconoOrden activo={ordenViajes.columna === 'participantes'} direccion={ordenViajes.direccion} />
-                      </th>
-                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('estado')}>
-                        Estado <IconoOrden activo={ordenViajes.columna === 'estado'} direccion={ordenViajes.direccion} />
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viajesFiltrados.length === 0 ? (
-                      <tr>
-                        <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-                          No hay viajes {!mostrarTodosViajes ? 'para esta ruta' : 'con estos filtros'}
-                        </td>
-                      </tr>
-                    ) : (
-                      viajesFiltrados.map((viaje, index) => (
-                        <tr 
-                          key={viaje.id} 
-                          className={`${index % 2 === 0 ? 'route-row-light' : 'route-row-white'} ${viajeSeleccionado?.id === viaje.id ? 'selected-route-row' : ''}`}
-                          onClick={() => setViajeSeleccionado(viaje)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <td className="route-name-cell">{viaje.ruta?.nombre || 'Sin nombre'}</td>
-                          <td>{viaje.participantes?.length || 0}</td>
-                          <td>{getEstadoBadge(viaje.estado)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div className="route-table-footer">
-                {filtroEstado !== 'todos' && `Filtro: ${filtroEstado}`}
-                {busquedaRuta && ` | Busqueda: "${busquedaRuta}"`}
-              </div>
-            </div>
-            {/* Gráfico 2: Tendencia (Debajo de la tabla de Viajes) */}
-            <GraficoTendencia viajes={viajesReal.length > 0 ? viajesReal : viajes} />
-          </div>
-
-          {/* COLUMNA 3: Mapa y Detalles */}
+          {/* COLUMNA 2: Mapa y Detalles (Centro) */}
           <div className="rutas-column">
             <div className="route-chart-card mapa-card">
               <div className="route-chart-title-bold">
@@ -828,10 +891,15 @@ const Rutas = () => {
                               {/* Punto de INICIO */}
                               <div 
                                 className="punto-item-mini inicio"
-                                onClick={() => rutaSeleccionada?.latitudInicio && setMapCenter({
-                                  lat: parseFloat(rutaSeleccionada.latitudInicio),
-                                  lng: parseFloat(rutaSeleccionada.longitudInicio)
-                                })}
+                                onClick={() => {
+                                  if (rutaSeleccionada?.latitudInicio) {
+                                    setMapCenter({
+                                      lat: parseFloat(rutaSeleccionada.latitudInicio),
+                                      lng: parseFloat(rutaSeleccionada.longitudInicio)
+                                    });
+                                    setExpandirDetallesViaje(false);
+                                  }
+                                }}
                                 style={{ cursor: 'pointer' }}
                               >
                                 <div className="punto-icono-mini inicio">
@@ -849,10 +917,15 @@ const Rutas = () => {
                                   <div 
                                     key={punto.id} 
                                     className={`punto-item-mini ${isServicio ? 'servicio' : 'paso'}`}
-                                    onClick={() => punto.latitud && setMapCenter({
-                                      lat: parseFloat(punto.latitud),
-                                      lng: parseFloat(punto.longitud)
-                                    })}
+                                    onClick={() => {
+                                      if (punto.latitud) {
+                                        setMapCenter({
+                                          lat: parseFloat(punto.latitud),
+                                          lng: parseFloat(punto.longitud)
+                                        });
+                                        setExpandirDetallesViaje(false);
+                                      }
+                                    }}
                                     style={{ cursor: 'pointer' }}
                                   >
                                     <div className={`punto-icono-mini ${isServicio ? 'servicio' : 'paso'}`}>
@@ -869,10 +942,15 @@ const Rutas = () => {
                               {/* Punto de DESTINO */}
                               <div 
                                 className="punto-item-mini destino"
-                                onClick={() => rutaSeleccionada?.latitudFin && setMapCenter({
-                                  lat: parseFloat(rutaSeleccionada.latitudFin),
-                                  lng: parseFloat(rutaSeleccionada.longitudFin)
-                                })}
+                                onClick={() => {
+                                  if (rutaSeleccionada?.latitudFin) {
+                                    setMapCenter({
+                                      lat: parseFloat(rutaSeleccionada.latitudFin),
+                                      lng: parseFloat(rutaSeleccionada.longitudFin)
+                                    });
+                                    setExpandirDetallesViaje(false);
+                                  }
+                                }}
                                 style={{ cursor: 'pointer' }}
                               >
                                 <div className="punto-icono-mini destino">
@@ -918,13 +996,11 @@ const Rutas = () => {
                         zoom={12}
                         mapTypeId={tipoMapa}
                         options={{
-                          zoomControl: true,
+                          zoomControl: false,
                           streetViewControl: false,
                           mapTypeControl: false,
-                          fullscreenControl: true,
-                          zoomControlOptions: {
-                            position: window.google?.maps?.ControlPosition?.RIGHT_CENTER
-                          }
+                          fullscreenControl: false,
+                          styles: theme === 'dark' ? darkMapStyles : []
                         }}
                         onLoad={(map) => setMapRef(map)}
                       >
@@ -1032,6 +1108,52 @@ const Rutas = () => {
                         <option value="terrain">Terreno</option>
                       </select>
                     </div>
+
+                    {/* Custom Map Controls Overlay */}
+                    <div className="custom-map-controls">
+                      <button 
+                        className="custom-control-btn"
+                        onClick={() => {
+                           if (mapRef) {
+                             const currentZoom = mapRef.getZoom();
+                             mapRef.setZoom(currentZoom + 1);
+                           }
+                        }}
+                        title="Acercar"
+                      >
+                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                      </button>
+                      <button 
+                        className="custom-control-btn"
+                        onClick={() => {
+                          if (mapRef) {
+                            const currentZoom = mapRef.getZoom();
+                            mapRef.setZoom(currentZoom - 1);
+                          }
+                        }}
+                        title="Alejar"
+                      >
+                         <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+                      </button>
+                      <button 
+                        className="custom-control-btn"
+                        onClick={() => {
+                          const mapContainer = document.querySelector('.google-mapa-container');
+                          if (mapContainer) {
+                            if (!document.fullscreenElement) {
+                              mapContainer.requestFullscreen().catch(err => {
+                                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                              });
+                            } else {
+                              document.exitFullscreen();
+                            }
+                          }
+                        }}
+                        title="Pantalla Completa"
+                      >
+                         <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1044,7 +1166,203 @@ const Rutas = () => {
               )}
               
             </div>
-            {/* Gráfico 3: Estado (Debajo del Mapa) */}
+            {/* Grafico 2: Tendencia (Debajo del Mapa) */}
+            <GraficoTendencia viajes={viajesReal.length > 0 ? viajesReal : viajes} />
+          </div>
+
+          {/* COLUMNA 3: Tabla de Viajes (Derecha) */}
+          <div className="rutas-column">
+            <div className="routes-table-card">
+              <div className="table-header-bar">
+                <span>
+                  {mostrarTodosViajes 
+                    ? 'TODOS LOS VIAJES' 
+                    : `VIAJES DE: ${rutaSeleccionada?.nombre || ''}`}
+                </span>
+                <span className="badge-count">{viajesFiltrados.length}</span>
+              </div>
+              
+              {/* Filtros */}
+              <div className="filtros-container">
+                <button 
+                  className={`filtro-btn ${mostrarTodosViajes ? 'active' : ''}`}
+                  onClick={verTodosViajes}
+                >
+                  Ver Todos
+                </button>
+                <input 
+                  type="text"
+                  className="filtro-input"
+                  placeholder="Buscar ruta..."
+                  value={busquedaRuta}
+                  onChange={(e) => setBusquedaRuta(e.target.value)}
+                />
+              </div>
+              
+              {/* Radio buttons para tipo de filtro */}
+              <div className="filtros-container filtros-radio">
+                <span className="filtro-radio-label">Filtrar por:</span>
+                <label className="filtro-radio-option">
+                  <input
+                    type="radio"
+                    name="tipoFiltro"
+                    value="todos"
+                    checked={tipoFiltro === 'todos'}
+                    onChange={(e) => setTipoFiltro(e.target.value)}
+                  />
+                  <span>Todos</span>
+                </label>
+                <label className="filtro-radio-option">
+                  <input
+                    type="radio"
+                    name="tipoFiltro"
+                    value="estado"
+                    checked={tipoFiltro === 'estado'}
+                    onChange={(e) => setTipoFiltro(e.target.value)}
+                  />
+                  <span>Estado</span>
+                </label>
+                <label className="filtro-radio-option">
+                  <input
+                    type="radio"
+                    name="tipoFiltro"
+                    value="fechas"
+                    checked={tipoFiltro === 'fechas'}
+                    onChange={(e) => setTipoFiltro(e.target.value)}
+                  />
+                  <span>Rango Fechas</span>
+                </label>
+                <label className="filtro-radio-option">
+                  <input
+                    type="radio"
+                    name="tipoFiltro"
+                    value="organizador"
+                    checked={tipoFiltro === 'organizador'}
+                    onChange={(e) => setTipoFiltro(e.target.value)}
+                  />
+                  <span>Organizador</span>
+                </label>
+              </div>
+              
+              {/* Filtro de Estado */}
+              {tipoFiltro === 'estado' && (
+                <div className="filtros-container filtros-dinamico">
+                  <select 
+                    className="filtro-select"
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}
+                  >
+                    <option value="todos">Todos estados</option>
+                    <option value="en_curso">En Curso</option>
+                    <option value="programado">Programados</option>
+                    <option value="finalizado">Finalizados</option>
+                    <option value="cancelado">Cancelados</option>
+                  </select>
+                </div>
+              )}
+              
+              {/* Filtro de Fechas */}
+              {tipoFiltro === 'fechas' && (
+                <div className="filtros-container filtros-dinamico filtros-fecha">
+                  <div className="filtro-fecha-grupo">
+                    <label className="filtro-fecha-label">Desde:</label>
+                    <input
+                      type="date"
+                      className={`filtro-fecha-input ${fechasInvalidas ? 'fecha-invalida' : ''}`}
+                      value={fechaDesde}
+                      onChange={(e) => setFechaDesde(e.target.value)}
+                      max={fechaHasta || undefined}
+                    />
+                  </div>
+                  <div className="filtro-fecha-grupo">
+                    <label className="filtro-fecha-label">Hasta:</label>
+                    <input
+                      type="date"
+                      className={`filtro-fecha-input ${fechasInvalidas ? 'fecha-invalida' : ''}`}
+                      value={fechaHasta}
+                      onChange={(e) => setFechaHasta(e.target.value)}
+                      min={fechaDesde || undefined}
+                    />
+                  </div>
+                  {(fechaDesde || fechaHasta) && (
+                    <button 
+                      className="filtro-btn filtro-btn-limpiar"
+                      onClick={limpiarFiltrosFecha}
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                  {fechasInvalidas && (
+                    <span className="filtro-fecha-error">
+                      Rango invalido
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Filtro de Organizador */}
+              {tipoFiltro === 'organizador' && (
+                <div className="filtros-container filtros-dinamico">
+                  <select
+                    className="filtro-select"
+                    value={filtroOrganizador}
+                    onChange={(e) => setFiltroOrganizador(e.target.value)}
+                  >
+                    <option value="todos">Todos organizadores</option>
+                    {organizadoresUnicos.map(org => (
+                      <option key={org.id} value={org.id}>
+                        {org.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              <div className="table-scroll-container table-scroll-viajes">
+                <table className="routes-table">
+                  <thead>
+                    <tr>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('ruta')}>
+                        Ruta <IconoOrden activo={ordenViajes.columna === 'ruta'} direccion={ordenViajes.direccion} />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('participantes')}>
+                         Part. <IconoOrden activo={ordenViajes.columna === 'participantes'} direccion={ordenViajes.direccion} />
+                      </th>
+                      <th className="th-sortable header-orange" onClick={() => ordenarViajesPor('estado')}>
+                        Estado <IconoOrden activo={ordenViajes.columna === 'estado'} direccion={ordenViajes.direccion} />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viajesFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+                          No hay viajes {!mostrarTodosViajes ? 'para esta ruta' : 'con estos filtros'}
+                        </td>
+                      </tr>
+                    ) : (
+                      viajesFiltrados.map((viaje, index) => (
+                        <tr 
+                          key={viaje.id} 
+                          className={`${index % 2 === 0 ? 'route-row-light' : 'route-row-white'} ${viajeSeleccionado?.id === viaje.id ? 'selected-route-row' : ''}`}
+                          onClick={() => seleccionarViaje(viaje)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <td className="route-name-cell">{viaje.ruta?.nombre || 'Sin nombre'}</td>
+                          <td>{viaje.participantes?.length || 0}</td>
+                          <td>{getEstadoBadge(viaje.estado)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="route-table-footer">
+                {filtroEstado !== 'todos' && `Filtro: ${filtroEstado}`}
+                {busquedaRuta && ` | Busqueda: "${busquedaRuta}"`}
+              </div>
+            </div>
+            {/* Grafico 3: Estado (Debajo de la tabla de Viajes) */}
             <GraficoEstado viajes={viajes} />
           </div>
         </div>

@@ -731,83 +731,83 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-
-          {/* Top 5 Usuarios por Kilómetros */}
-          <div className="chart-card">
-            <div className="chart-title-bold">TOP 5 POR KILOMETROS</div>
-            <div style={{ padding: '1rem' }}>
-              {loading ? (
-                <div className="skeleton" style={{ height: '150px', width: '100%' }}></div>
-              ) : usuarios.length > 0 ? (
-                (() => {
-                  const top5Km = [...usuarios]
-                    .sort((a, b) => (b.distancia || 0) - (a.distancia || 0))
-                    .slice(0, 5);
-                  
-                  const maxKm = Math.max(...top5Km.map(u => u.distancia || 0), 1);
-                  
-                  return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {top5Km.map((usuario, i) => {
-                        const porcentaje = (usuario.distancia / maxKm) * 100;
-                        const colores = ['#FF6610', '#FF8C42', '#FFA366', '#FFB88C', '#FFCEB3'];
-                        return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {/* Posición */}
-                            <div style={{ 
-                              width: '20px', 
-                              height: '20px', 
-                              borderRadius: '50%', 
-                              background: colores[i],
-                              color: '#fff',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.7rem',
-                              fontWeight: '700'
-                            }}>
-                              {i + 1}
-                            </div>
-                            {/* Alias */}
-                            <div style={{ 
-                              width: '70px', 
-                              fontSize: '0.7rem', 
-                              fontWeight: '600',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              @{usuario.alias}
-                            </div>
-                            {/* Barra */}
-                            <div style={{ flex: 1, background: '#f0f0f0', borderRadius: '4px', height: '18px', overflow: 'hidden' }}>
-                              <div style={{
-                                width: `${porcentaje}%`,
-                                height: '100%',
-                                background: `linear-gradient(90deg, ${colores[i]} 0%, ${colores[i]}cc 100%)`,
-                                borderRadius: '4px',
-                                transition: 'width 0.5s ease'
-                              }}></div>
-                            </div>
-                            {/* Valor */}
-                            <div style={{ width: '45px', fontSize: '0.75rem', fontWeight: '700', color: '#333', textAlign: 'right' }}>
-                              {usuario.distancia} km
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()
-              ) : (
-                <div style={{ height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                  Sin datos
-                </div>
-              )}
-            </div>
-          </div>
         </div>
         
+        </div>
+
+        {/* Top 5 Usuarios por Kilometros - Ancho completo */}
+        <div className="chart-card chart-card-full-width" style={{ marginTop: '1rem' }}>
+          <div className="chart-title-bold">TOP 5 POR KILOMETROS</div>
+          <div style={{ padding: '1rem' }}>
+            {loading ? (
+              <div className="skeleton" style={{ height: '150px', width: '100%' }}></div>
+            ) : usuarios.length > 0 ? (
+              (() => {
+                const top5Km = [...usuarios]
+                  .sort((a, b) => (b.distancia || 0) - (a.distancia || 0))
+                  .slice(0, 5);
+                
+                const maxKm = Math.max(...top5Km.map(u => u.distancia || 0), 1);
+                
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {top5Km.map((usuario, i) => {
+                      const porcentaje = (usuario.distancia / maxKm) * 100;
+                      const colores = ['#FF6610', '#FF8C42', '#FFA366', '#FFB88C', '#FFCEB3'];
+                      return (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {/* Posicion */}
+                          <div style={{ 
+                            width: '20px', 
+                            height: '20px', 
+                            borderRadius: '50%', 
+                            background: colores[i],
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.7rem',
+                            fontWeight: '700'
+                          }}>
+                            {i + 1}
+                          </div>
+                          {/* Alias */}
+                          <div style={{ 
+                            width: '70px', 
+                            fontSize: '0.7rem', 
+                            fontWeight: '600',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            @{usuario.alias}
+                          </div>
+                          {/* Barra */}
+                          <div style={{ flex: 1, background: '#f0f0f0', borderRadius: '4px', height: '18px', overflow: 'hidden' }}>
+                            <div style={{
+                              width: `${porcentaje}%`,
+                              height: '100%',
+                              background: `linear-gradient(90deg, ${colores[i]} 0%, ${colores[i]}cc 100%)`,
+                              borderRadius: '4px',
+                              transition: 'width 0.5s ease'
+                            }}></div>
+                          </div>
+                          {/* Valor */}
+                          <div style={{ width: '45px', fontSize: '0.75rem', fontWeight: '700', color: '#333', textAlign: 'right' }}>
+                            {usuario.distancia} km
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            ) : (
+              <div style={{ height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+                Sin datos
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

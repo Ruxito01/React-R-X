@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext"; // Importar ThemeProvider
 import ProtectedRoute from "./components/ProtectedRoute";
+import "./Theme.css"; // Importar variables CSS
 
 // La página principal para usuarios NO logueados
 import LandingPage from "./pages/LandingPage";
@@ -30,38 +32,40 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AuthProvider>
-        <Router>
-          <Routes>
-            {/* RUTA PRINCIPAL: 
-              Muestra la página larga de bienvenida (Intro + Login + Descarga)
-            */}
-            <Route path="/" element={<LandingPage />} />
+        <ThemeProvider> {/* Envolver con ThemeProvider */}
+          <Router>
+            <Routes>
+              {/* RUTA PRINCIPAL: 
+                Muestra la página larga de bienvenida (Intro + Login + Descarga)
+              */}
+              <Route path="/" element={<LandingPage />} />
 
-            {/* RUTAS INTERNAS (Protegidas): 
-              Usan MainLayout y requieren autenticación de ADMIN
-            */}
-            <Route element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="/general" element={<DashboardGeneral />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/vehiculos" element={<Vehiculos />} />
-              <Route path="/rutas" element={<Rutas />} />
-              <Route path="/comunidades" element={<Comunidades />} />
-              
-              {/* Rutas de Administracion */}
-              <Route path="/admin/marcas" element={<AdminMarcas />} />
-              <Route path="/admin/modelos" element={<AdminModelos />} />
-              <Route path="/admin/logros" element={<AdminLogros />} />
-              <Route path="/admin/tipos-vehiculo" element={<AdminTiposVehiculo />} />
-              <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-            </Route>
-          </Routes>
-        </Router>
-        <Analytics />
+              {/* RUTAS INTERNAS (Protegidas): 
+                Usan MainLayout y requieren autenticación de ADMIN
+              */}
+              <Route element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route path="/general" element={<DashboardGeneral />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/vehiculos" element={<Vehiculos />} />
+                <Route path="/rutas" element={<Rutas />} />
+                <Route path="/comunidades" element={<Comunidades />} />
+                
+                {/* Rutas de Administracion */}
+                <Route path="/admin/marcas" element={<AdminMarcas />} />
+                <Route path="/admin/modelos" element={<AdminModelos />} />
+                <Route path="/admin/logros" element={<AdminLogros />} />
+                <Route path="/admin/tipos-vehiculo" element={<AdminTiposVehiculo />} />
+                <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+              </Route>
+            </Routes>
+          </Router>
+          <Analytics />
+        </ThemeProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

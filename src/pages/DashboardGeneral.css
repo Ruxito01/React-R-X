@@ -141,14 +141,16 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--bg-card) !important;
     border-radius: 12px;
     padding: 20px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-subtle);
+    /* Añadir borde sutil */
+    transition: transform 0.2s, background 0.3s, border 0.3s;
 }
 
 .stat-card:hover {
@@ -166,23 +168,43 @@
 }
 
 .icon-users {
-    background: #E3F2FD;
+    background: rgba(25, 118, 210, 0.1);
     color: #1976D2;
 }
 
+[data-theme='dark'] .icon-users {
+    color: #90CAF9;
+    background: rgba(144, 202, 249, 0.15);
+}
+
 .icon-routes {
-    background: #E8F5E9;
+    background: rgba(56, 142, 60, 0.1);
     color: #388E3C;
 }
 
+[data-theme='dark'] .icon-routes {
+    color: #A5D6A7;
+    background: rgba(165, 214, 167, 0.15);
+}
+
 .icon-communities {
-    background: #F3E5F5;
+    background: rgba(123, 31, 162, 0.1);
     color: #7B1FA2;
 }
 
+[data-theme='dark'] .icon-communities {
+    color: #CE93D8;
+    background: rgba(206, 147, 216, 0.15);
+}
+
 .icon-vehicles {
-    background: #FFF3E0;
+    background: rgba(255, 102, 16, 0.1);
     color: #FF6610;
+}
+
+[data-theme='dark'] .icon-vehicles {
+    color: #FFB74D;
+    background: rgba(255, 183, 77, 0.15);
 }
 
 .stat-info {
@@ -193,13 +215,15 @@
 .stat-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary) !important;
+    /* Forzar color */
     line-height: 1.2;
 }
 
 .stat-label {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-secondary) !important;
+    /* Forzar color */
     font-weight: 500;
 }
 
@@ -207,10 +231,14 @@
 .dashboard-general-content {
     max-width: 1400px;
     margin: 0 auto;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--glass-bg);
+    /* Usar variable para glassmorphism */
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-hover);
+    backdrop-filter: blur(10px);
+    /* Asegurar el efecto blur si se pierde */
+    border: 1px solid var(--border-subtle);
 }
 
 .dashboard-row {
@@ -228,13 +256,13 @@
 /* Tarjetas (secciones internas con contorno) */
 /* Tarjetas (secciones internas con contorno) */
 .dashboard-card {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    height: 450px;
-    /* Altura fija corta */
+    box-shadow: var(--shadow-card);
+    min-height: 400px;
+    /* Altura minima consistente */
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
     display: flex;
@@ -251,7 +279,7 @@
     gap: 12px;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #FF6610;
+    border-bottom: 2px solid var(--primary-orange);
     flex-shrink: 0;
     /* Header no se encoge */
 }
@@ -290,7 +318,7 @@
 .card-header h2 {
     margin: 0;
     font-size: 1.2rem;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -318,7 +346,7 @@
 
 .tacometro-label {
     font-size: 11px;
-    fill: #666;
+    fill: var(--text-secondary);
 }
 
 .big-number {
@@ -329,7 +357,7 @@
 }
 
 .total-label {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -344,7 +372,7 @@
     align-items: center;
     gap: 12px;
     padding: 8px;
-    background: #f8f8f8;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
@@ -386,7 +414,7 @@
 
 .usuario-nombre {
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary);
 }
 
 /* Rutas recientes */
@@ -404,12 +432,22 @@
     font-size: 0.9rem;
 }
 
-.table-scroll-container {
-    /* Altura para aprox 3 filas + header (45px * 3 + 45px = ~180px) */
-    max-height: 180px;
+/* Selector especifico para evitar conflictos con Rutas.css */
+.dashboard-general-container .rutas-recientes .table-scroll-container {
+    /* Altura estricta para 3 filas (aprox 35px c/u) + header */
+    height: 135px !important;
+    max-height: 135px !important;
+    min-height: 135px !important;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    display: block;
+}
+
+/* Reducir padding para compactar filas */
+.dashboard-general-container .rutas-recientes .rutas-tabla td,
+.dashboard-general-container .rutas-recientes .rutas-tabla th {
+    padding: 6px 12px;
 }
 
 .table-scroll-container::-webkit-scrollbar {
@@ -492,11 +530,11 @@
 }
 
 .rutas-tabla tbody tr td {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .rutas-tabla tbody tr:hover {
-    background: #f8f8f8;
+    background: var(--bg-secondary);
 }
 
 .rutas-tabla tbody tr:last-child td {
@@ -508,7 +546,7 @@
 }
 
 .ruta-fecha {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.85rem;
 }
 
@@ -516,13 +554,13 @@
 .grafico-picos {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
 }
 
 .grafico-titulo {
     margin: 0 0 16px 0;
     font-size: 1rem;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -557,13 +595,13 @@
 
 .label-dia {
     font-size: 0.75rem;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .label-fecha {
     font-size: 0.65rem;
-    color: #999;
+    color: var(--text-muted);
 }
 
 /* Comunidades - Lista con miembros */
@@ -574,7 +612,7 @@
 }
 
 .comunidad-card {
-    background: #f8f8f8;
+    background: var(--bg-secondary);
     border-radius: 12px;
     padding: 14px;
     transition: transform 0.3s, box-shadow 0.3s;
@@ -623,12 +661,12 @@
 
 .comunidad-nombre {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     font-size: 0.95rem;
 }
 
 .comunidad-miembros-count {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.8rem;
 }
 
@@ -671,7 +709,7 @@
 }
 
 .sin-miembros {
-    color: #999;
+    color: var(--text-muted);
     font-size: 0.8rem;
     font-style: italic;
 }
@@ -691,7 +729,7 @@
 
 .tipo-nombre {
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary);
     font-size: 0.9rem;
 }
 
@@ -700,7 +738,7 @@
     align-items: center;
     gap: 12px;
     height: 28px;
-    background: #f0f0f0;
+    background: var(--bg-secondary);
     border-radius: 14px;
     overflow: hidden;
 }
@@ -715,14 +753,14 @@
 
 .tipo-count {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     padding-right: 12px;
 }
 
 /* Sin datos */
 .no-data {
     text-align: center;
-    color: #999;
+    color: var(--text-muted);
     font-style: italic;
     padding: 20px;
 }

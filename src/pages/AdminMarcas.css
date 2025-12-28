@@ -67,16 +67,16 @@
 
 /* Tarjeta principal */
 .admin-main-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--glass-bg);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-card);
     position: relative;
     z-index: 1;
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    border: 2px solid rgba(255, 102, 16, 0.1);
+    border: 2px solid var(--border-subtle);
     animation: fadeZoomIn 0.6s ease-out;
 }
 
@@ -126,9 +126,9 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.8rem 1.2rem;
-    background: #f5f5f5;
-    color: #666;
-    border: 1px solid #ddd;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 500;
@@ -151,8 +151,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.5rem 1rem;
     margin-left: auto;
@@ -179,6 +179,7 @@
     font-size: 0.9rem;
     width: 100%;
     font-family: inherit;
+    color: var(--text-primary);
 }
 
 .input-busqueda::placeholder {
@@ -228,10 +229,10 @@
 
 /* Tabla */
 .admin-table-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
 }
 
 .admin-table {
@@ -259,20 +260,22 @@
 }
 
 .admin-table tbody tr:hover {
-    background: #fff8f5 !important;
+    background: var(--bg-secondary) !important;
 }
 
 .row-light {
-    background: #fafafa;
+    background: var(--bg-card);
 }
 
 .row-white {
-    background: #ffffff;
+    background: var(--bg-card);
 }
 
 .admin-table td {
     padding: 0.9rem 1rem;
     font-size: 0.95rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .td-id {
@@ -283,7 +286,7 @@
 
 .td-nombre {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .td-logo {
@@ -316,6 +319,7 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
+    background: var(--bg-secondary);
 }
 
 .btn-editar {
@@ -359,8 +363,8 @@
     display: inline-block;
     min-width: 28px;
     padding: 0.3rem 0.6rem;
-    background: #f0f0f0;
-    color: #888;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -401,16 +405,19 @@
     display: flex;
     gap: 1rem;
     padding: 0.9rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .skeleton-row:nth-child(even) {
-    background: #fafafa;
+    background: var(--bg-secondary);
 }
 
 .skeleton-cell {
     height: 20px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg,
+            var(--skeleton-bg) 25%,
+            var(--skeleton-shimmer-mid) 50%,
+            var(--skeleton-bg) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
@@ -500,11 +507,11 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-card);
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     animation: slideUp 0.3s ease;
 }
 
@@ -587,7 +594,7 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     font-size: 0.9rem;
 }
 
@@ -596,12 +603,14 @@
 .form-group textarea {
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     transition: border-color 0.2s;
     font-family: inherit;
     box-sizing: border-box;
+    background: var(--bg-card);
+    color: var(--text-primary);
 }
 
 .form-group input:focus,
@@ -639,12 +648,12 @@
     align-items: center;
     gap: 0.5rem;
     padding: 1.5rem 2rem;
-    background: #f8f8f8;
-    border: 2px dashed #ddd;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9rem;
     width: 100%;
     box-sizing: border-box;
@@ -705,14 +714,14 @@
     gap: 1rem;
     justify-content: flex-end;
     padding-top: 1rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
     margin-top: 1rem;
 }
 
 .btn-cancelar {
     padding: 0.7rem 1.5rem;
-    background: #f0f0f0;
-    color: #666;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     border: none;
     border-radius: 8px;
     font-weight: 500;

@@ -10,22 +10,22 @@
     font-family: 'Inter', sans-serif;
     color: #333;
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 /* Contenedor principal tipo tarjeta que agrupa todo el dashboard */
 .rutas-main-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    background: var(--glass-bg);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: var(--shadow-card);
     position: relative;
     z-index: 1;
     max-width: 1400px;
-    width: 100%;
+    /* Removed width: 100% to prevent overflow */
     margin: 0 auto;
-    border: 2px solid rgba(255, 102, 16, 0.1);
+    border: 2px solid var(--border-subtle);
+    min-height: 400px;
 }
 
 /* Superposición semi-transparente elegante */
@@ -128,12 +128,26 @@
 
 /* Scroll para tablas - Altura limitada para coincidir con mapa */
 .table-scroll-container {
-    height: 300px;
-    /* Altura fija para scroll */
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #FF6610 #f0f0f0;
+}
+
+/* Tabla de rutas - 6 filas de alto */
+.table-scroll-rutas {
+    height: 335px !important;
+    min-height: 335px !important;
+    max-height: 335px !important;
+    flex: none !important;
+}
+
+/* Tabla de viajes - altura aumentada para 2 filas mas */
+.table-scroll-viajes {
+    height: 386px !important;
+    min-height: 386px !important;
+    max-height: 386px !important;
+    flex: none !important;
 }
 
 .table-scroll-container::-webkit-scrollbar {
@@ -155,20 +169,21 @@
     display: flex;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
 }
 
 .filtro-btn {
     padding: 0.4rem 0.8rem;
-    border: 1px solid #ddd;
-    background: white;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
     border-radius: 6px;
     font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
+    color: var(--text-primary);
 }
 
 .filtro-btn:hover {
@@ -183,11 +198,13 @@
 }
 
 .filtro-select {
+    flex: 1;
     padding: 0.4rem 0.6rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.8rem;
-    background: white;
+    background: var(--bg-card);
+    color: var(--text-primary);
     cursor: pointer;
 }
 
@@ -200,14 +217,126 @@
     flex: 1;
     min-width: 100px;
     padding: 0.4rem 0.6rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.8rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
 }
 
 .filtro-input:focus {
     outline: none;
     border-color: #FF6610;
+}
+
+/* Estilos para filtros de fecha */
+.filtros-fecha {
+    align-items: center;
+}
+
+.filtro-fecha-grupo {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.filtro-fecha-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.filtro-fecha-input {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    min-width: 130px;
+    transition: all 0.2s;
+}
+
+.filtro-fecha-input:focus {
+    outline: none;
+    border-color: #FF6610;
+}
+
+.filtro-fecha-input.fecha-invalida {
+    border-color: #f44336;
+    background: #fff5f5;
+}
+
+.filtro-fecha-error {
+    font-size: 0.75rem;
+    color: #f44336;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.filtro-btn-limpiar {
+    background: #e8e8e8;
+    border-color: #ccc;
+    color: #666;
+}
+
+.filtro-btn-limpiar:hover {
+    background: #FF6610;
+    color: white;
+    border-color: #FF6610;
+}
+
+/* Estilos para radio buttons de filtro */
+.filtros-radio {
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+}
+
+.filtro-radio-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-right: 0.5rem;
+}
+
+.filtro-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.filtro-radio-option:hover {
+    color: #FF6610;
+}
+
+.filtro-radio-option input[type="radio"] {
+    accent-color: #FF6610;
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+}
+
+.filtro-radio-option span {
+    white-space: nowrap;
+}
+
+/* Contenedor de filtro dinamico */
+.filtros-dinamico {
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border-left: 3px solid #FF6610;
+}
+
+.filtros-dinamico .filtro-select {
+    min-width: 180px;
 }
 
 /* Tarjeta de mapa */
@@ -229,7 +358,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
     padding: 0.75rem;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
@@ -247,7 +376,7 @@
 .info-value {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
 }
 
 /* SECCIÓN IZQUIERDA - Diagonal desde arriba-izquierda */
@@ -296,10 +425,10 @@
 
 /* Ruta Destacada - Pop con rebote */
 .featured-route-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     border: 3px solid #FF6610;
     animation: popSwing 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
     animation-fill-mode: both;
@@ -342,7 +471,7 @@
     justify-content: space-between;
     gap: 1.5rem;
     padding: 1.5rem 2rem;
-    background: #f8f8f8;
+    background: var(--bg-secondary);
 }
 
 .route-icon-circle {
@@ -373,7 +502,7 @@
 .route-distance-number {
     font-size: 2.8rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
 }
 
 .route-vertical-bars-group {
@@ -398,7 +527,7 @@
 
 .route-participation-label {
     font-size: 1rem;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 600;
     margin-left: 0.2rem;
 }
@@ -414,7 +543,7 @@
 .route-number {
     font-size: 4.2rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
 }
 
 .route-mini-bars-group {
@@ -439,10 +568,10 @@
 
 /* Tabla de Rutas - Estilo Unificado Sticky */
 .routes-table-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     animation: slideInScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
     animation-fill-mode: both;
     display: flex;
@@ -469,8 +598,6 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 300px;
-    /* Altura base, pero flex deberia manejarlo */
     scrollbar-width: thin;
     scrollbar-color: #FF6610 #f0f0f0;
 }
@@ -540,33 +667,33 @@
 
 .routes-table tbody tr {
     transition: all 0.2s ease;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .routes-table tbody tr:hover {
-    background: #fff8f5;
+    background: var(--bg-secondary);
     /* Eliminar transform scale que rompe layouts complejos en tablas */
 }
 
 .routes-table tbody tr.selected-route-row {
-    background: #ffe8d6 !important;
+    background: rgba(255, 102, 16, 0.15) !important;
     border-left: 4px solid #FF6610;
 }
 
 .route-row-light {
-    background: #fff;
+    background: var(--bg-card);
 }
 
 .route-row-white {
-    background: #ffffff;
+    background: var(--bg-card);
 }
 
 .routes-table td {
     padding: 0.7rem 0.8rem;
-    color: #333;
+    color: var(--text-primary);
     font-size: 0.95rem;
-    border-right: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .routes-table td:last-child {
@@ -575,7 +702,7 @@
 
 .route-name-cell {
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-primary);
     white-space: pre-line;
 }
 
@@ -589,10 +716,10 @@
 
 /* Gráficos */
 .route-chart-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 12px;
     padding: 1.2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     animation: flipInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     animation-fill-mode: both;
 }
@@ -631,7 +758,7 @@
 }
 
 .route-chart-title {
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 1rem;
@@ -639,7 +766,7 @@
 }
 
 .route-chart-title-bold {
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 700;
     font-size: 0.9rem;
     margin-bottom: 1rem;
@@ -929,7 +1056,7 @@
 
 .viaje-info-panel {
     padding: 1rem;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     border-radius: 8px;
 }
 
@@ -997,7 +1124,7 @@
     flex-wrap: wrap;
     gap: 0.5rem 1rem;
     padding: 0.5rem;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     border-radius: 8px;
     font-size: 0.85rem;
 }
@@ -1020,12 +1147,12 @@
 }
 
 .ruta-info-mini .info-label {
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
 .ruta-info-mini .info-value {
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -1034,7 +1161,9 @@
     background: white;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+    z-index: 100;
 }
 
 .expandible-header {
@@ -1049,6 +1178,7 @@
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
+    border-radius: 8px;
 }
 
 .expandible-header:hover {
@@ -1056,8 +1186,19 @@
 }
 
 .expandible-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     padding: 0.75rem;
     background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 101;
+    max-height: 350px;
+    overflow-y: auto;
 }
 
 .viaje-organizador {
@@ -1086,7 +1227,7 @@
     display: flex;
     justify-content: space-between;
     padding: 0.5rem;
-    background: white;
+    background: var(--bg-card);
     border-radius: 6px;
     margin-bottom: 0.75rem;
 }
@@ -1103,7 +1244,7 @@
 }
 
 .participantes-lista {
-    background: white;
+    background: var(--bg-card);
     border-radius: 6px;
     padding: 0.5rem;
 }
@@ -1208,7 +1349,7 @@
 /* Lista de puntos dentro del expandible */
 .puntos-lista-expandible {
     margin-top: 0.75rem;
-    background: white;
+    background: var(--bg-card);
     border-radius: 6px;
     padding: 0.5rem;
 }
@@ -1363,7 +1504,8 @@
     padding: 6px 10px;
     border: none;
     border-radius: 4px;
-    background: white;
+    background: var(--bg-card);
+    color: var(--text-primary);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     font-size: 12px;
     cursor: pointer;
@@ -1378,7 +1520,7 @@
     height: 30px;
     border: none;
     border-radius: 4px;
-    background: white;
+    background: var(--bg-card);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     display: flex;
@@ -1401,6 +1543,45 @@
 .viaje-mapa-panel {
     position: relative;
     min-height: 200px;
+}
+
+/* Custom Map Controls Overlay */
+.custom-map-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+}
+
+.custom-control-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.custom-control-btn:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    color: #FF6610;
+}
+
+.custom-control-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
 }
 
 .mapa-container {
@@ -1631,4 +1812,153 @@
     font-size: 0.75rem;
     color: #888;
     margin-top: 2px;
+}
+
+/* Styles for Trip Details expandable section - Dark Mode support */
+.viaje-detalles-expandible {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.expandible-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #FF6610;
+    color: white;
+    border: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.expandible-content {
+    padding: 15px;
+    background: var(--bg-secondary);
+}
+
+.viaje-organizador,
+.viaje-fecha {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.organizador-label,
+.fecha-label,
+.participantes-titulo,
+.puntos-titulo {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.organizador-value,
+.fecha-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.participantes-items {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.participante-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+}
+
+.participante-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #FF6610;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.participante-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.participante-nombre {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.participante-estado {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.participante-estado.ingresa {
+    color: #4CAF50;
+}
+
+.participante-estado.cancela {
+    color: #F44336;
+}
+
+.participante-estado.pendiente {
+    color: #FF9800;
+}
+
+.sin-participantes {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.puntos-lista {
+    margin-top: 15px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.puntos-items {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.punto-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.punto-icono {
+    color: #FF6610;
+    font-size: 0.7rem;
 }

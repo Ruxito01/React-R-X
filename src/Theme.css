@@ -1,0 +1,65 @@
+:root {
+    /* Variables Globales (Color Branding) */
+    --primary-orange: #FF6610;
+    --primary-orange-hover: #e05a00;
+
+    /* Variables Tema Claro (Default) */
+    --bg-main: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --bg-secondary: #f8f8f8;
+    /* Fondos alternos suaves */
+
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+
+    --border-color: #e0e0e0;
+    --border-subtle: rgba(255, 102, 16, 0.2);
+
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+    --glass-bg: rgba(255, 255, 255, 0.95);
+
+    /* Skeleton Loading - Light */
+    --skeleton-bg: #e0e0e0;
+    --skeleton-shimmer-start: rgba(255, 255, 255, 0);
+    --skeleton-shimmer-mid: rgba(255, 255, 255, 0.5);
+    --skeleton-shimmer-end: rgba(255, 255, 255, 0);
+}
+
+[data-theme='dark'] {
+    /* Variables Tema Oscuro */
+    --bg-main: #121212;
+    /* Fondo muy oscuro pero no negro total */
+    --bg-card: #1e1e1e;
+    /* Tarjetas un poco más claras */
+    --bg-card-hover: #252525;
+    --bg-secondary: #2a2a2a;
+
+    --text-primary: #ffffff;
+    /* Blanco puro para máximo contraste */
+    --text-secondary: #cccccc;
+    /* Gris mucho más claro */
+    --text-muted: #999999;
+
+    --border-color: #333333;
+    --border-subtle: rgba(255, 102, 16, 0.3);
+
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.7);
+
+    --glass-bg: rgba(30, 30, 30, 0.95);
+
+    /* Ajustes específicos para gráficos/elementos que necesitan contraste */
+    /* Ajustes específicos para gráficos/elementos que necesitan contraste */
+    color-scheme: dark;
+
+    /* Skeleton Loading - Dark */
+    --skeleton-bg: #333333;
+    --skeleton-shimmer-start: rgba(255, 255, 255, 0);
+    --skeleton-shimmer-mid: rgba(255, 255, 255, 0.05);
+    /* Muy sutil en dark mode */
+    --skeleton-shimmer-end: rgba(255, 255, 255, 0);
+}
