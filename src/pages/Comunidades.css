@@ -845,3 +845,114 @@
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Tooltips para graficas - Dashboard Comunidades */
+        .grafico-tooltip {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            min-width: 160px;
+            animation: tooltipFadeIn 0.2s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tooltip-header {
+            font-weight: 700;
+            color: #FF6610;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            padding: 4px 0;
+        }
+
+        .tooltip-row span {
+            color: var(--text-secondary);
+        }
+
+        .tooltip-row strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tooltip-badge {
+            background: linear-gradient(135deg, #FF6610, #ff8c42);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Leyenda donut interactiva */
+        .legend-interactivo:hover,
+        .legend-activo {
+            background: rgba(255, 102, 16, 0.1) !important;
+            border-color: #FF6610 !important;
+        }
+
+        .donut-tooltip {
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* Barras ranking interactivas */
+        .ranking-bar-hover {
+            cursor: pointer;
+        }
+
+        .ranking-bar-hover:hover>div:nth-child(2),
+        .ranking-bar-activo>div:nth-child(2) {
+            transform: scaleY(1.05);
+            box-shadow: 0 4px 12px rgba(255, 102, 16, 0.3);
+        }
+
+        .ranking-tooltip {
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* Ajuste responsive para tooltips */
+        @media (max-width: 768px) {
+            .donut-tooltip {
+                left: auto;
+                right: 0;
+                top: auto;
+                bottom: 100%;
+                margin-bottom: 8px;
+            }
+
+            .ranking-tooltip {
+                min-width: 140px;
+            }
+        }

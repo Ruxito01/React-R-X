@@ -12,6 +12,8 @@ const Dashboard = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState(0);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [tooltipPodio, setTooltipPodio] = useState({ visible: false, index: null });
+  const [tooltipKm, setTooltipKm] = useState({ visible: false, index: null });
 
   // Estados para la carga de usuarios desde el backend
   const [usuarios, setUsuarios] = useState([]);
@@ -478,9 +480,9 @@ const Dashboard = () => {
 
         {/* SECCIÓN DERECHA: Gráficos */}
         <div className="right-section">
-          {/* Gráfico de Picos - Distancias por Viaje del Último Mes */}
-          <div className="chart-card">
-            <div className="chart-title">Km por viaje (último mes)</div>
+          {/* Grafico de Picos - Distancias por Viaje del Ultimo Mes */}
+          <div className="chart-card" id="grafica-usuarios-actividad">
+            <div className="chart-title">Km por viaje (ultimo mes)</div>
             <div className="peaks-chart" style={{ position: 'relative', padding: '1rem' }}>
               {loading ? (
                 <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
@@ -580,11 +582,31 @@ const Dashboard = () => {
                     ))}
                   </div>
                   {hoveredPoint && hoveredPoint.startsWith('viaje-') && (
-                    <div className="chart-tooltip">
+                    <div className="grafico-tooltip viaje-tooltip-usuario">
                       {(() => {
                         const idx = parseInt(hoveredPoint.split('-')[1]);
                         const v = selectedUser.viajesUltimoMes[idx];
-                        return `${v.nombre}: ${v.km.toFixed(1)} km`;
+                        const promedio = selectedUser.viajesUltimoMes.reduce((a, b) => a + b.km, 0) / selectedUser.viajesUltimoMes.length;
+                        return (
+                          <>
+                            <div className="tooltip-header">{v.nombre}</div>
+                            <div className="tooltip-row">
+                              <span>Distancia:</span>
+                              <strong>{v.km.toFixed(1)} km</strong>
+                            </div>
+                            <div className="tooltip-row">
+                              <span>Fecha:</span>
+                              <strong>{v.fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' })}</strong>
+                            </div>
+                            <div className="tooltip-row">
+                              <span>Estado:</span>
+                              <strong>{v.estado}</strong>
+                            </div>
+                            {v.km > promedio && (
+                              <div className="tooltip-badge">Sobre el promedio</div>
+                            )}
+                          </>
+                        );
                       })()}
                     </div>
                   )}
@@ -604,8 +626,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Top 3 Usuarios con Más Viajes */}
-          <div className="chart-card">
+          {/* Top 3 Usuarios con Mas Viajes */}
+          <div className="chart-card" id="grafica-usuarios-top">
             <div className="chart-title-bold">TOP 3 USUARIOS</div>
             <div style={{ padding: '1rem', position: 'relative' }}>
               {loading ? (
@@ -698,17 +720,24 @@ const Dashboard = () => {
                               {usuario.rutasMes} viajes
                             </div>
                             {/* Barra del podio */}
-                            <div style={{
-                              width: '55px',
-                              height: `${altura}px`,
-                              background: `linear-gradient(180deg, ${colores[i]} 0%, ${colores[i]}99 100%)`,
-                              borderRadius: '8px 8px 0 0',
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              justifyContent: 'center',
-                              paddingTop: '6px',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                            }}>
+                            <div 
+                              className={`podio-barra ${tooltipPodio.index === i ? 'podio-activo' : ''}`}
+                              style={{
+                                width: '55px',
+                                height: `${altura}px`,
+                                background: `linear-gradient(180deg, ${colores[i]} 0%, ${colores[i]}99 100%)`,
+                                borderRadius: '8px 8px 0 0',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'center',
+                                paddingTop: '6px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s'
+                              }}
+                              onMouseEnter={() => setTooltipPodio({ visible: true, index: i })}
+                              onMouseLeave={() => setTooltipPodio({ visible: false, index: null })}
+                            >
                               <span style={{ 
                                 fontSize: '1.3rem', 
                                 fontWeight: '800', 
@@ -718,6 +747,27 @@ const Dashboard = () => {
                                 {posiciones[i]}
                               </span>
                             </div>
+                            {/* Tooltip del podio */}
+                            {tooltipPodio.visible && tooltipPodio.index === i && (
+                              <div className="grafico-tooltip podio-tooltip">
+                                <div className="tooltip-header">{usuario.nombre}</div>
+                                <div className="tooltip-row">
+                                  <span>Viajes:</span>
+                                  <strong>{usuario.rutasMes}</strong>
+                                </div>
+                                <div className="tooltip-row">
+                                  <span>Km recorridos:</span>
+                                  <strong>{usuario.distancia} km</strong>
+                                </div>
+                                <div className="tooltip-row">
+                                  <span>Vehiculos:</span>
+                                  <strong>{usuario.vehiculos}</strong>
+                                </div>
+                                {posiciones[i] === '1' && (
+                                  <div className="tooltip-badge">Lider del mes</div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -754,8 +804,14 @@ const Dashboard = () => {
                     {top5Km.map((usuario, i) => {
                       const porcentaje = (usuario.distancia / maxKm) * 100;
                       const colores = ['#FF6610', '#FF8C42', '#FFA366', '#FFB88C', '#FFCEB3'];
-                      return (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        return (
+                        <div 
+                          key={i} 
+                          className={`top-km-row ${tooltipKm.index === i ? 'top-km-activo' : ''}`}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', padding: '4px', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }}
+                          onMouseEnter={() => setTooltipKm({ visible: true, index: i })}
+                          onMouseLeave={() => setTooltipKm({ visible: false, index: null })}
+                        >
                           {/* Posicion */}
                           <div style={{ 
                             width: '20px', 
@@ -796,6 +852,27 @@ const Dashboard = () => {
                           <div style={{ width: '45px', fontSize: '0.75rem', fontWeight: '700', color: '#333', textAlign: 'right' }}>
                             {usuario.distancia} km
                           </div>
+                          {/* Tooltip Km */}
+                          {tooltipKm.visible && tooltipKm.index === i && (
+                            <div className="grafico-tooltip km-tooltip">
+                              <div className="tooltip-header">{usuario.nombre}</div>
+                              <div className="tooltip-row">
+                                <span>Km totales:</span>
+                                <strong>{usuario.distancia} km</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Viajes:</span>
+                                <strong>{usuario.rutasMes}</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Promedio/viaje:</span>
+                                <strong>{usuario.rutasMes > 0 ? (usuario.distancia / usuario.rutasMes).toFixed(1) : 0} km</strong>
+                              </div>
+                              {i === 0 && (
+                                <div className="tooltip-badge">Mayor distancia</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

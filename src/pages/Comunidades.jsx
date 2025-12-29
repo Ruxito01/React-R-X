@@ -14,6 +14,10 @@ function Comunidades() {
   const [selectedCommunityIndex, setSelectedCommunityIndex] = useState(0);
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
+  // Estados para tooltips de graficas
+  const [tooltipDonut, setTooltipDonut] = useState({ visible: false, tipo: null });
+  const [tooltipRanking, setTooltipRanking] = useState({ visible: false, index: null });
+
   // Estado para ordenamiento
   const [ordenamiento, setOrdenamiento] = useState({ columna: 'miembros', direccion: 'desc' });
 
@@ -416,28 +420,100 @@ function Comunidades() {
                                     </div>
                                 </div>
                                 
-                                {/* Leyenda Derecha */}
+                                {/* Leyenda Derecha con interactividad */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-                                <div className="community-legend-item">
+                                <div 
+                                  className={`community-legend-item legend-interactivo ${tooltipDonut.tipo === 'pequenas' ? 'legend-activo' : ''}`}
+                                  onMouseEnter={() => setTooltipDonut({ visible: true, tipo: 'pequenas' })}
+                                  onMouseLeave={() => setTooltipDonut({ visible: false, tipo: null })}
+                                  style={{ cursor: 'pointer', position: 'relative', padding: '6px', borderRadius: '8px', transition: 'background 0.2s' }}
+                                >
                                     <div style={{ width: '14px', height: '14px', background: '#FFB74D', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}></div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <span className="community-legend-title">Pequeñas</span>
                                         <span className="community-legend-subtitle">&lt; 5 miembros ({peq})</span>
                                     </div>
+                                    {tooltipDonut.visible && tooltipDonut.tipo === 'pequenas' && (
+                                      <div className="grafico-tooltip donut-tooltip">
+                                        <div className="tooltip-header">Comunidades Pequeñas</div>
+                                        <div className="tooltip-row">
+                                          <span>Cantidad:</span>
+                                          <strong>{peq}</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Porcentaje:</span>
+                                          <strong>{((peq / total) * 100).toFixed(1)}%</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Rango:</span>
+                                          <strong>&lt; 5 miembros</strong>
+                                        </div>
+                                      </div>
+                                    )}
                                 </div>
-                                <div className="community-legend-item">
+                                <div 
+                                  className={`community-legend-item legend-interactivo ${tooltipDonut.tipo === 'medianas' ? 'legend-activo' : ''}`}
+                                  onMouseEnter={() => setTooltipDonut({ visible: true, tipo: 'medianas' })}
+                                  onMouseLeave={() => setTooltipDonut({ visible: false, tipo: null })}
+                                  style={{ cursor: 'pointer', position: 'relative', padding: '6px', borderRadius: '8px', transition: 'background 0.2s' }}
+                                >
                                     <div style={{ width: '14px', height: '14px', background: '#FB8C00', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}></div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <span className="community-legend-title">Medianas</span>
                                         <span className="community-legend-subtitle">5-20 miembros ({med})</span>
                                     </div>
+                                    {tooltipDonut.visible && tooltipDonut.tipo === 'medianas' && (
+                                      <div className="grafico-tooltip donut-tooltip">
+                                        <div className="tooltip-header">Comunidades Medianas</div>
+                                        <div className="tooltip-row">
+                                          <span>Cantidad:</span>
+                                          <strong>{med}</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Porcentaje:</span>
+                                          <strong>{((med / total) * 100).toFixed(1)}%</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Rango:</span>
+                                          <strong>5-20 miembros</strong>
+                                        </div>
+                                        {med === Math.max(peq, med, gra) && (
+                                          <div className="tooltip-badge">Tamaño mas comun</div>
+                                        )}
+                                      </div>
+                                    )}
                                 </div>
-                                <div className="community-legend-item">
+                                <div 
+                                  className={`community-legend-item legend-interactivo ${tooltipDonut.tipo === 'grandes' ? 'legend-activo' : ''}`}
+                                  onMouseEnter={() => setTooltipDonut({ visible: true, tipo: 'grandes' })}
+                                  onMouseLeave={() => setTooltipDonut({ visible: false, tipo: null })}
+                                  style={{ cursor: 'pointer', position: 'relative', padding: '6px', borderRadius: '8px', transition: 'background 0.2s' }}
+                                >
                                     <div style={{ width: '14px', height: '14px', background: '#E65100', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}></div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <span className="community-legend-title">Grandes</span>
                                         <span className="community-legend-subtitle">&gt; 20 miembros ({gra})</span>
                                     </div>
+                                    {tooltipDonut.visible && tooltipDonut.tipo === 'grandes' && (
+                                      <div className="grafico-tooltip donut-tooltip">
+                                        <div className="tooltip-header">Comunidades Grandes</div>
+                                        <div className="tooltip-row">
+                                          <span>Cantidad:</span>
+                                          <strong>{gra}</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Porcentaje:</span>
+                                          <strong>{((gra / total) * 100).toFixed(1)}%</strong>
+                                        </div>
+                                        <div className="tooltip-row">
+                                          <span>Rango:</span>
+                                          <strong>&gt; 20 miembros</strong>
+                                        </div>
+                                        {gra > 0 && (
+                                          <div className="tooltip-badge">Mayor alcance</div>
+                                        )}
+                                      </div>
+                                    )}
                                 </div>
                                 </div>
                             </div>
@@ -645,7 +721,13 @@ function Comunidades() {
                     return top5.map((comunidad, i) => {
                       const altura = (comunidad.cantidadMiembros / maxMiembros) * 100;
                       return (
-                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', width: '18%', justifyContent: 'flex-end' }}>
+                        <div 
+                          key={i} 
+                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', width: '18%', justifyContent: 'flex-end', position: 'relative' }}
+                          className={`ranking-bar-hover ${tooltipRanking.index === i ? 'ranking-bar-activo' : ''}`}
+                          onMouseEnter={() => setTooltipRanking({ visible: true, index: i })}
+                          onMouseLeave={() => setTooltipRanking({ visible: false, index: null })}
+                        >
                           {/* Valor encima de la barra */}
                           <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#333', marginBottom: '4px' }}>
                             {comunidad.cantidadMiembros}
@@ -658,8 +740,9 @@ function Comunidades() {
                             background: 'linear-gradient(180deg, #FF8C42 0%, #E65100 100%)',
                             borderRadius: '6px 6px 0 0',
                             position: 'relative',
-                            transition: 'height 0.5s ease',
-                            minHeight: '4px'
+                            transition: 'height 0.5s ease, transform 0.2s',
+                            minHeight: '4px',
+                            cursor: 'pointer'
                           }}>
                             {/* Efecto brillo */}
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.3)', borderRadius: '6px 6px 0 0' }}></div>
@@ -679,6 +762,28 @@ function Comunidades() {
                           }}>
                             {comunidad.nombre.substring(0, 8)}
                           </span>
+                          
+                          {/* Tooltip Ranking */}
+                          {tooltipRanking.visible && tooltipRanking.index === i && (
+                            <div className="grafico-tooltip ranking-tooltip">
+                              <div className="tooltip-header">{comunidad.nombre}</div>
+                              <div className="tooltip-row">
+                                <span>Posicion:</span>
+                                <strong>#{i + 1}</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Miembros:</span>
+                                <strong>{comunidad.cantidadMiembros}</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Estado:</span>
+                                <strong>{comunidad.estado}</strong>
+                              </div>
+                              {i === 0 && (
+                                <div className="tooltip-badge">Comunidad lider</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     });

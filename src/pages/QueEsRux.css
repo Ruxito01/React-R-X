@@ -1,0 +1,260 @@
+/* src/pages/QueEsRux.css */
+
+/* Contenedor principal de la pagina */
+.que-es-rux-container {
+    min-height: 100vh;
+    background-color: #000000;
+    /* Fondo negro puro para las líneas */
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Wrapper para el fondo Three.js - Fixed para que acompañe el scroll */
+.floating-lines-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+}
+
+/* === NAVBAR SIMPLE (Copiado para consistencia) === */
+.simple-navbar {
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    background: rgba(15, 15, 25, 0.7);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.simple-navbar.scrolled {
+    top: 15px;
+    background: rgba(10, 10, 20, 0.9);
+    padding: 10px 40px;
+    border-color: rgba(255, 102, 0, 0.3);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(255, 102, 0, 0.1);
+}
+
+.simple-navbar a {
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.3s ease;
+    position: relative;
+    letter-spacing: 0.5px;
+}
+
+.simple-navbar a:hover,
+.simple-navbar a.active {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.simple-navbar a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: #ff6600;
+    transition: width 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 2px;
+}
+
+.simple-navbar a:hover::after,
+.simple-navbar a.active::after {
+    width: 100%;
+    box-shadow: 0 0 10px #ff6600;
+}
+
+/* === SECCION INFO === */
+.info-section-page {
+    position: relative;
+    z-index: 1;
+    /* Contenido sobre el fondo */
+    padding: 120px 20px 120px;
+    /* Aumentado padding top para navbar */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 80px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(180deg, #ffffff 0%, #aaaaaa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 120px;
+    width: 100%;
+}
+
+.info-card {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+.info-card.reverse {
+    flex-direction: row-reverse;
+}
+
+.info-text {
+    flex: 1;
+    /* Estilos para legibilidad sobre fondo animado */
+    background: rgba(0, 0, 0, 0.6);
+    /* Fondo oscuro mas solido */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.info-text:hover {
+    background: rgba(0, 0, 0, 0.75);
+    border-color: rgba(255, 102, 0, 0.3);
+    transform: translateY(-5px);
+}
+
+.info-text h3 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    /* Mas peso */
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #ff8800, #ffdd00);
+    /* Mas brillante */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.info-text p {
+    font-size: 1.15rem;
+    /* Un poco mas grande */
+    line-height: 1.8;
+    color: #ffffff;
+    /* Blanco puro para maximo contraste */
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    /* Sombra fuerte */
+}
+
+.info-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* === MOCKUPS === */
+.mockup-img-container {
+    width: 100%;
+    max-width: 420px;
+    /* Aumentado IMPACTANTE */
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    /* Sin borde ni background para respetar la transparencia del PNG */
+    filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4));
+}
+
+.mockup-img-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* Un ligero borde radius si se desea, o dejar que el PNG mande */
+    border-radius: 20px;
+}
+
+.info-card:hover .mockup-img-container {
+    transform: translateY(-15px) scale(1.03);
+    filter: drop-shadow(0 25px 50px rgba(255, 102, 0, 0.15));
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+
+    .info-card,
+    .info-card.reverse {
+        flex-direction: column;
+        text-align: center;
+        gap: 40px;
+    }
+
+    .info-text h3 {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        margin-bottom: 50px;
+    }
+}
+
+@media (max-width: 768px) {
+    .simple-navbar {
+        width: 90%;
+        gap: 20px;
+        padding: 10px 20px;
+    }
+
+    .floating-lines-wrapper {
+        /* Opcional: ajustar rendimiento en movil */
+    }
+}
+
+/* === DOWNLOAD SECTION === */
+.download-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px 120px;
+    gap: 40px;
+    position: relative;
+    z-index: 10;
+    width: 100%;
+}
+
+.download-cta-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(90deg, #ffffff, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+}

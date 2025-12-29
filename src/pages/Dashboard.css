@@ -831,3 +831,128 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Tooltips para graficas - Dashboard Usuarios */
+.grafico-tooltip {
+    position: absolute;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    min-width: 160px;
+    animation: tooltipFadeIn 0.2s ease-out;
+    pointer-events: none;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tooltip-header {
+    font-weight: 700;
+    color: #FF6610;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+
+.tooltip-row span {
+    color: var(--text-secondary);
+}
+
+.tooltip-row strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.tooltip-badge {
+    background: linear-gradient(135deg, #FF6610, #ff8c42);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Tooltip viaje - posicion especifica */
+.viaje-tooltip-usuario {
+    top: 10px;
+    right: 10px;
+    min-width: 180px;
+}
+
+/* Tooltip podio */
+.podio-barra {
+    position: relative;
+}
+
+.podio-barra:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.podio-activo {
+    transform: scale(1.05);
+}
+
+.podio-tooltip {
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* Tooltip top km */
+.top-km-row {
+    position: relative;
+}
+
+.top-km-row:hover,
+.top-km-activo {
+    background: var(--bg-secondary);
+}
+
+.km-tooltip {
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* Ajuste responsive para tooltips */
+@media (max-width: 768px) {
+    .km-tooltip {
+        right: auto;
+        left: 50%;
+        top: auto;
+        bottom: 100%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+    }
+
+    .podio-tooltip {
+        min-width: 140px;
+    }
+}

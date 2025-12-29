@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './DashboardGeneral.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import AuthLoadingScreen from '../components/AuthLoadingScreen';
+import BotonPdfFlotante from '../components/BotonPdfFlotante';
 
 const DashboardGeneral = () => {
   const navigate = useNavigate();
@@ -34,6 +35,11 @@ const DashboardGeneral = () => {
 
   // Estado para ordenamiento de rutas
   const [ordenamiento, setOrdenamiento] = useState({ columna: 'fecha', direccion: 'desc' });
+
+  // Estados para tooltips de graficas
+  const [tooltipTacometro, setTooltipTacometro] = useState(false);
+  const [tooltipViaje, setTooltipViaje] = useState({ visible: false, index: null, x: 0, y: 0 });
+  const [tooltipVehiculo, setTooltipVehiculo] = useState({ visible: false, tipoId: null });
   
   // Funcion para cambiar ordenamiento
   const ordenarPor = (columna) => {
@@ -410,33 +416,58 @@ const DashboardGeneral = () => {
               <h2>Usuarios en Linea</h2>
             </div>
             <div className="card-scroll-area">
-              <div className="tacometro-container">
+              <div 
+                className="tacometro-container" 
+                id="grafica-general-tacometro"
+                onMouseEnter={() => setTooltipTacometro(true)}
+                onMouseLeave={() => setTooltipTacometro(false)}
+              >
                 {loading ? (
                   <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="skeleton skeleton-circle" style={{ width: '100px', height: '100px', borderRadius: '50%', borderBottom: 'transparent' }}></div>
                   </div>
                 ) : (
-                  <svg viewBox="0 0 200 120" className="tacometro-svg">
-                    {/* Arco de fondo */}
-                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e0e0e0" strokeWidth="12" strokeLinecap="round" />
-                    {/* Arco de progreso */}
-                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#tacometroGradient)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(usuariosEnLinea.length / Math.max(usuarios.length, 1)) * 251} 251`} className="tacometro-progress" />
-                    <defs>
-                      <linearGradient id="tacometroGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#FFB380" />
-                        <stop offset="100%" stopColor="#FF6610" />
-                      </linearGradient>
-                    </defs>
-                    <line x1="20" y1="100" x2="30" y2="100" stroke="#999" strokeWidth="2" />
-                    <line x1="180" y1="100" x2="170" y2="100" stroke="#999" strokeWidth="2" />
-                    <line x1="100" y1="20" x2="100" y2="30" stroke="#999" strokeWidth="2" />
-                    <text x="100" y="85" textAnchor="middle" className="tacometro-numero">
-                      {usuariosEnLinea.length}/{usuarios.length}
-                    </text>
-                    <text x="100" y="105" textAnchor="middle" className="tacometro-label">
-                      usuarios activos
-                    </text>
-                  </svg>
+                  <>
+                    <svg viewBox="0 0 200 120" className="tacometro-svg">
+                      {/* Arco de fondo */}
+                      <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e0e0e0" strokeWidth="12" strokeLinecap="round" />
+                      {/* Arco de progreso */}
+                      <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#tacometroGradient)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(usuariosEnLinea.length / Math.max(usuarios.length, 1)) * 251} 251`} className="tacometro-progress" />
+                      <defs>
+                        <linearGradient id="tacometroGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#FFB380" />
+                          <stop offset="100%" stopColor="#FF6610" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="20" y1="100" x2="30" y2="100" stroke="#999" strokeWidth="2" />
+                      <line x1="180" y1="100" x2="170" y2="100" stroke="#999" strokeWidth="2" />
+                      <line x1="100" y1="20" x2="100" y2="30" stroke="#999" strokeWidth="2" />
+                      <text x="100" y="85" textAnchor="middle" className="tacometro-numero">
+                        {usuariosEnLinea.length}/{usuarios.length}
+                      </text>
+                      <text x="100" y="105" textAnchor="middle" className="tacometro-label">
+                        usuarios activos
+                      </text>
+                    </svg>
+                    {/* Tooltip tacometro */}
+                    {tooltipTacometro && (
+                      <div className="grafico-tooltip tacometro-tooltip">
+                        <div className="tooltip-header">Usuarios en Linea</div>
+                        <div className="tooltip-row">
+                          <span>Activos:</span>
+                          <strong>{usuariosEnLinea.length}</strong>
+                        </div>
+                        <div className="tooltip-row">
+                          <span>Total registrados:</span>
+                          <strong>{usuarios.length}</strong>
+                        </div>
+                        <div className="tooltip-row">
+                          <span>Porcentaje:</span>
+                          <strong>{usuarios.length > 0 ? ((usuariosEnLinea.length / usuarios.length) * 100).toFixed(1) : 0}%</strong>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <div className="usuarios-lista">
@@ -532,10 +563,10 @@ const DashboardGeneral = () => {
                 )
               )}
 
-              {/* Gráfico de picos - Viajes por día */}
-              <div className="grafico-picos">
-                <h3 className="grafico-titulo">Viajes por día</h3>
-                <div className="grafico-container">
+              {/* Grafico de picos - Viajes por dia */}
+              <div className="grafico-picos" id="grafica-general-viajes">
+                <h3 className="grafico-titulo">Viajes por dia</h3>
+                <div className="grafico-container grafico-interactivo">
                   {(loading || loadingBackground) ? (
                     <div className="skeleton" style={{ width: '100%', height: '100px' }}></div>
                   ) : (
@@ -577,12 +608,35 @@ const DashboardGeneral = () => {
                     </svg>
                   )}
                   
+                  {/* Labels con hover para tooltip */}
                   <div className="grafico-labels">
                     {viajesPorDia.map((d, i) => (
-                      <div key={i} className="grafico-label">
+                      <div 
+                        key={i} 
+                        className={`grafico-label label-interactivo ${tooltipViaje.index === i ? 'label-activo' : ''}`}
+                        onMouseEnter={() => setTooltipViaje({ visible: true, index: i })}
+                        onMouseLeave={() => setTooltipViaje({ visible: false, index: null })}
+                      >
                         <span className="label-cantidad">{d.cantidad}</span>
                         <span className="label-dia">{d.dia}</span>
                         <span className="label-fecha">{d.fecha}</span>
+                        {/* Tooltip individual */}
+                        {tooltipViaje.visible && tooltipViaje.index === i && (
+                          <div className="grafico-tooltip viaje-tooltip">
+                            <div className="tooltip-header">{d.dia} {d.fecha}</div>
+                            <div className="tooltip-row">
+                              <span>Viajes:</span>
+                              <strong>{d.cantidad}</strong>
+                            </div>
+                            <div className="tooltip-row">
+                              <span>Promedio semanal:</span>
+                              <strong>{(viajesPorDia.reduce((a, b) => a + b.cantidad, 0) / 7).toFixed(1)}</strong>
+                            </div>
+                            {d.cantidad === Math.max(...viajesPorDia.map(x => x.cantidad)) && d.cantidad > 0 && (
+                              <div className="tooltip-badge">Dia mas activo</div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -683,7 +737,7 @@ const DashboardGeneral = () => {
               <h2>Tipos de Vehiculos</h2>
             </div>
             <div className="card-scroll-area">
-              <div className="tipos-chart">
+              <div className="tipos-chart" id="grafica-general-vehiculos">
                 {(loading || loadingBackground) ? (
                   [1, 2, 3].map(i => (
                     <div key={i} className="tipo-bar-wrapper">
@@ -696,8 +750,14 @@ const DashboardGeneral = () => {
                     tiposVehiculo.map(tipo => {
                       const count = getVehiculosCount(tipo.id);
                       const percentage = maxTipoCount > 0 ? (count / maxTipoCount) * 100 : 0;
+                      const porcentajeTotal = vehiculos.length > 0 ? ((count / vehiculos.length) * 100).toFixed(1) : 0;
                       return (
-                        <div key={tipo.id} className="tipo-bar-wrapper">
+                        <div 
+                          key={tipo.id} 
+                          className={`tipo-bar-wrapper tipo-interactivo ${tooltipVehiculo.tipoId === tipo.id ? 'tipo-activo' : ''}`}
+                          onMouseEnter={() => setTooltipVehiculo({ visible: true, tipoId: tipo.id })}
+                          onMouseLeave={() => setTooltipVehiculo({ visible: false, tipoId: null })}
+                        >
                           <span className="tipo-nombre">{tipo.nombre}</span>
                           <div className="tipo-bar-container">
                             <div 
@@ -706,6 +766,23 @@ const DashboardGeneral = () => {
                             ></div>
                             <span className="tipo-count">{count}</span>
                           </div>
+                          {/* Tooltip vehiculo */}
+                          {tooltipVehiculo.visible && tooltipVehiculo.tipoId === tipo.id && (
+                            <div className="grafico-tooltip vehiculo-tooltip">
+                              <div className="tooltip-header">{tipo.nombre}</div>
+                              <div className="tooltip-row">
+                                <span>Cantidad:</span>
+                                <strong>{count} vehiculos</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Del total:</span>
+                                <strong>{porcentajeTotal}%</strong>
+                              </div>
+                              {count === Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.id))) && count > 0 && (
+                                <div className="tooltip-badge">Tipo mas popular</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })
@@ -718,6 +795,9 @@ const DashboardGeneral = () => {
           </div>
         </div>
       </div>
+
+      {/* Boton flotante para exportar PDF */}
+      <BotonPdfFlotante />
     </div>
   );
 };

@@ -24,6 +24,11 @@ const Vehiculos = () => {
   const [tipoFiltro, setTipoFiltro] = useState('todos'); // todos, alias, tipo, propietario
   const [valorFiltro, setValorFiltro] = useState('');
 
+  // Estados para tooltips de graficas
+  const [tooltipTipo, setTooltipTipo] = useState({ visible: false, index: null });
+  const [tooltipMarca, setTooltipMarca] = useState({ visible: false, index: null });
+  const [tooltipPodio, setTooltipPodio] = useState({ visible: false, posicion: null });
+
   // Scroll to top al montar
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -586,7 +591,7 @@ const Vehiculos = () => {
           {/* SECCION DERECHA: Graficos */}
           <div className="right-section">
             {/* Grafico de Barras - Distribucion por Tipo */}
-            <div className="chart-card">
+            <div className="chart-card" id="grafica-vehiculos-distribucion">
               <div className="chart-title">Distribucion por Tipo de Vehiculo</div>
               <div className="horizontal-bars-chart" style={{ position: 'relative', padding: '20px 15px' }}>
                 {loading ? (
@@ -597,7 +602,13 @@ const Vehiculos = () => {
                       const porcentaje = (cantidad / totalParaDistribucion) * 100;
                       const colores = ['#FF6610', '#FF8844', '#FFB380', '#FFD4B8', '#FFE8D6'];
                       return (
-                        <div key={tipo} style={{ position: 'relative' }}>
+                        <div 
+                          key={tipo} 
+                          style={{ position: 'relative' }}
+                          className={`tipo-bar-hover ${tooltipTipo.index === index ? 'tipo-bar-activo' : ''}`}
+                          onMouseEnter={() => setTooltipTipo({ visible: true, index })}
+                          onMouseLeave={() => setTooltipTipo({ visible: false, index: null })}
+                        >
                           <div style={{ 
                             fontSize: '12px', 
                             fontWeight: '600', 
@@ -607,7 +618,7 @@ const Vehiculos = () => {
                             justifyContent: 'space-between'
                           }}>
                             <span>{tipo}</span>
-                            <span style={{ color: colores[index] }}>{cantidad} ({porcentaje.toFixed(0)}%)</span>
+                            <span style={{ color: colores[index % colores.length] }}>{cantidad} ({porcentaje.toFixed(0)}%)</span>
                           </div>
                           <div style={{ 
                             width: '100%', 
@@ -619,11 +630,28 @@ const Vehiculos = () => {
                             <div style={{ 
                               width: `${porcentaje}%`, 
                               height: '100%',
-                              background: `linear-gradient(90deg, ${colores[index]} 0%, ${colores[index]}cc 100%)`,
+                              background: `linear-gradient(90deg, ${colores[index % colores.length]} 0%, ${colores[index % colores.length]}cc 100%)`,
                               borderRadius: '8px',
                               transition: 'all 0.3s ease'
                             }} />
                           </div>
+                          {/* Tooltip tipo */}
+                          {tooltipTipo.visible && tooltipTipo.index === index && (
+                            <div className="grafico-tooltip tipo-tooltip">
+                              <div className="tooltip-header">{tipo}</div>
+                              <div className="tooltip-row">
+                                <span>Cantidad:</span>
+                                <strong>{cantidad} vehiculos</strong>
+                              </div>
+                              <div className="tooltip-row">
+                                <span>Porcentaje:</span>
+                                <strong>{porcentaje.toFixed(1)}%</strong>
+                              </div>
+                              {index === 0 && (
+                                <div className="tooltip-badge">Tipo mas comun</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -633,7 +661,7 @@ const Vehiculos = () => {
             </div>
 
             {/* Grafico: Vehiculos por Marca - Barras simples */}
-            <div className="chart-card">
+            <div className="chart-card" id="grafica-vehiculos-podio">
               <div className="chart-title-bold">VEHICULOS POR MARCA</div>
               <div style={{ padding: '1rem', maxHeight: '290px', overflowY: 'auto' }}>
                 {loading ? (
@@ -647,7 +675,13 @@ const Vehiculos = () => {
                       return relacionMarcaModeloTipo.map((item, i) => {
                         const porcentaje = (item.total / maxTotal) * 100;
                         return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div 
+                            key={i} 
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', padding: '4px', borderRadius: '6px', cursor: 'pointer', transition: 'background 0.2s' }}
+                            className={`marca-bar-hover ${tooltipMarca.index === i ? 'marca-bar-activo' : ''}`}
+                            onMouseEnter={() => setTooltipMarca({ visible: true, index: i })}
+                            onMouseLeave={() => setTooltipMarca({ visible: false, index: null })}
+                          >
                             {/* Nombre de marca */}
                             <div style={{ 
                               width: '80px', 
@@ -686,6 +720,27 @@ const Vehiculos = () => {
                                 </span>
                               </div>
                             </div>
+                            {/* Tooltip marca */}
+                            {tooltipMarca.visible && tooltipMarca.index === i && (
+                              <div className="grafico-tooltip marca-tooltip">
+                                <div className="tooltip-header">{item.marca}</div>
+                                <div className="tooltip-row">
+                                  <span>Vehiculos:</span>
+                                  <strong>{item.total}</strong>
+                                </div>
+                                <div className="tooltip-row">
+                                  <span>Modelos:</span>
+                                  <strong>{item.cantidadModelos}</strong>
+                                </div>
+                                <div className="tooltip-row">
+                                  <span>Tipos:</span>
+                                  <strong>{item.cantidadTipos}</strong>
+                                </div>
+                                {i === 0 && (
+                                  <div className="tooltip-badge">Marca mas popular</div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       });

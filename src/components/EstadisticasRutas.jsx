@@ -26,8 +26,8 @@ export const GraficoTopRutas = ({ rutas = [], viajes = [] }) => {
   }, [rutas, viajes]);
 
   return (
-    <div className="grafico-card individual">
-      <h4>Top Rutas Más Activas</h4>
+    <div className="grafico-card individual" id="grafica-rutas-top">
+      <h4>Top Rutas Mas Activas</h4>
       <div className="grafico-wrapper mini">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
@@ -65,7 +65,7 @@ export const GraficoTendencia = ({ viajes = [] }) => {
   }, [viajes]);
 
   return (
-    <div className="grafico-card individual">
+    <div className="grafico-card individual" id="grafica-rutas-tendencia">
       <h4>Tendencia de Viajes</h4>
       <div className="grafico-wrapper mini">
         <ResponsiveContainer width="100%" height="100%">
@@ -115,7 +115,7 @@ export const GraficoEstado = ({ viajes = [] }) => {
   }, [viajes]);
 
   return (
-    <div className="grafico-card individual">
+    <div className="grafico-card individual" id="grafica-rutas-estado">
       <h4>Estado de Viajes</h4>
       <div className="grafico-wrapper mini">
         <ResponsiveContainer width="100%" height="100%">

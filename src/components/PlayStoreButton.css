@@ -1,0 +1,399 @@
+/* src/components/PlayStoreButton.css */
+
+/* === BOTON ANIMADO PLAY STORE === */
+.play-store-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b0e 50%, #1a1a2e 100%);
+    background-size: 200% 200%;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    text-decoration: none;
+    overflow: hidden;
+    z-index: 100;
+    cursor: pointer;
+    box-shadow:
+        0 0 20px rgba(255, 102, 0, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation:
+        gradientShift 3s ease infinite,
+        buttonPulse 2s ease-in-out infinite,
+        borderGlow 2s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    /* Default position relative, override if absolute needed */
+}
+
+.play-store-button::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #ff6600, #ffcc00, #ff3300, #ff6600);
+    background-size: 400% 400%;
+    border-radius: 18px;
+    z-index: -1;
+    animation: rainbowBorder 4s linear infinite;
+    opacity: 0.8;
+}
+
+.play-store-button::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b0e 100%);
+    border-radius: 14px;
+    z-index: -1;
+}
+
+.play-store-button:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow:
+        0 0 40px rgba(255, 102, 0, 0.5),
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.play-store-button:hover .play-icon {
+    animation: iconBounce 0.6s ease;
+    filter: drop-shadow(0 0 10px currentColor);
+}
+
+.play-store-button:hover .button-shine {
+    animation: shineEffect 0.8s ease forwards;
+}
+
+.play-store-button:hover .button-particles span {
+    animation: particleFloat 1s ease-out forwards;
+}
+
+/* Icono de Play Store */
+.play-icon {
+    width: 36px;
+    height: 36px;
+    color: #ff6600;
+    filter: drop-shadow(0 0 5px rgba(255, 102, 0, 0.5));
+    transition: all 0.3s ease;
+}
+
+/* Contenido del texto */
+.button-text-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.small-text {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.main-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffffff, #ff6600, #ffffff);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textShimmer 2s ease infinite;
+}
+
+/* Efecto de brillo deslizante */
+.button-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 102, 0, 0.3),
+            transparent);
+    transform: skewX(-25deg);
+}
+
+/* Contenedor de particulas */
+.button-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.button-particles span {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(135deg, #ff6600, #ffcc00);
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(1px);
+}
+
+.button-particles span:nth-child(1) {
+    left: 20%;
+    bottom: 10px;
+}
+
+.button-particles span:nth-child(2) {
+    left: 40%;
+    bottom: 10px;
+    animation-delay: 0.1s;
+}
+
+.button-particles span:nth-child(3) {
+    left: 60%;
+    bottom: 10px;
+    animation-delay: 0.2s;
+}
+
+.button-particles span:nth-child(4) {
+    left: 80%;
+    bottom: 10px;
+    animation-delay: 0.3s;
+}
+
+.button-particles span:nth-child(5) {
+    left: 50%;
+    bottom: 10px;
+    animation-delay: 0.15s;
+}
+
+/* === ANIMACIONES === */
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes buttonPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(255, 102, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 35px rgba(255, 102, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+}
+
+@keyframes borderGlow {
+
+    0%,
+    100% {
+        border-color: rgba(255, 102, 0, 0.2);
+    }
+
+    50% {
+        border-color: rgba(255, 102, 0, 0.5);
+    }
+}
+
+@keyframes rainbowBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 400% 50%;
+    }
+}
+
+@keyframes textShimmer {
+
+    0%,
+    100% {
+        background-position: -200% 0;
+    }
+
+    50% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes shineEffect {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+@keyframes iconBounce {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        transform: scale(1.2) rotate(-10deg);
+    }
+
+    50% {
+        transform: scale(0.9) rotate(10deg);
+    }
+
+    75% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+}
+
+@keyframes particleFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.3);
+    }
+}
+
+/* === MODAL PROXIMAMENTE === */
+.proximamente-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+.proximamente-modal {
+    position: relative;
+    background: linear-gradient(135deg, rgba(30, 15, 5, 0.95), rgba(45, 20, 10, 0.95));
+    border: 2px solid rgba(255, 102, 0, 0.3);
+    border-radius: 24px;
+    padding: 40px 50px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow:
+        0 0 60px rgba(255, 102, 0, 0.3),
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.modal-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 102, 0, 0.15) 0%, transparent 60%);
+    animation: glowRotate 6s linear infinite;
+    pointer-events: none;
+}
+
+.modal-icon {
+    width: 80px;
+    height: 80px;
+    color: #ff6600;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 20px rgba(255, 102, 0, 0.6));
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.proximamente-modal h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffffff, #ff6600, #ffcc00);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textShimmer 3s ease infinite;
+    margin: 0 0 12px 0;
+}
+
+.proximamente-modal p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 30px 0;
+    line-height: 1.5;
+}
+
+.modal-close-btn {
+    background: linear-gradient(135deg, #ff6600 0%, #ff8800 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(255, 102, 0, 0.4);
+}
+
+.modal-close-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(255, 102, 0, 0.6);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes glowRotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes iconPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
