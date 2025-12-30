@@ -93,6 +93,8 @@
     /* Aumentado padding top para navbar */
     max-width: 1200px;
     margin: 0 auto;
+    pointer-events: none;
+    /* Permite hover al fondo */
 }
 
 .section-title {
@@ -138,6 +140,8 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
+    pointer-events: auto;
+    /* Elementos interactivos */
 }
 
 .info-text:hover {
@@ -244,6 +248,13 @@
     position: relative;
     z-index: 10;
     width: 100%;
+    pointer-events: none;
+    /* Permite hover al fondo */
+}
+
+.download-section>* {
+    pointer-events: auto;
+    /* Elementos interactivos */
 }
 
 .download-cta-text {

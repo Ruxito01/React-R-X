@@ -367,8 +367,27 @@ const Rutas = () => {
     setExpandirDetallesViaje(true);
     
     // Si el viaje tiene ruta, SIEMPRE actualizar el mapa (incluso si es la misma ruta)
+    // Si el viaje tiene ruta, SIEMPRE actualizar el mapa e intentar sincronizar con tabla de rutas
     if (viaje.ruta) {
-       setRutaSeleccionada(viaje.ruta);
+        let rutaParaSeleccionar = viaje.ruta;
+
+        // Intentar encontrar la ruta en la lista cargada para tener la referencia correcta y hacer scroll
+        const rutaEnLista = rutas.find(r => r.id === viaje.ruta.id);
+        
+        if (rutaEnLista) {
+            rutaParaSeleccionar = rutaEnLista;
+            
+            // Auto-scroll visual a la ruta en la tabla de la izquierda
+            setTimeout(() => {
+                const element = document.getElementById(`ruta-row-${viaje.ruta.id}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Opcional: Destello visual o borde momentaneo
+                }
+            }, 100);
+        }
+
+       setRutaSeleccionada(rutaParaSeleccionar);
        
        // Centrar mapa
        if (viaje.ruta.latitudInicio && viaje.ruta.longitudInicio) {
@@ -745,6 +764,7 @@ const Rutas = () => {
                     ) : (
                       rutasFiltradas.map((ruta, index) => (
                         <tr 
+                          id={`ruta-row-${ruta.id}`}
                           key={ruta.id} 
                           className={`${index % 2 === 0 ? 'route-row-light' : 'route-row-white'} ${rutaSeleccionada?.id === ruta.id ? 'selected-route-row' : ''}`}
                           onClick={() => seleccionarRuta(ruta)}

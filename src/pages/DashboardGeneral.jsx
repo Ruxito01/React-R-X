@@ -155,90 +155,105 @@ const DashboardGeneral = () => {
     procesarAuthGoogle();
   }, [navigate]);
 
-  // Funcion para cargar datos de forma progresiva
-  // Carga rapida primero (usuarios, comunidades, tipos), luego datos lentos en background
+  // Funcion para cargar datos optimizada (Paralelismo Total)
   const fetchData = async (mostrarLoading = true) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     
+    // Si es carga inicial o manual, mostrar estados de carga
+    if (mostrarLoading) {
+      if (usuarios.length === 0) setLoading(true);
+      setLoadingBackground(true);
+    }
+
     try {
-      if (mostrarLoading) {
-        if (usuarios.length === 0) setLoading(true);
-        // Si vamos a cargar datos, asumimos que background también carga
-        setLoadingBackground(true);
-      }
-      
-      // FASE 1: Cargar datos rapidos primero (< 1 seg)
-      const [usuariosRes, comunidadesRes, tiposRes] = await Promise.all([
-        fetch(`${apiUrl}/usuario`),
-        fetch(`${apiUrl}/comunidad`),
-        fetch(`${apiUrl}/tipovehiculo`)
-      ]);
+      // Definir promesas Base (Criticas para UI principal)
+      const pUsuarios = fetch(`${apiUrl}/usuario`).then(res => res.ok ? res.json() : []);
+      const pComunidades = fetch(`${apiUrl}/comunidad`).then(res => res.ok ? res.json() : []);
+      const pTipos = fetch(`${apiUrl}/tipovehiculo`).then(res => res.ok ? res.json() : []);
 
-      if (!usuariosRes.ok || !comunidadesRes.ok || !tiposRes.ok) {
-        throw new Error('Error al cargar datos basicos');
-      }
+      // Definir promesas Background (Datos pesados o secundarios)
+      // AHORA OPTIMIZADOS: Solo traemos lo necesario del backend
+      const pViajes = fetch(`${apiUrl}/viaje/recientes?dias=7`).then(res => res.ok ? res.json() : []);
+      const pVehiculos = fetch(`${apiUrl}/vehiculo/conteo-tipos`).then(res => res.ok ? res.json() : []);
 
-      const [usuariosData, comunidadesData, tiposData] = await Promise.all([
-        usuariosRes.json(),
-        comunidadesRes.json(),
-        tiposRes.json()
-      ]);
-
-      // Mostrar datos basicos inmediatamente
-      setUsuarios(usuariosData);
-      setTiposVehiculo(tiposData);
-      setLoading(false); // Quitar loading principal aqui
-      
-      // Ocultar pantalla de carga de autenticacion
-      if (sessionStorage.getItem('show_loading_screen') === 'true') {
-        sessionStorage.removeItem('show_loading_screen');
-        setMostrarLoadingScreen(false);
-      }
-
-      // FASE 2: Cargar miembros de comunidades en paralelo
-      const comunidadesConMiembros = await Promise.all(
-        comunidadesData.map(async (comunidad) => {
-          try {
-            const miembrosRes = await fetch(`${apiUrl}/comunidad/${comunidad.id}/miembros`);
-            if (miembrosRes.ok) {
-              const miembrosData = await miembrosRes.json();
-              return { ...comunidad, miembros: miembrosData };
-            }
-          } catch (e) {
-            console.error(`Error cargando miembros de comunidad ${comunidad.id}:`, e);
+      // --- GRUPO 1: Datos Base (Usuarios, Tipos, Lista Comunidades) ---
+      // Se ejecutan y desbloquean setLoading lo antes posible
+      const promesaBase = Promise.all([pUsuarios, pComunidades, pTipos])
+        .then(([usuariosData, comunidadesData, tiposData]) => {
+          setUsuarios(usuariosData);
+          setTiposVehiculo(tiposData);
+          
+          // EVITAR PARPADEO: Solo actualizar la lista base parcial si es carga inicial.
+          // Si es un refresh automatico, esperamos a tener los miembros para no mostrar "0 miembros" momentaneamente.
+          if (mostrarLoading) {
+            setComunidades(comunidadesData);
           }
-          return { ...comunidad, miembros: [] };
+           
+          setLoading(false); // Desbloquear UI principal
+
+          // Ocultar pantalla de carga auth si sigue activa
+          if (sessionStorage.getItem('show_loading_screen') === 'true') {
+            sessionStorage.removeItem('show_loading_screen');
+            setMostrarLoadingScreen(false);
+          }
+
+          // Iniciar carga de detalles de comunidad (miembros) en background
+          // NO bloquea setLoading ni setLoadingBackground
+          if (comunidadesData.length > 0) {
+            Promise.all(comunidadesData.map(async (c) => {
+              try {
+                const res = await fetch(`${apiUrl}/comunidad/${c.id}/miembros`);
+                const miembros = res.ok ? await res.json() : [];
+                return { ...c, miembros };
+              } catch {
+                return { ...c, miembros: [] };
+              }
+            })).then(comunidadesCompletas => {
+              setComunidades(comunidadesCompletas);
+            });
+          }
         })
-      );
-      setComunidades(comunidadesConMiembros);
+        .catch(err => {
+          console.error('Error en datos base:', err);
+          setError('Error cargando datos principales');
+          setLoading(false);
+        });
 
-      // FASE 3: Cargar datos lentos en background (viajes y vehiculos)
-      // No bloqueamos la UI, se actualizan cuando esten listos
-      Promise.all([
-        fetch(`${apiUrl}/viaje`).then(res => res.ok ? res.json() : []),
-        fetch(`${apiUrl}/vehiculo`).then(res => res.ok ? res.json() : [])
-      ]).then(([viajesData, vehiculosData]) => {
-        setViajes(viajesData);
-        setVehiculos(vehiculosData);
-        setUltimaActualizacion(new Date());
-      }).catch(err => {
-        console.error('Error cargando viajes/vehiculos:', err);
-      }).finally(() => {
-        setLoadingBackground(false); // Datos background listos
-      });
+      // --- GRUPO 2: Datos Background (Viajes, Vehiculos) ---
+      // Se ejecutan en paralelo al Grupo 1, no esperan a nadie
+      const promesaBackground = Promise.all([pViajes, pVehiculos])
+        .then(([viajesData, vehiculosData]) => {
+          setViajes(viajesData);
+          setVehiculos(vehiculosData); // Ahora es [{tipo: "Sedan", cantidad: 10}, ...]
+          setUltimaActualizacion(new Date());
+        })
+        .catch(err => console.error('Error viajes/vehiculos:', err))
+        .finally(() => {
+          setLoadingBackground(false); // Desbloquear UI secundaria
+        });
 
-      setError(null);
+      // Esperar a que ambas ramas principales inicien (await aqui espera a que los .then internos terminen)
+      await Promise.all([promesaBase, promesaBackground]);
       
     } catch (err) {
-      console.error('Error:', err);
-      setError(err.message);
-      // Ocultar pantalla de carga en caso de error tambien
-      if (sessionStorage.getItem('show_loading_screen') === 'true') {
-        sessionStorage.removeItem('show_loading_screen');
-        setMostrarLoadingScreen(false);
-      }
+      console.error('Error global fetchData:', err);
+      // Fallback para quitar loadings en caso de error catastrofico
       setLoading(false);
       setLoadingBackground(false);
+    }
+  };
+
+  // Funcion para actualizar solo usuarios (rapida, cada 2 segundos)
+  const fetchUsuariosRapido = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    try {
+      const res = await fetch(`${apiUrl}/usuario`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsuarios(data);
+      }
+    } catch (err) {
+      console.error('Error actualizando usuarios:', err);
     }
   };
 
@@ -249,30 +264,32 @@ const DashboardGeneral = () => {
     
     fetchData(true); // Mostrar loading la primera vez
 
-    // Auto-refresh cada 5 segundos
-    const intervalId = setInterval(() => {
+    // Auto-refresh rapido para usuarios (cada 2 segundos)
+    const intervalUsuarios = setInterval(() => {
+      fetchUsuariosRapido();
+    }, 2000);
+
+    // Auto-refresh completo cada 5 segundos (rutas, comunidades, vehiculos)
+    const intervalCompleto = setInterval(() => {
       fetchData(false); // background update
     }, 5000);
 
-    // Limpiar intervalo al desmontar
-    return () => clearInterval(intervalId);
+    // Limpiar intervalos al desmontar
+    return () => {
+      clearInterval(intervalUsuarios);
+      clearInterval(intervalCompleto);
+    };
   }, [authProcesada]);
 
-  // Calcular usuarios en linea (ultimaActividad en ultimos 30 segundos)
+  // Calcular usuarios en linea (ultimaActividad en ultimos 15 segundos para mayor reactividad)
   const usuariosEnLinea = usuarios.filter(u => {
     if (!u.ultimaActividad) return false;
-    const hace30Seg = new Date(Date.now() - 30 * 1000);
-    return new Date(u.ultimaActividad) > hace30Seg;
+    const hace15Seg = new Date(Date.now() - 15 * 1000);
+    return new Date(u.ultimaActividad) > hace15Seg;
   });
 
-  // Filtrar y ordenar viajes de los ultimos 7 dias
-  const hace7Dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const viajesRecientes = viajes
-    .filter(v => {
-      const fecha = new Date(v.fechaProgramada || v.fechaCreacion);
-      return fecha > hace7Dias;
-    })
-    .sort((a, b) => {
+  // Filtrar y ordenar viajes (AHORA SOLO ORDENAMOS, YA VIENEN FILTRADOS DEL BACKEND)
+  const viajesRecientes = [...viajes].sort((a, b) => { // Clonar para no mutar estado
       const { columna, direccion } = ordenamiento;
       let valorA, valorB;
       
@@ -333,13 +350,18 @@ const DashboardGeneral = () => {
   const viajesPorDia = obtenerViajesPorDia();
   const maxViajesDia = Math.max(...viajesPorDia.map(d => d.cantidad), 1);
 
-  // Calcular conteo de vehiculos por tipo
-  const getVehiculosCount = (tipoId) => {
-    return vehiculos.filter(v => v.tipoVehiculo?.id === tipoId && v.estado === 'en_posesion').length;
+  // Calcular conteo de vehiculos por tipo (AHORA BUSCAMOS EN EL MAPA DE CONTEOS)
+  const getVehiculosCount = (nombreTipo) => {
+    // vehiculos es ahora [{tipo: 'Sedan', cantidad: 5}, ...]
+    const encontrado = vehiculos.find(v => v.tipo === nombreTipo);
+    return encontrado ? encontrado.cantidad : 0;
   };
+  
+  // Calcular total de vehiculos desde los conteos
+  const totalVehiculos = vehiculos.reduce((acc, curr) => acc + (parseInt(curr.cantidad) || 0), 0);
 
   // Calcular max para grafico de barras
-  const maxTipoCount = Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.id)), 1);
+  const maxTipoCount = Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.nombre)), 1);
 
   // Mostrar pantalla de carga si viene de login con Google
   if (mostrarLoadingScreen) {
@@ -399,7 +421,7 @@ const DashboardGeneral = () => {
           <div className="stat-icon icon-vehicles">🚗</div>
           <div className="stat-info">
             <span className="stat-value">
-              {(loading || loadingBackground) ? <span className="skeleton skeleton-card-value"></span> : vehiculos.length}
+              {(loading || loadingBackground) ? <span className="skeleton skeleton-card-value"></span> : totalVehiculos}
             </span>
             <span className="stat-label">Vehículos</span>
           </div>
@@ -412,7 +434,7 @@ const DashboardGeneral = () => {
           {/* Usuarios en linea */}
           <div className="dashboard-card usuarios-online">
             <div className="card-header">
-              <span className="card-icon">🟢</span>
+              <span className="card-icon">👥</span>
               <h2>Usuarios en Linea</h2>
             </div>
             <div className="card-scroll-area">
@@ -748,9 +770,9 @@ const DashboardGeneral = () => {
                 ) : (
                   tiposVehiculo.length > 0 ? (
                     tiposVehiculo.map(tipo => {
-                      const count = getVehiculosCount(tipo.id);
+                      const count = getVehiculosCount(tipo.nombre);
                       const percentage = maxTipoCount > 0 ? (count / maxTipoCount) * 100 : 0;
-                      const porcentajeTotal = vehiculos.length > 0 ? ((count / vehiculos.length) * 100).toFixed(1) : 0;
+                      const porcentajeTotal = totalVehiculos > 0 ? ((count / totalVehiculos) * 100).toFixed(1) : 0;
                       return (
                         <div 
                           key={tipo.id} 
@@ -778,7 +800,7 @@ const DashboardGeneral = () => {
                                 <span>Del total:</span>
                                 <strong>{porcentajeTotal}%</strong>
                               </div>
-                              {count === Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.id))) && count > 0 && (
+                              {count === Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.nombre))) && count > 0 && (
                                 <div className="tooltip-badge">Tipo mas popular</div>
                               )}
                             </div>

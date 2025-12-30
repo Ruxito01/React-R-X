@@ -47,6 +47,11 @@ const AdminUsuarios = () => {
     const [mapCenter, setMapCenter] = useState({ lat: -0.180653, lng: -78.467834 });
     const [directionsResponse, setDirectionsResponse] = useState(null);
 
+    // Estados para galeria de fotos
+    const [fotosUsuario, setFotosUsuario] = useState([]);
+    const [cargandoFotos, setCargandoFotos] = useState(false);
+    const [fotoLightbox, setFotoLightbox] = useState(null);
+
     // ... (Mantener lógica de carga de usuarios intacta, omitida por brevedad en reemplazo pero NO eliminar) ...
     // NOTA: Para este replace solo reemplazamos la parte superior y lógica nueva del mapa, conservando el medio.
     // Usaremos MultiReplace si no calza, pero replace_file_content permite reemplazar bloques. 
@@ -257,6 +262,35 @@ const AdminUsuarios = () => {
         setViewMode('list');
         setSelectedItem(null);
         setDirectionsResponse(null);
+        setFotosUsuario([]);
+        setFotoLightbox(null);
+    };
+
+    // Cargar fotos del usuario
+    const cargarFotosUsuario = async (usuarioId) => {
+        setCargandoFotos(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/foto-usuario/usuario/${usuarioId}`);
+            if (res.ok) {
+                const fotos = await res.json();
+                setFotosUsuario(fotos);
+            } else {
+                setFotosUsuario([]);
+            }
+        } catch (err) {
+            console.error('Error cargando fotos:', err);
+            setFotosUsuario([]);
+        } finally {
+            setCargandoFotos(false);
+        }
+    };
+
+    // Manejar cambio de pestaña a fotos
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        if (tab === 'fotos' && usuarioSeleccionado && fotosUsuario.length === 0) {
+            cargarFotosUsuario(usuarioSeleccionado.id);
+        }
     };
 
     // Sub-componentes para vistas detalladas
@@ -744,19 +778,25 @@ const AdminUsuarios = () => {
                             <div className="profile-tabs">
                                 <button 
                                     className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('info')}
+                                    onClick={() => handleTabChange('info')}
                                 >
-                                    Información
+                                    Informacion
+                                </button>
+                                <button 
+                                    className={`tab-btn ${activeTab === 'fotos' ? 'active' : ''}`}
+                                    onClick={() => handleTabChange('fotos')}
+                                >
+                                    Fotos
                                 </button>
                                 <button 
                                     className={`tab-btn ${activeTab === 'rutas' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('rutas')}
+                                    onClick={() => handleTabChange('rutas')}
                                 >
                                     Rutas Creadas
                                 </button>
                                 <button 
                                     className={`tab-btn ${activeTab === 'viajes' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('viajes')}
+                                    onClick={() => handleTabChange('viajes')}
                                 >
                                     Viajes
                                 </button>
@@ -793,6 +833,83 @@ const AdminUsuarios = () => {
                                             <h4>Rol</h4>
                                             <p>{usuarioSeleccionado.rol || 'Usuario'}</p>
                                         </div>
+                                    </div>
+                                )}
+
+                                {/* Pestana Fotos - Galeria estilo red social */}
+                                {activeTab === 'fotos' && (
+                                    <div className="gallery-container">
+                                        {cargandoFotos ? (
+                                            <div className="gallery-loading">
+                                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                                    <div key={i} className="gallery-skeleton"></div>
+                                                ))}
+                                            </div>
+                                        ) : fotosUsuario.length > 0 ? (
+                                            <>
+                                                <div className="gallery-grid">
+                                                    {fotosUsuario.map((foto, index) => (
+                                                        <div 
+                                                            key={foto.id} 
+                                                            className="gallery-item"
+                                                            style={{ animationDelay: `${index * 0.08}s` }}
+                                                            onClick={() => setFotoLightbox(foto)}
+                                                        >
+                                                            <img src={foto.urlFoto} alt={`Foto ${index + 1}`} />
+                                                            <div className="gallery-overlay">
+                                                                <div className="gallery-date">
+                                                                    {foto.fechaSubida ? new Date(foto.fechaSubida).toLocaleDateString() : ''}
+                                                                </div>
+                                                                <div className="gallery-zoom-icon">
+                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                        <circle cx="11" cy="11" r="8"/>
+                                                                        <path d="M21 21l-4.35-4.35"/>
+                                                                        <path d="M11 8v6M8 11h6"/>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Lightbox Modal */}
+                                                {fotoLightbox && (
+                                                    <div className="photo-lightbox" onClick={() => setFotoLightbox(null)}>
+                                                        <div className="lightbox-content" onClick={e => e.stopPropagation()}>
+                                                            <button className="lightbox-close" onClick={() => setFotoLightbox(null)}>
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                            <img src={fotoLightbox.urlFoto} alt="Foto ampliada" className="lightbox-image" />
+                                                            <div className="lightbox-info">
+                                                                <span className="lightbox-user">
+                                                                    {usuarioSeleccionado?.nombre} {usuarioSeleccionado?.apellido}
+                                                                </span>
+                                                                {fotoLightbox.fechaSubida && (
+                                                                    <span className="lightbox-date">
+                                                                        {new Date(fotoLightbox.fechaSubida).toLocaleDateString('es-ES', { 
+                                                                            day: 'numeric', month: 'long', year: 'numeric' 
+                                                                        })}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <div className="gallery-empty">
+                                                <div className="gallery-empty-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                        <path d="M21 15l-5-5L5 21"/>
+                                                    </svg>
+                                                </div>
+                                                <p>Este usuario no ha subido fotos</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
