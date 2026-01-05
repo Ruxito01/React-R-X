@@ -131,6 +131,13 @@ const Header = () => {
                   Usuarios
                 </NavLink>
                 <NavLink 
+                  to="/admin/avatares"
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => { setAdminDropdownOpen(false); closeMobileMenu(); }}
+                >
+                  Avatares 3D
+                </NavLink>
+                <NavLink 
                   to="/admin/marcas" 
                   className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
                   onClick={() => { setAdminDropdownOpen(false); closeMobileMenu(); }}

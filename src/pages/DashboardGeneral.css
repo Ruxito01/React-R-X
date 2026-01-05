@@ -245,8 +245,14 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
-    /* Aumentar gap para separación visual interna */
     margin-bottom: 40px;
+}
+
+.dashboard-row.three-col {
+    grid-template-columns: 1fr 1fr 1.25fr;
+    /* Comunidades, Vehiculos, Mapa Calor */
+    gap: 24px;
+    /* Menor gap para que quepan */
 }
 
 .dashboard-row:last-child {
@@ -767,8 +773,19 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+    .dashboard-row.three-col {
+        grid-template-columns: 1fr;
+        /* Stackear en pantallas medianas */
+    }
+}
+
 @media (max-width: 1024px) {
     .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-row.three-col {
         grid-template-columns: 1fr;
     }
 

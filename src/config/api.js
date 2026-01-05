@@ -14,6 +14,7 @@ export const API_CONFIG = {
         comunidades: '/comunidad',
         vehiculos: '/vehiculo',
         rutas: '/ruta',
+        catalogoAvatar: '/catalogoavatar',
     },
     headers: {
         'Content-Type': 'application/json',

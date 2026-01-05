@@ -141,6 +141,60 @@ export const subirImagenMarca = (file, nombreMarca) =>
 export const eliminarImagenMarca = (imageUrl) =>
     eliminarImagen(imageUrl, BUCKETS.MARCAS);
 
+// ==================== AVATARES 3D ====================
+
+const BUCKET_AVATARES = 'avatares';
+
+/**
+ * Sube un modelo 3D (.glb) o preview al bucket de avatares
+ * @param {File} file 
+ * @param {string} nombre 
+ * @param {string} tipo 'models' o 'previews'
+ */
+export const subirArchivoAvatar = async (file, nombre, tipo = 'models') => {
+    try {
+        console.log(`Subiendo ${tipo} de avatar...`);
+        const cleanName = nombre.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+        const extension = file.name.split('.').pop().toLowerCase();
+        const fileName = `${tipo}/${cleanName}_${Date.now()}.${extension}`;
+
+        // Content Type especifico para GLB
+        let contentType = 'application/octet-stream';
+        if (extension === 'glb') contentType = 'model/gltf-binary';
+        else if (extension === 'gltf') contentType = 'model/gltf+json';
+        else if (extension === 'png') contentType = 'image/png';
+        else if (extension === 'jpg' || extension === 'jpeg') contentType = 'image/jpeg';
+
+        const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET_AVATARES}/${fileName}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': contentType,
+                'x-upsert': 'true'
+            },
+            body: file
+        });
+
+        if (!response.ok) {
+            console.error('Error al subir archivo avatar:', await response.text());
+            return null;
+        }
+
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_AVATARES}/${fileName}`;
+        console.log('Archivo avatar subido:', publicUrl);
+        return publicUrl;
+
+    } catch (error) {
+        console.error('Error exception subir avatar:', error);
+        return null;
+    }
+};
+
+export const eliminarArchivoAvatar = (url) => eliminarImagen(url, BUCKET_AVATARES);
+
 export default {
     BUCKETS,
     subirImagen,
@@ -150,5 +204,8 @@ export default {
     subirImagenLogro,
     eliminarImagenLogro,
     subirImagenMarca,
-    eliminarImagenMarca
+    eliminarImagenMarca,
+    subirArchivoAvatar,
+    eliminarArchivoAvatar,
+    BUCKET_AVATARES
 };

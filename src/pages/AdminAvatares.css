@@ -1,0 +1,762 @@
+/* AdminAvatares.css */
+
+/* Reutilizar estructura general de Admin (definida en AdminUsuarios.css o global) 
+ * Aquí solo definimos lo específico de la grid de avatares 
+ */
+
+/* AdminAvatares.css */
+
+/* Custom override for this page's main card */
+/* Custom override for this page's/* AdminAvatares.css */
+
+/* Custom override for this page's main card */
+.admin-avatares-card {
+    height: calc(100vh - 110px) !important;
+    max-width: 1400px !important;
+    margin-top: 90px;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    /* Contain internal scroll */
+}
+
+/* Renamed to avoid conflicts and ensure full height */
+.avatares-scroll-container {
+    flex: 1 1 auto !important;
+    /* Grow and shrink */
+    min-height: 0 !important;
+    /* Crucial for flex scrolling */
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding-bottom: 60px;
+    width: 100%;
+}
+
+/* --- ANIMATION CONTROLS --- */
+.btn-anim-toggle {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+}
+
+.btn-anim-toggle:hover {
+    transform: translateY(-2px) scale(1.05);
+    background: #fff;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.btn-anim-toggle.active {
+    background: var(--primary-orange);
+    color: white;
+}
+
+.avatar-card.premium .btn-anim-toggle {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #3e2703;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.avatar-card.premium .btn-anim-toggle:hover {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    transform: translateY(-2px) scale(1.05);
+}
+
+.avatar-card.premium .btn-anim-toggle.active {
+    background: #fff;
+    color: #d4af37;
+    border-color: #d4af37;
+}
+
+/* Animations Panel (Replaces Info) */
+.avatar-content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Ensure content doesn't spill */
+    min-height: 140px;
+    /* Force minimum height to match typical info area */
+}
+
+.avatar-animations-panel {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.02);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.anim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.anim-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.avatar-card.premium .anim-header h4 {
+    color: #FFD700;
+}
+
+.btn-close-anim {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.anim-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 120px;
+}
+
+.anim-chip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.anim-chip:hover {
+    border-color: var(--primary-orange);
+}
+
+.anim-chip.active {
+    background: var(--primary-orange);
+    color: #fff;
+    border-color: var(--primary-orange);
+}
+
+/* Premium Chips */
+.avatar-card.premium .anim-chip {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 215, 0, 0.3);
+    color: #fff;
+}
+
+.avatar-card.premium .anim-chip:hover {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.avatar-card.premium .anim-chip.active {
+    background: linear-gradient(to right, #BF953F, #FBF5B7);
+    color: #3e2703;
+    border-color: #fff;
+    font-weight: bold;
+}
+
+.avatars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* Un poco más anchos para mejor proporción con 3D */
+    gap: 24px;
+    padding: 1rem;
+}
+
+.avatar-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.avatar-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-orange);
+    box-shadow: var(--shadow-hover);
+}
+
+.avatar-card.premium {
+    border-color: #FFD700;
+}
+
+.avatar-card.premium:hover {
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.15);
+}
+
+.avatar-preview-container {
+    height: 200px;
+    background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+}
+
+/* PREMIUM GOLD CARD STYLING */
+.avatar-card.premium,
+.modal-content.premium-modal {
+    border: 1px solid #BF953F !important;
+    /* Metallic Gold Border */
+    background: linear-gradient(145deg, #111 0%, #1a1500 100%) !important;
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Force light text for Premium Cards (Fixes Day Mode visibility issues) */
+.avatar-card.premium h3,
+.avatar-card.premium .avatar-desc,
+.avatar-card.premium .stat-users,
+.avatar-card.premium .stat-users span,
+.avatar-card.premium .btn-icon-admin {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.avatar-card.premium .avatar-desc {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.avatar-card.premium .stat-users svg {
+    color: #FFD700 !important;
+}
+
+.avatar-card.premium .btn-icon-admin {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.avatar-card.premium .btn-icon-admin:hover {
+    background: #FFD700;
+    color: #000 !important;
+    border-color: #FFD700;
+}
+
+
+/* Apply Gold Gradient to Card Header (Preview Container) */
+.avatar-card.premium .avatar-preview-container {
+    background: linear-gradient(135deg,
+            #BF953F 0%,
+            #FCF6BA 25%,
+            #B38728 50%,
+            #FBF5B7 75%,
+            #AA771C 100%) !important;
+    border-bottom: 2px solid #fff;
+    position: relative;
+    /* Ensure absolute children are relative to this */
+}
+
+/* Adjust Badge for Gold Background */
+.avatar-card.premium .badge-premium {
+    background: rgba(0, 0, 0, 0.7) !important;
+    color: #FFD700 !important;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    /* Positioning Restore */
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    /* Top Left as requested */
+    right: auto !important;
+    z-index: 10;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* FREE CARD IMPROVEMENTS (To look better in clear/day mode) */
+.avatar-card:not(.premium) {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+}
+
+.avatar-card:not(.premium):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: var(--primary-orange, #FF8C42);
+}
+
+.avatar-card:not(.premium) .avatar-preview-container {
+    background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-card) 100%);
+}
+
+.avatar-card.premium .badge-premium {
+    /* Positioning Restore - Ensure this matches the previous block if needed, but redundant here if already set correctly above */
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+}
+
+
+/* Improve Gratis Badge */
+.badge-gratis {
+    background: #e8f5e9;
+    /* Light green background */
+    color: #2e7d32;
+    /* Dark green text */
+    border: 1px solid #c8e6c9;
+    /* Positioning consistent with Premium */
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: auto;
+    z-index: 10;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Sparkle/Shine Animation */
+@keyframes sparkle {
+    0% {
+        transform: translateX(-150%) skewX(-25deg);
+    }
+
+    100% {
+        transform: translateX(250%) skewX(-25deg);
+    }
+}
+
+.avatar-card.premium::after,
+.modal-content.premium-modal::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 45%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0.1) 55%,
+            transparent 100%);
+    transform: skewX(-25deg);
+    pointer-events: none;
+    z-index: 2;
+    animation: sparkle 6s infinite ease-in-out;
+    /* Slow shiny pass */
+}
+
+/* Metallic Gold Header Gradient */
+.modal-content.premium-modal .modal-header {
+    background: linear-gradient(135deg,
+            #BF953F 0%,
+            #FCF6BA 25%,
+            #B38728 50%,
+            #FBF5B7 75%,
+            #AA771C 100%) !important;
+    position: relative;
+    border-bottom: 2px solid #fff;
+}
+
+/* Text in Gold Header should be dark for contrast */
+.modal-content.premium-modal h2 {
+    color: #3e2703 !important;
+    /* Dark Brown/Gold text */
+    text-shadow: 0 1px 0px rgba(255, 255, 255, 0.4) !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.modal-content.premium-modal .modal-close {
+    color: #3e2703 !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(62, 39, 3, 0.2);
+}
+
+.modal-content.premium-modal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.6) !important;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Adjust switch colors for Gold Theme within Modal */
+.modal-content.premium-modal .switch-label-text:last-child {
+    background: linear-gradient(to right, #BF953F, #FBF5B7, #BF953F);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    text-shadow: none;
+    font-weight: 900;
+}
+
+/* Metallic Badge Base Styles + Restore Absolute default for others */
+.badge-premium {
+    background: linear-gradient(to bottom right, #BF953F, #FCF6BA, #B38728, #FBF5B7);
+    color: #3e2703;
+    border: 1px solid #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    /* Ensure absolute positioning is base if missed */
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    /* Defaulting to left for consistency with premium override */
+    z-index: 10;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.avatar-preview-container {
+    padding: 2rem 0;
+    text-align: center;
+    position: relative;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-link-sketchfab:hover {
+    text-decoration: underline !important;
+    opacity: 0.8;
+}
+
+.avatar-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.avatar-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.avatar-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.avatar-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stat-users {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.stat-users svg {
+    color: var(--primary-orange);
+}
+
+/* Botones específicos de Admin - Reutilizando vars */
+.btn-crear-admin {
+    background: var(--primary-orange);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 102, 16, 0.25);
+}
+
+.btn-crear-admin:hover {
+    background: var(--primary-orange-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 102, 16, 0.35);
+}
+
+.btn-icon-admin {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon-admin:hover:not(:disabled) {
+    background: #fff;
+    border-color: var(--primary-orange);
+    color: var(--primary-orange);
+    transform: translateY(-2px);
+}
+
+.btn-icon-admin.delete:hover:not(:disabled) {
+    border-color: #ff3b30;
+    color: #ff3b30;
+}
+
+.btn-icon-admin:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--bg-main);
+}
+
+/* Modal form inputs override for internal consistency */
+/* Modal Improvements */
+.modal-content {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-orange) 0%, #FF8C42 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+}
+
+.modal-header h2 {
+    color: white !important;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Custom Premium Toggle Switch */
+.switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: var(--bg-secondary);
+    padding: 12px 20px;
+    border-radius: 16px;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    margin: 10px 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked+.slider {
+    background-color: #FFD700;
+    /* Gold for Premium */
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #FFD700;
+}
+
+input:checked+.slider:before {
+    transform: translateX(22px);
+}
+
+.switch-label-text {
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+}
+
+/* File Upload Area Polish */
+.file-drop-area {
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-drop-area:hover {
+    border-color: var(--primary-orange);
+    background: rgba(255, 102, 16, 0.05);
+}
+
+.file-drop-area label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 10px;
+    display: block;
+}
+
+.file-drop-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+}
+
+.file-selected {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+/* Modal Actions */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1.5rem;
+}
+
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-guardar {
+    background: linear-gradient(135deg, var(--primary-orange) 0%, #FF8C42 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 102, 16, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-guardar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 102, 16, 0.4);
+}
+
+.btn-guardar:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}

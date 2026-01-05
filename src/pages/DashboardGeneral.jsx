@@ -1,19 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import './DashboardGeneral.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import AuthLoadingScreen from '../components/AuthLoadingScreen';
 import BotonPdfFlotante from '../components/BotonPdfFlotante';
 
+import { GoogleMap, LoadScript, HeatmapLayerF } from '@react-google-maps/api';
+
 const DashboardGeneral = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   
+  const libraries = ['visualization'];
+  
+  // Referencias para controlar el mapa
+  const mapRef = React.useRef(null);
+  const hasCentered = React.useRef(false);
+
+  // Estilos de mapa oscuro (reutilizado simplificado)
+  const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+  ];
+
+  // Estilos de mapa claro (Silver/Gris suave para dashboard)
+  const lightMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+    { featureType: "administrative.land_parcel", elementType: "labels.text.fill", stylers: [{ color: "#bdbdbd" }] },
+    { featureType: "poi", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+    { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#dadada" }] },
+    { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+    { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
+    { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9c9c9" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] }
+  ];
+
   // Estados para datos
   const [usuarios, setUsuarios] = useState([]);
   const [comunidades, setComunidades] = useState([]);
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [viajes, setViajes] = useState([]);
+  const [rutas, setRutas] = useState([]); // Para heatmap
   const [loading, setLoading] = useState(true);
   // Nuevo estado para datos de carga lenta (viajes y vehículos)
   const [loadingBackground, setLoadingBackground] = useState(true);
@@ -219,15 +261,19 @@ const DashboardGeneral = () => {
           setLoading(false);
         });
 
-      // --- GRUPO 2: Datos Background (Viajes, Vehiculos) ---
+      // --- GRUPO 2: Datos Background (Viajes, Vehiculos, Rutas para Heatmap) ---
       // Se ejecutan en paralelo al Grupo 1, no esperan a nadie
-      const promesaBackground = Promise.all([pViajes, pVehiculos])
-        .then(([viajesData, vehiculosData]) => {
+      // Agregamos fetch de TODAS las rutas para el heatmap
+      const pRutas = fetch(`${apiUrl}/ruta`).then(res => res.ok ? res.json() : []);
+
+      const promesaBackground = Promise.all([pViajes, pVehiculos, pRutas])
+        .then(([viajesData, vehiculosData, rutasData]) => {
           setViajes(viajesData);
           setVehiculos(vehiculosData); // Ahora es [{tipo: "Sedan", cantidad: 10}, ...]
+          setRutas(rutasData); // Guardamos rutas para el heatmap
           setUltimaActualizacion(new Date());
         })
-        .catch(err => console.error('Error viajes/vehiculos:', err))
+        .catch(err => console.error('Error viajes/vehiculos/rutas:', err))
         .finally(() => {
           setLoadingBackground(false); // Desbloquear UI secundaria
         });
@@ -383,8 +429,54 @@ const DashboardGeneral = () => {
     );
   }
 
+  // Guardar referencia del mapa al cargar
+  const onMapLoad = (map) => {
+    mapRef.current = map;
+  };
+
+  // Efecto para centrar el mapa UNA sola vez cuando lleguen las rutas
+  useEffect(() => {
+    if (rutas.length > 0 && mapRef.current && !hasCentered.current) {
+      // Calcular centro
+      let latSum = 0;
+      let lngSum = 0;
+      let count = 0;
+  
+      rutas.forEach(r => {
+        if (r.latitudInicio && r.longitudInicio) {
+          latSum += parseFloat(r.latitudInicio);
+          lngSum += parseFloat(r.longitudInicio);
+          count++;
+        }
+      });
+  
+      if (count > 0) {
+        const newCenter = { lat: latSum / count, lng: lngSum / count };
+        mapRef.current.panTo(newCenter);
+        hasCentered.current = true; // Marcar como centrado para no volver a moverlo
+      }
+    }
+  }, [rutas]);
+
+
+  const heatmapData = React.useMemo(() => {
+    // Verificar que la API de Google Maps esté completamente cargada
+    if (!window.google || !window.google.maps || !rutas.length) return [];
+
+    return rutas
+      .filter(r => r.latitudInicio && r.longitudInicio)
+      .map(r => {
+        // Usar la clase LatLng directamente es lo más seguro para HeatmapLayer
+        return new window.google.maps.LatLng(
+          parseFloat(r.latitudInicio), 
+          parseFloat(r.longitudInicio)
+        );
+      });
+  }, [rutas, window.google]); // Recalcular si cambian rutas o se carga google
+
   return (
     <div className="dashboard-general-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+
 
 
       {/* Tarjetas Resumen */}
@@ -668,8 +760,8 @@ const DashboardGeneral = () => {
           </div>
         </div>
 
-        {/* Fila inferior: Comunidades + Tipos de vehiculos */}
-        <div className="dashboard-row">
+        {/* Fila inferior: Comunidades + Tipos de vehiculos + Mapa Calor */}
+        <div className="dashboard-row three-col">
           {/* Comunidades */}
           <div className="dashboard-card comunidades">
             <div className="card-header">
@@ -772,7 +864,7 @@ const DashboardGeneral = () => {
                     tiposVehiculo.map(tipo => {
                       const count = getVehiculosCount(tipo.nombre);
                       const percentage = maxTipoCount > 0 ? (count / maxTipoCount) * 100 : 0;
-                      const porcentajeTotal = totalVehiculos > 0 ? ((count / totalVehiculos) * 100).toFixed(1) : 0;
+                      // const porcentajeTotal = totalVehiculos > 0 ? ((count / totalVehiculos) * 100).toFixed(1) : 0; // Unused
                       return (
                         <div 
                           key={tipo.id} 
@@ -798,7 +890,7 @@ const DashboardGeneral = () => {
                               </div>
                               <div className="tooltip-row">
                                 <span>Del total:</span>
-                                <strong>{porcentajeTotal}%</strong>
+                                <strong>{totalVehiculos > 0 ? ((count / totalVehiculos) * 100).toFixed(1) : 0}%</strong>
                               </div>
                               {count === Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.nombre))) && count > 0 && (
                                 <div className="tooltip-badge">Tipo mas popular</div>
@@ -809,13 +901,61 @@ const DashboardGeneral = () => {
                       );
                     })
                   ) : (
-                    <p className="no-data">Sin tipos de vehiculos</p>
+                    <p className="no-data">Sin tipos de vehiculo</p>
                   )
                 )}
               </div>
             </div>
           </div>
+
+          {/* Mapa de Calor - Zonas de Rutas (NUEVO) */}
+          <div className="dashboard-card mapa-calor">
+              <div className="card-header">
+                  <span className="card-icon">🔥</span>
+                  <h2>Zonas de Rutas</h2>
+              </div>
+              <div style={{ height: '100%', width: '100%', borderRadius: '12px', overflow: 'hidden', position:'relative' }}>
+                  {(loading || loadingBackground) ? (
+                      <div className="skeleton" style={{width:'100%', height:'100%'}}></div>
+                  ) : (
+                     <LoadScript 
+                        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                        libraries={libraries}
+                     >
+                          <GoogleMap
+                              mapContainerStyle={{ width: '100%', height: '100%' }}
+                              defaultCenter={{ lat: -0.180653, lng: -78.467834 }} // Centro inicial (Quito)
+                              zoom={10}
+                              onLoad={onMapLoad}
+                              options={{
+                                  disableDefaultUI: true,
+                                  styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+                                  zoomControl: true,
+                              }}
+                          >
+                              {heatmapData.length > 0 && (
+                                  <HeatmapLayerF
+                                      data={heatmapData}
+                                      options={{
+                                          radius: 40, // Radio aumentado para mejor visibilidad
+                                          opacity: 0.9,
+                                          gradient: [
+                                              'rgba(255, 165, 0, 0)',   // Transparente Naranja
+                                              'rgba(255, 200, 50, 0.8)', // Amarillo Naranja
+                                              'rgba(255, 140, 0, 1)',   // Naranja Oscuro
+                                              'rgba(255, 69, 0, 1)',    // Rojo Naranja
+                                              'rgba(255, 0, 0, 1)'      // Rojo intenso
+                                          ]
+                                      }}
+                                  />
+                              )}
+                          </GoogleMap>
+                     </LoadScript>
+                  )}
+              </div>
+          </div>
         </div>
+
       </div>
 
       {/* Boton flotante para exportar PDF */}
@@ -823,5 +963,4 @@ const DashboardGeneral = () => {
     </div>
   );
 };
-
 export default DashboardGeneral;

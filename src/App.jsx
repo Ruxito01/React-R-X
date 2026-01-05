@@ -27,6 +27,7 @@ import AdminModelos from "./pages/AdminModelos";
 import AdminLogros from "./pages/AdminLogros";
 import AdminTiposVehiculo from "./pages/AdminTiposVehiculo";
 import AdminUsuarios from "./pages/AdminUsuarios";
+import AdminAvatares from "./pages/AdminAvatares";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -64,6 +65,7 @@ function AnimatedRoutes() {
           <Route path="/admin/logros" element={<AdminLogros />} />
           <Route path="/admin/tipos-vehiculo" element={<AdminTiposVehiculo />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+          <Route path="/admin/avatares" element={<AdminAvatares />} />
         </Route>
       </Routes>
     </AnimatePresence>
