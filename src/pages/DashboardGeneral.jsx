@@ -409,25 +409,6 @@ const DashboardGeneral = () => {
   // Calcular max para grafico de barras
   const maxTipoCount = Math.max(...tiposVehiculo.map(t => getVehiculosCount(t.nombre)), 1);
 
-  // Mostrar pantalla de carga si viene de login con Google
-  if (mostrarLoadingScreen) {
-    return <AuthLoadingScreen />;
-  }
-
-  if (error) {
-    return (
-      <div className="dashboard-general-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
-        <div className="dashboard-general-header">
-          <h1>DASHBOARD GENERAL</h1>
-        </div>
-        <div className="dashboard-general-error">
-          <div className="error-icon">⚠</div>
-          <p>Error: {error}</p>
-          <button onClick={() => window.location.reload()}>Reintentar</button>
-        </div>
-      </div>
-    );
-  }
 
   // Guardar referencia del mapa al cargar
   const onMapLoad = (map) => {
@@ -473,6 +454,26 @@ const DashboardGeneral = () => {
         );
       });
   }, [rutas, window.google]); // Recalcular si cambian rutas o se carga google
+
+  // Mostrar pantalla de carga si viene de login con Google
+  if (mostrarLoadingScreen) {
+    return <AuthLoadingScreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-general-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
+        <div className="dashboard-general-header">
+          <h1>DASHBOARD GENERAL</h1>
+        </div>
+        <div className="dashboard-general-error">
+          <div className="error-icon">⚠</div>
+          <p>Error: {error}</p>
+          <button onClick={() => window.location.reload()}>Reintentar</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-general-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>

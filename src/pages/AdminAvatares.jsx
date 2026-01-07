@@ -19,7 +19,7 @@ const AvatarCardItem = ({ avatar, usos, abrirModal, eliminarAvatar }) => {
                 setAnimations(modelViewer.availableAnimations || []);
             };
             modelViewer.addEventListener('load', loadHandler);
-            // Check immediately if already loaded
+            // Verificar inmediatamente si ya está cargado
             if (modelViewer.loaded) loadHandler();
             return () => modelViewer.removeEventListener('load', loadHandler);
         }
@@ -50,7 +50,7 @@ const AvatarCardItem = ({ avatar, usos, abrirModal, eliminarAvatar }) => {
                     <div style={{color:'var(--text-muted)'}}>Sin modelo 3D</div>
                 )}
 
-                {/* Animation Toggle Button (Only if animations exist) */}
+                {/* Botón para alternar animaciones (Solo si existen animaciones) */}
                 {animations.length > 0 && (
                     <button 
                         className={`btn-anim-toggle ${showAnims ? 'active' : ''}`}
@@ -72,7 +72,7 @@ const AvatarCardItem = ({ avatar, usos, abrirModal, eliminarAvatar }) => {
                 )}
             </div>
 
-            {/* Content Area: Swaps between Info and Animations to keep height fixed */}
+            {/* Área de contenido: Cambia entre Info y Animaciones para mantener la altura fija */}
             <div className="avatar-content-area">
                 {showAnims ? (
                     <div className="avatar-animations-panel">
@@ -146,12 +146,12 @@ const AdminAvatares = () => {
     const [cargando, setCargando] = useState(true);
     const [busqueda, setBusqueda] = useState('');
     
-    // Modal State
+    // Estado del Modal
     const [modalAbierto, setModalAbierto] = useState(false);
     const [avatarEditando, setAvatarEditando] = useState(null); // null = creando
     const [guardando, setGuardando] = useState(false);
 
-    // Form State
+    // Estado del Formulario
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [esPremium, setEsPremium] = useState(false);
@@ -212,11 +212,24 @@ const AdminAvatares = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Validar extensión
             const ext = file.name.split('.').pop().toLowerCase();
             if (ext !== 'glb' && ext !== 'gltf') {
                 alert('Solo se permiten archivos .glb o .gltf');
+                e.target.value = ''; // Limpiar input
                 return;
             }
+
+            // Validar tamaño (Max 50MB)
+            const MAX_SIZE_MB = 50;
+            const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024; // 52,428,800 bytes
+
+            if (file.size > MAX_SIZE_BYTES) {
+                alert(`El archivo excede el tamaño máximo permitido de ${MAX_SIZE_MB}MB.`);
+                e.target.value = ''; // Limpiar input
+                return;
+            }
+
             setArchivo3D(file);
         }
     };
@@ -249,7 +262,8 @@ const AdminAvatares = () => {
             };
 
             if (avatarEditando) {
-                await catalogoAvatarService.actualizar(avatarEditando.id, avatarData);
+                const datosActualizar = { ...avatarData, id: avatarEditando.id };
+                await catalogoAvatarService.actualizar(avatarEditando.id, datosActualizar);
             } else {
                 await catalogoAvatarService.crear(avatarData);
             }

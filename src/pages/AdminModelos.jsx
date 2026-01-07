@@ -204,6 +204,7 @@ const AdminModelos = () => {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: modeloEditando ? modeloEditando.id : undefined,
           nombre: formulario.nombre.trim(),
           marcaId: parseInt(formulario.marcaId)
         })

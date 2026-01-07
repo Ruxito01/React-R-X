@@ -154,6 +154,7 @@ const AdminMarcas = () => {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: marcaEditando ? marcaEditando.id : undefined,
           nombre: formulario.nombre.trim()
         })
       });
