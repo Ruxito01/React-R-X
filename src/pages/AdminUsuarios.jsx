@@ -122,13 +122,17 @@ const AdminUsuarios = () => {
 
         setCargandoDetalles(true);
         try {
-            const [rutasRes, viajesRes] = await Promise.all([
+            const [rutasRes, viajesRes, vehiculosRes, tiposRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/ruta`),
-                fetch(`${API_BASE_URL}/viaje`)
+                fetch(`${API_BASE_URL}/viaje`),
+                fetch(`${API_BASE_URL}/vehiculo`),
+                fetch(`${API_BASE_URL}/tipovehiculo`)
             ]);
 
             const rutasData = rutasRes.ok ? await rutasRes.json() : [];
             const viajesData = viajesRes.ok ? await viajesRes.json() : [];
+            const vehiculosData = vehiculosRes.ok ? await vehiculosRes.json() : [];
+            const tiposData = tiposRes.ok ? await tiposRes.json() : [];
 
             const rutasUsuario = rutasData.filter(r => r.creadorId === usuario.id || r.creador?.id === usuario.id);
             const viajesUsuario = viajesData.filter(v => 
@@ -139,13 +143,37 @@ const AdminUsuarios = () => {
                  }))
             );
 
-            const detalles = { rutas: rutasUsuario, viajes: viajesUsuario };
+            const vehiculosUsuario = vehiculosData.filter(v => 
+                v.usuario_id === usuario.id || (v.usuario && v.usuario.id === usuario.id)
+            ).map(v => {
+                // Normalizar keys para manejar inconsistencias camelCase/snake_case
+                const foto = v.url_foto || v.urlFoto || v.urlImagen || v.foto;
+                const anio = v.anio_fabricacion || v.anioFabricacion || v.year || v.anio;
+                const traccion = v.traccion || v.traccionVehiculo;
+                const tipoId = v.tipo_vehiculo_id || v.tipoVehiculoId;
+                // Buscar nombre del tipo
+                const tipoObj = tiposData.find(t => t.id === tipoId);
+                const tipoNombre = tipoObj ? tipoObj.nombre : (v.tipoVehiculo?.nombre || 'Desconocido');
+
+                return {
+                    ...v,
+                    nombre: v.alias || `${v.marca || ''} ${v.modelo || ''}`.trim() || 'Sin nombre',
+                    marca: v.marca || 'Sin marca',
+                    modelo: v.modelo || 'Sin modelo',
+                    url_foto: foto,
+                    anio_fabricacion: anio, // Estandarizar
+                    traccion: traccion,
+                    tipo_nombre: tipoNombre.trim()
+                };
+            });
+
+            const detalles = { rutas: rutasUsuario, viajes: viajesUsuario, vehiculos: vehiculosUsuario };
             setDetallesExtra(detalles);
             setDetallesCache(prev => ({ ...prev, [usuario.id]: detalles }));
 
         } catch (err) {
             console.warn("Error cargando detalles extra", err);
-            setDetallesExtra({ rutas: [], viajes: [] });
+            setDetallesExtra({ rutas: [], viajes: [], vehiculos: [] });
         } finally {
             setCargandoDetalles(false);
         }
@@ -240,6 +268,11 @@ const AdminUsuarios = () => {
         }
     };
 
+    const handleVehiculoClick = (vehiculo) => {
+        setSelectedItem(vehiculo);
+        setViewMode('detail_vehiculo');
+    };
+
     const handleBackToList = () => {
         setViewMode('list');
         setSelectedItem(null);
@@ -258,7 +291,7 @@ const AdminUsuarios = () => {
     const cerrarModal = () => {
         setModalAbierto(false);
         setUsuarioSeleccionado(null);
-        setDetallesExtra({ rutas: [], viajes: [] });
+        setDetallesExtra({ rutas: [], viajes: [], vehiculos: [] });
         setViewMode('list');
         setSelectedItem(null);
         setDirectionsResponse(null);
@@ -382,6 +415,71 @@ const AdminUsuarios = () => {
             </div>
         );
     };
+
+    const VehiculoDetailView = ({ vehiculo, onBack }) => (
+        <div className="detail-view-container">
+            <div className="detail-header-row">
+                <button className="btn-back" onClick={onBack}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Volver
+                </button>
+                <h3>Detalle de Vehículo</h3>
+            </div>
+            
+            <div className="vehicle-detail-main">
+                <div className="vehicle-photo-large">
+                    {vehiculo.url_foto ? (
+                        <img src={vehiculo.url_foto} alt={vehiculo.alias} />
+                    ) : (
+                        <div className="placeholder-large">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+                                <circle cx="7" cy="17" r="2" />
+                                <path d="M9 17h6" />
+                                <circle cx="17" cy="17" r="2" />
+                            </svg>
+                            <span>Sin foto</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="vehicle-info-content">
+                    <h2 className="detail-title">{vehiculo.alias || 'Sin Alias'}</h2>
+                    
+                    <div className="detail-tags-row">
+                        <span className={`badge-estado large ${vehiculo.estado === 'en_posesion' ? 'active' : ''}`}>
+                             {vehiculo.estado === 'en_posesion' ? 'Activo / En Posesión' : vehiculo.estado}
+                        </span>
+                    </div>
+
+                    <div className="info-grid-2">
+                        <div className="info-box">
+                            <span className="label">Marca</span>
+                            <span className="value">{vehiculo.marca}</span>
+                        </div>
+                        <div className="info-box">
+                            <span className="label">Modelo</span>
+                            <span className="value">{vehiculo.modelo}</span>
+                        </div>
+                        <div className="info-box">
+                            <span className="label">Año</span>
+                            <span className="value">{vehiculo.anio_fabricacion || 'N/A'}</span>
+                        </div>
+                        <div className="info-box">
+                            <span className="label">Tracción</span>
+                            <span className="value">{vehiculo.traccion || 'N/A'}</span>
+                        </div>
+                        <div className="info-box">
+                            <span className="label">Tipo</span>
+                            <span className="value">{vehiculo.tipo_nombre || 'Desconocido'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     const RutaDetailView = ({ ruta, puntos, loadingPuntos, onBack }) => (
         <div className="detail-view-container">
@@ -780,13 +878,19 @@ const AdminUsuarios = () => {
                                     className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
                                     onClick={() => handleTabChange('info')}
                                 >
-                                    Informacion
+                                    Información
                                 </button>
                                 <button 
                                     className={`tab-btn ${activeTab === 'fotos' ? 'active' : ''}`}
                                     onClick={() => handleTabChange('fotos')}
                                 >
                                     Fotos
+                                </button>
+        <button 
+                                    className={`tab-btn ${activeTab === 'vehiculos' ? 'active' : ''}`}
+                                    onClick={() => handleTabChange('vehiculos')}
+                                >
+                                    Vehículos
                                 </button>
                                 <button 
                                     className={`tab-btn ${activeTab === 'rutas' ? 'active' : ''}`}
@@ -911,6 +1015,57 @@ const AdminUsuarios = () => {
                                             </div>
                                         )}
                                     </div>
+                                )}
+
+    {activeTab === 'vehiculos' && (
+                                    viewMode === 'detail_vehiculo' && selectedItem ? (
+                                        <VehiculoDetailView 
+                                            vehiculo={selectedItem} 
+                                            onBack={handleBackToList}
+                                        />
+                                    ) : (
+                                        <div className="list-container">
+                                            {cargandoDetalles ? <ShimmerList /> : (
+                                                detallesExtra.vehiculos && detallesExtra.vehiculos.length > 0 ? (
+                                                    <div className="vehicles-grid-list">
+                                                        {detallesExtra.vehiculos.map(v => (
+                                                            <div 
+                                                                key={v.id} 
+                                                                className="vehicle-card-item clickable"
+                                                                onClick={() => handleVehiculoClick(v)}
+                                                            >
+                                                                <div className="vehicle-card-bg">
+                                                                    {v.url_foto ? (
+                                                                        <img src={v.url_foto} alt={v.alias} className="vehicle-img-cover" />
+                                                                    ) : (
+                                                                        <div className="vehicle-placeholder-gradient">
+                                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                                                                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+                                                                                <circle cx="7" cy="17" r="2" />
+                                                                                <path d="M9 17h6" />
+                                                                                <circle cx="17" cy="17" r="2" />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="vehicle-card-overlay">
+                                                                        <div className="vehicle-content-wrapper">
+                                                                            {v.anio_fabricacion && (
+                                                                                <span className="badge-year">{v.anio_fabricacion}</span>
+                                                                            )}
+                                                                            <strong className="vehicle-title">{v.nombre}</strong>
+                                                                            <span className="vehicle-subtitle">
+                                                                                {(v.marca || '').toUpperCase()} {v.modelo !== 'Sin modelo' ? v.modelo : ''}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : <div className="empty-state">No tiene vehículos registrados.</div>
+                                            )}
+                                        </div>
+                                    )
                                 )}
 
                                 {activeTab === 'rutas' && (
