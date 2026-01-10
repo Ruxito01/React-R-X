@@ -861,11 +861,20 @@ const AdminUsuarios = () => {
                     <div className="modal-content-large" onClick={e => e.stopPropagation()}>
                         <div className="modal-header-profile">
                             <button className="modal-close-white" onClick={cerrarModal}>×</button>
-                            <img 
-                                src={usuarioSeleccionado.foto || 'https://via.placeholder.com/150'} 
-                                alt={usuarioSeleccionado.alias} 
-                                className="profile-avatar-large"
-                            />
+                            {usuarioSeleccionado.foto ? (
+                                <img 
+                                    src={usuarioSeleccionado.foto} 
+                                    alt={usuarioSeleccionado.alias} 
+                                    className="profile-avatar-large"
+                                />
+                            ) : (
+                                <div className="profile-avatar-large placeholder-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                            )}
                             <div className="profile-info">
                                 <h2>{usuarioSeleccionado.nombre} {usuarioSeleccionado.apellido}</h2>
                                 <span className="alias">@{usuarioSeleccionado.alias}</span>

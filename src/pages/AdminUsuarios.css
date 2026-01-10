@@ -244,6 +244,18 @@
     background: white;
 }
 
+.profile-avatar-large.placeholder-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1; /* Light gray for the icon */
+}
+
+.profile-avatar-large.placeholder-icon svg {
+    width: 60%;
+    height: 60%;
+}
+
 .profile-info h2 {
     margin: 0;
     font-size: 2rem;
