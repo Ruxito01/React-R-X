@@ -157,6 +157,22 @@ const AdminAvatares = () => {
     const [esPremium, setEsPremium] = useState(false);
     const [archivo3D, setArchivo3D] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null); // Para mostrar preview si ya existe
+    
+    // Animaciones extraídas del nuevo archivo
+    const [extractedAnimations, setExtractedAnimations] = useState([]);
+    const hiddenViewerRef = useRef(null);
+
+    useEffect(() => {
+        const viewer = hiddenViewerRef.current;
+        if (viewer && archivo3D) {
+            const onLoad = () => {
+                console.log("Animaciones extraídas:", viewer.availableAnimations);
+                setExtractedAnimations(viewer.availableAnimations || []);
+            };
+            viewer.addEventListener('load', onLoad);
+            return () => viewer.removeEventListener('load', onLoad);
+        }
+    }, [archivo3D]);
 
     useEffect(() => {
         cargarDatos();
@@ -172,6 +188,7 @@ const AdminAvatares = () => {
 
             setAvatares(listaAvatares);
             setUsuarios(listaUsuarios);
+            console.log("Avatares cargados:", listaAvatares);
         } catch (error) {
             console.error("Error al cargar datos:", error);
         } finally {
@@ -192,6 +209,7 @@ const AdminAvatares = () => {
             setEsPremium(avatar.esPremium);
             setPreviewUrl(avatar.urlModelo3d);
             setArchivo3D(null);
+            setExtractedAnimations(avatar.animaciones || []); // Mantener existentes si no se cambia archivo
         } else {
             setAvatarEditando(null);
             setNombre('');
@@ -199,6 +217,7 @@ const AdminAvatares = () => {
             setEsPremium(false);
             setPreviewUrl(null);
             setArchivo3D(null);
+            setExtractedAnimations([]);
         }
         setModalAbierto(true);
     };
@@ -207,6 +226,7 @@ const AdminAvatares = () => {
         setModalAbierto(false);
         setAvatarEditando(null);
         setGuardando(false);
+        setExtractedAnimations([]);
     };
 
     const handleFileChange = (e) => {
@@ -231,6 +251,7 @@ const AdminAvatares = () => {
             }
 
             setArchivo3D(file);
+            setExtractedAnimations([]); // Resetear mientras carga
         }
     };
 
@@ -239,6 +260,16 @@ const AdminAvatares = () => {
         
         if (!nombre.trim()) return alert('El nombre es obligatorio');
         if (!avatarEditando && !archivo3D) return alert('Debes subir un archivo 3D');
+
+        // Si se subió un archivo, esperar a que el viewer extraiga animaciones si aun no lo ha hecho
+        // (Aunque el usuario probablemente espere unos segundos, podriamos forzar chequeo)
+        // Por simplicidad confiamos en que el viewer carga rápido localmente.
+        let animacionesFinales = extractedAnimations;
+        if (!archivo3D && avatarEditando) {
+             // Si no cambiamos archivo, mantenemos las de la base (que ya pusimos en state al abrir modal)
+             // o si el usuario edito y no cambio archivo.
+             animacionesFinales = avatarEditando.animaciones || [];
+        }
 
         setGuardando(true);
         try {
@@ -258,7 +289,8 @@ const AdminAvatares = () => {
                 descripcion,
                 esPremium,
                 urlModelo3d: urlModelo,
-                urlPreview: null
+                urlPreview: null,
+                animaciones: animacionesFinales
             };
 
             if (avatarEditando) {
@@ -468,6 +500,14 @@ const AdminAvatares = () => {
                                     </a>
                                 </div>
                             </div>
+                            
+                            {/* Hidden model-viewer for animation extraction */}
+                            <model-viewer
+                                ref={hiddenViewerRef}
+                                id="hidden-extraction-viewer"
+                                src={archivo3D ? URL.createObjectURL(archivo3D) : null}
+                                style={{ display: 'none' }} 
+                            ></model-viewer>
 
                             <div className="modal-footer" style={{marginTop:'20px'}}>
                                 <button type="button" className="btn-cancelar" onClick={cerrarModal}>Cancelar</button>
