@@ -506,7 +506,7 @@ const AdminAvatares = () => {
                                 ref={hiddenViewerRef}
                                 id="hidden-extraction-viewer"
                                 src={archivo3D ? URL.createObjectURL(archivo3D) : null}
-                                style={{ display: 'none' }} 
+                                style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }} 
                             ></model-viewer>
 
                             <div className="modal-footer" style={{marginTop:'20px'}}>
