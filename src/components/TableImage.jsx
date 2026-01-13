@@ -40,6 +40,41 @@ const TableImage = ({ src, alt, className, style, width = '40px', height = '40px
     setShowPreview(false);
   };
 
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [src]);
+
+  const handleError = () => {
+    setImgError(true);
+  };
+
+  if (imgError) {
+    return (
+      <div 
+        className={className}
+        style={{ 
+          ...style, 
+          width: width, 
+          height: height, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          backgroundColor: '#f0f0f0',
+          color: '#888',
+          fontWeight: 'bold',
+          fontSize: '14px',
+          border: '1px solid #ddd',
+          borderRadius: style?.borderRadius || '4px'
+        }}
+        title={alt}
+      >
+        {alt ? alt.charAt(0).toUpperCase() : 'U'}
+      </div>
+    );
+  }
+
   return (
     <>
       <img
@@ -58,6 +93,7 @@ const TableImage = ({ src, alt, className, style, width = '40px', height = '40px
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onError={handleError}
       />
       
       {showPreview && createPortal(

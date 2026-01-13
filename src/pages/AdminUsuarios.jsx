@@ -60,11 +60,49 @@ const AdminUsuarios = () => {
     
     // Mejor estrategia: Reemplazar imports y hook inicial
     
-    // Cargar usuarios al inicio
+    // Cargar usuarios al inicio y configurar polling para el log
     useEffect(() => {
         cargarDatosIniciales();
         window.scrollTo(0, 0);
+
+        // Polling para log en tiempo real (cada 5 seg)
+        const intervalId = setInterval(() => {
+            actualizarUsuariosEnSegundoPlano();
+        }, 5000);
+
+        return () => clearInterval(intervalId);
     }, []);
+
+    // Función ligera para actualizar log sin loading screen
+    const actualizarUsuariosEnSegundoPlano = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/usuario`);
+            if (res.ok) {
+                const data = await res.json();
+                // Solo actualizamos si hay cambios o para refrescar el log
+                // Mapeamos igual que en carga inicial pero simplificado para el log
+                const usuariosEnriquecidos = data.map(u => ({
+                    ...u,
+                    // No recalculamos viajes aqui para no saturar, usamos lo basico para el log
+                    usuarios: u // Preservamos data raw si se necesita
+                }));
+                
+                // Actualizamos estado silenciosamente
+                setUsuarios(prev => {
+                   // Mezclar con datos previos para no perder info de viajes si es compleja
+                   // Pero para el log, necesitamos la lista actualizada
+                   // Estrategia: Actualizar la lista completa pero preservando campos calculados si coinciden ID
+                   // O simplemente actualizar todo. Como el log usa `usuarios`, necesitamos que tenga fechaCreacion
+                   return usuariosEnriquecidos.map(nuevo => {
+                       const existente = prev.find(p => p.id === nuevo.id);
+                       return existente ? { ...existente, ...nuevo } : nuevo; // Update or Add
+                   });
+                });
+            }
+        } catch (e) {
+            console.warn('Error polling usuarios', e);
+        }
+    };
 
     const cargarDatosIniciales = async () => {
         try {
@@ -167,7 +205,24 @@ const AdminUsuarios = () => {
                 };
             });
 
-            const detalles = { rutas: rutasUsuario, viajes: viajesUsuario, vehiculos: vehiculosUsuario };
+            // Cargar comunidades del usuario usando el endpoint directo (igual que la app móvil)
+            let comunidadesUsuario = [];
+            try {
+                const comunidadesRes = await fetch(`${API_BASE_URL}/usuario/${usuario.id}/comunidades`);
+                if (comunidadesRes.ok) {
+                    comunidadesUsuario = await comunidadesRes.json();
+                    
+                    // Asegurar que tenemos la info de si es creador
+                    comunidadesUsuario = comunidadesUsuario.map(c => ({
+                        ...c,
+                        esCreador: c.creador?.id === usuario.id || c.creadorId === usuario.id
+                    }));
+                }
+            } catch (e) {
+                console.warn("Error cargando comunidades del usuario", e);
+            }
+
+            const detalles = { rutas: rutasUsuario, viajes: viajesUsuario, vehiculos: vehiculosUsuario, comunidades: comunidadesUsuario };
             setDetallesExtra(detalles);
             setDetallesCache(prev => ({ ...prev, [usuario.id]: detalles }));
 
@@ -291,7 +346,7 @@ const AdminUsuarios = () => {
     const cerrarModal = () => {
         setModalAbierto(false);
         setUsuarioSeleccionado(null);
-        setDetallesExtra({ rutas: [], viajes: [], vehiculos: [] });
+        setDetallesExtra({ rutas: [], viajes: [], vehiculos: [], comunidades: [] });
         setViewMode('list');
         setSelectedItem(null);
         setDirectionsResponse(null);
@@ -763,96 +818,148 @@ const AdminUsuarios = () => {
 
     return (
         <div className="admin-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
-            <div className="admin-main-card">
-                {/* Header Actions */}
-                <div className="admin-actions-bar">
-                    <h2 style={{ margin: 0, color: '#FF6610' }}>Administración de Usuarios</h2>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button className="btn-refrescar" onClick={cargarDatosIniciales} disabled={cargando}>
-                            Refrescar
-                        </button>
-                        <div className="buscador-container">
-                            <input 
-                                type="text" 
-                                className="input-busqueda" 
-                                placeholder="Buscar..." 
-                                value={busqueda}
-                                onChange={(e) => setBusqueda(e.target.value)}
-                            />
-                            {busqueda && <button onClick={() => setBusqueda('')}>X</button>}
+            <div className="admin-content-wrapper">
+                {/* Left Column: Admin Main Card */}
+                <div className="admin-main-card">
+                    {/* Header Actions */}
+                    <div className="admin-actions-bar">
+                        <h2 style={{ margin: 0, color: '#FF6610' }}>Administración de Usuarios</h2>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn-refrescar" onClick={cargarDatosIniciales} disabled={cargando}>
+                                Refrescar
+                            </button>
+                            <div className="buscador-container">
+                                <input 
+                                    type="text" 
+                                    className="input-busqueda" 
+                                    placeholder="Buscar..." 
+                                    value={busqueda}
+                                    onChange={(e) => setBusqueda(e.target.value)}
+                                />
+                                {busqueda && <button onClick={() => setBusqueda('')}>X</button>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tabla */}
+                    <div className="admin-table-card">
+                        <div className="table-scroll-container">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th className="th-sortable" onClick={() => ordenarPor('id')}>ID <IconoOrden columna="id" /></th>
+                                        <th>Perfil</th>
+                                        <th className="th-sortable" onClick={() => ordenarPor('nombre')}>Nombre <IconoOrden columna="nombre" /></th>
+                                        <th className="th-sortable" onClick={() => ordenarPor('apellido')}>Apellido <IconoOrden columna="apellido" /></th>
+                                        <th className="th-sortable" onClick={() => ordenarPor('email')}>Email <IconoOrden columna="email" /></th>
+                                        <th className="th-sortable" onClick={() => ordenarPor('viajesCount')}>Viajes <IconoOrden columna="viajesCount" /></th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cargando ? (
+                                        <TableShimmer />
+                                    ) : (
+                                        usuariosFiltrados.map((usuario, index) => (
+                                            <tr key={usuario.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                                                <td>{usuario.id}</td>
+                                                <td className="avatar-cell">
+                                                    {usuario.foto ? (
+                                                        <TableImage 
+                                                            src={usuario.foto} 
+                                                            alt={usuario.alias} 
+                                                            width="35px" 
+                                                            height="35px" 
+                                                            className="avatar-preview"
+                                                            style={{ borderRadius: '50%' }}
+                                                        />
+                                                    ) : (
+                                                        <div className="avatar-placeholder">{usuario.alias?.charAt(0)}</div>
+                                                    )}
+                                                </td>
+                                                <td style={{ fontWeight: '500' }}>{usuario.nombre}</td>
+                                                <td>{usuario.apellido}</td>
+                                                <td>{usuario.email}</td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span style={{ 
+                                                        background: '#fff0e6', 
+                                                        color: '#FF6610', 
+                                                        padding: '4px 12px', 
+                                                        borderRadius: '12px',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.9rem'
+                                                    }}>
+                                                        {usuario.viajesCount}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button className="btn-editar" onClick={() => abrirModal(usuario)} title="Ver Detalles">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="table-footer">
+                            Total: {usuarios.length} usuarios
                         </div>
                     </div>
                 </div>
 
-                {/* Tabla */}
-                <div className="admin-table-card">
-                    <div className="table-scroll-container">
-                        <table className="admin-table">
-                            <thead>
-                                <tr>
-                                    <th className="th-sortable" onClick={() => ordenarPor('id')}>ID <IconoOrden columna="id" /></th>
-                                    <th>Perfil</th>
-                                    <th className="th-sortable" onClick={() => ordenarPor('nombre')}>Nombre <IconoOrden columna="nombre" /></th>
-                                    <th className="th-sortable" onClick={() => ordenarPor('apellido')}>Apellido <IconoOrden columna="apellido" /></th>
-                                    <th className="th-sortable" onClick={() => ordenarPor('email')}>Email <IconoOrden columna="email" /></th>
-                                    <th className="th-sortable" onClick={() => ordenarPor('viajesCount')}>Viajes <IconoOrden columna="viajesCount" /></th>
-                                    <th>Detalles</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cargando ? (
-                                    <TableShimmer />
-                                ) : (
-                                    usuariosFiltrados.map((usuario, index) => (
-                                        <tr key={usuario.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
-                                            <td>{usuario.id}</td>
-                                            <td className="avatar-cell">
-                                                {usuario.foto ? (
-                                                    <TableImage 
-                                                        src={usuario.foto} 
-                                                        alt={usuario.alias} 
-                                                        width="35px" 
-                                                        height="35px" 
-                                                        className="avatar-preview"
-                                                        style={{ borderRadius: '50%' }}
-                                                    />
-                                                ) : (
-                                                    <div className="avatar-placeholder">{usuario.alias?.charAt(0)}</div>
-                                                )}
-                                            </td>
-                                            <td style={{ fontWeight: '500' }}>{usuario.nombre}</td>
-                                            <td>{usuario.apellido}</td>
-                                            <td>{usuario.email}</td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span style={{ 
-                                                    background: '#fff0e6', 
-                                                    color: '#FF6610', 
-                                                    padding: '4px 12px', 
-                                                    borderRadius: '12px',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '0.9rem'
-                                                }}>
-                                                    {usuario.viajesCount}
+                {/* Right Column: Live Log Console */}
+                <aside className="admin-sidebar-log">
+                    <div className="admin-log-card full-height">
+                        <div className="log-card-header">
+                            <div className="log-title-row">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                <span>Actividad</span>
+                            </div>
+                            <div className="log-live-badge">
+                                <span className="pulse-dot"></span>
+                                LIVE
+                            </div>
+                        </div>
+                        <div className="log-card-content">
+                            {usuarios
+                                .sort((a, b) => {
+                                    const dateA = new Date(a.fecha_creacion || a.fechaCreacion || a.createdAt || a.created_at || a.fecha_registro || 0);
+                                    const dateB = new Date(b.fecha_creacion || b.fechaCreacion || b.createdAt || b.created_at || b.fecha_registro || 0);
+                                    return dateB - dateA;
+                                })
+                                .slice(0, 10) // Show more items since we have vertical space
+                                .map((u) => {
+                                    const fechaRaw = u.fecha_creacion || u.fechaCreacion || u.createdAt || u.created_at || u.fecha_registro;
+                                    const fecha = fechaRaw ? new Date(fechaRaw).toLocaleString() : 'Fecha desconocida';
+                                    
+                                    return (
+                                        <div key={u.id} className="log-item slide-in-row">
+                                            <div className="log-icon-wrapper">
+                                                <div className="log-avatar-small">
+                                                    {u.nombre ? u.nombre.charAt(0).toUpperCase() : 'U'}
+                                                </div>
+                                            </div>
+                                            <div className="log-info">
+                                                <span className="log-text">
+                                                    <strong>{u.nombre} {u.apellido}</strong>
                                                 </span>
-                                            </td>
-                                            <td>
-                                                <button className="btn-editar" onClick={() => abrirModal(usuario)} title="Ver Detalles">
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                                <span className="log-meta">
+                                                    {fecha}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                        </div>
                     </div>
-                    <div className="table-footer">
-                        Total: {usuarios.length} usuarios
-                    </div>
-                </div>
+                </aside>
             </div>
 
             {/* Modal de Detalles */}
@@ -861,17 +968,22 @@ const AdminUsuarios = () => {
                     <div className="modal-content-large" onClick={e => e.stopPropagation()}>
                         <div className="modal-header-profile">
                             <button className="modal-close-white" onClick={cerrarModal}>×</button>
-                            {usuarioSeleccionado.foto ? (
+                            {usuarioSeleccionado.foto && !usuarioSeleccionado.imgError ? (
                                 <img 
                                     src={usuarioSeleccionado.foto} 
                                     alt={usuarioSeleccionado.alias} 
                                     className="profile-avatar-large"
+                                    onError={(e) => {
+                                        e.target.onerror = null; 
+                                        setUsuarioSeleccionado(prev => ({ ...prev, imgError: true }));
+                                    }}
                                 />
                             ) : (
                                 <div className="profile-avatar-large placeholder-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" />
+                                        <div className="avatar-letter" style={{ fontSize: '2.5rem', fontWeight: 'bold', stroke: 'none', fill: 'currentColor' }}>
+                                            {usuarioSeleccionado.alias?.charAt(0).toUpperCase()}
+                                        </div>
                                     </svg>
                                 </div>
                             )}
@@ -912,6 +1024,12 @@ const AdminUsuarios = () => {
                                     onClick={() => handleTabChange('viajes')}
                                 >
                                     Viajes
+                                </button>
+                                <button 
+                                    className={`tab-btn ${activeTab === 'comunidades' ? 'active' : ''}`}
+                                    onClick={() => handleTabChange('comunidades')}
+                                >
+                                    Comunidades
                                 </button>
                             </div>
 
@@ -1156,6 +1274,31 @@ const AdminUsuarios = () => {
                                         </div>
                                     )
                                 )}
+
+                                {activeTab === 'comunidades' && (
+                                    <div className="list-container">
+                                        {cargandoDetalles ? <ShimmerList /> : (
+                                            detallesExtra.comunidades && detallesExtra.comunidades.length > 0 ? (
+                                                <ul className="simple-list">
+                                                    {detallesExtra.comunidades.map(c => (
+                                                        <li key={c.id} className="detail-list-item" style={{ cursor: 'default' }}>
+                                                            <div className="detail-row-main">
+                                                                <strong>{c.nombre || 'Comunidad sin nombre'}</strong>
+                                                                <span className={`badge-general ${c.privacidad === 'privada' ? 'privada' : 'publica'}`}>
+                                                                    {c.privacidad ? c.privacidad.charAt(0).toUpperCase() + c.privacidad.slice(1) : 'Pública'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="detail-row-sub">
+                                                                <span>Creador: {c.creador ? `${c.creador.nombre} ${c.creador.apellido}` : 'Desconocido'}</span>
+                                                                {c.esCreador && <span className="badge-role-sm">Creador</span>}
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : <div className="empty-state">No pertenece a ninguna comunidad.</div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1164,5 +1307,179 @@ const AdminUsuarios = () => {
         </div>
     );
 };
+
+// Updated Styles for Light Theme matching the specific dashboard design
+const logStyles = `
+/* Layout principal */
+.admin-content-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    align-items: stretch;
+    height: calc(100vh - 180px); /* Altura ajustada para llenar hasta abajo */
+    max-width: 1600px;
+    margin: 0 auto;
+    margin-top: 1rem; /* Espacio superior para bajar las tarjetas */
+}
+
+.admin-main-card {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Hacer que la tabla ocupe todo el espacio disponible */
+.admin-main-card .admin-table-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.admin-main-card .table-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.admin-sidebar-log {
+    flex: 1;
+    min-width: 320px;
+    max-width: 380px;
+    margin-top: 52px; /* Alinear con la tabla */
+    height: calc(100% - 52px); /* Mismo alto que la tarjeta izquierda */
+}
+
+/* Modificar admin-log-card para que ocupe todo el sidebar */
+.admin-log-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1px solid #eee;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.log-card-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Rest of styles remain same but ensuring no conflicts */
+.log-card-header {
+    background: #fff;
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+.log-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-weight: 600;
+    font-size: 1rem;
+}
+.log-title-row svg {
+    color: #FF6610;
+}
+.log-live-badge {
+    background: #e6f7ed;
+    color: #0d9446;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.5px;
+}
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #0d9446;
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(13, 148, 70, 0.4);
+    animation: pulse 2s infinite;
+}
+.log-item {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background 0.2s;
+}
+.log-item:last-child {
+    border-bottom: none;
+}
+.log-item:hover {
+    background: #FFF9F5;
+}
+.log-avatar-small {
+    width: 36px;
+    height: 36px;
+    background: #FF6610;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.log-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.log-text {
+    font-size: 0.95rem;
+    color: #333;
+}
+.log-meta {
+    font-size: 0.8rem;
+    color: #888;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(13, 148, 70, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(13, 148, 70, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(13, 148, 70, 0); }
+}
+.slide-in-row {
+    animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+    .admin-content-wrapper {
+        flex-direction: column;
+        height: auto;
+    }
+    .admin-sidebar-log {
+        width: 100%;
+        height: 400px; /* Fixed height when stacked */
+    }
+}
+`;
+
+// Inject styles
+const styleTag = document.createElement('style');
+styleTag.textContent = logStyles;
+document.head.appendChild(styleTag);
 
 export default AdminUsuarios;
