@@ -11,6 +11,7 @@ import "./Theme.css"; // Importar variables CSS
 // La página principal para usuarios NO logueados
 import LandingPage from "./pages/LandingPage";
 import QueEsRux from "./pages/QueEsRux";
+import InvitePage from "./pages/InvitePage";
 
 // El layout y páginas para usuarios SÍ logueados
 import MainLayout from "./layouts/MainLayout";
@@ -43,6 +44,7 @@ function AnimatedRoutes() {
         */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/que-es-rux" element={<QueEsRux />} />
+        <Route path="/invite" element={<InvitePage />} />
 
         {/* RUTAS INTERNAS (Protegidas): 
           Usan MainLayout y requieren autenticación de ADMIN
