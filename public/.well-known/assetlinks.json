@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.rux.movil",
+            "sha256_cert_fingerprints": [
+                "ED:C9:48:41:90:A2:5F:CF:1F:A4:29:D4:E0:28:4D:2D:5B:4E:C6:20:50:13:C0:20:24:1B:0A:7A:DB:2A:6B:AE"
+            ]
+        }
+    }
+]
