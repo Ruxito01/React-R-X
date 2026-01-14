@@ -937,7 +937,21 @@ const AdminUsuarios = () => {
                                 .slice(0, 10) // Show more items since we have vertical space
                                 .map((u) => {
                                     const fechaRaw = u.fecha_creacion || u.fechaCreacion || u.createdAt || u.created_at || u.fecha_registro;
-                                    const fecha = fechaRaw ? new Date(fechaRaw).toLocaleString() : 'Fecha desconocida';
+                                    // Convertir fecha del servidor (UTC) a hora de Ecuador (UTC-5)
+                                    let fecha = 'Fecha desconocida';
+                                    if (fechaRaw) {
+                                        const fechaUTC = new Date(fechaRaw);
+                                        // Restar 5 horas para convertir de UTC a Ecuador
+                                        fechaUTC.setHours(fechaUTC.getHours() - 5);
+                                        fecha = fechaUTC.toLocaleString('es-EC', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        });
+                                    }
                                     
                                     return (
                                         <div key={u.id} className="log-item slide-in-row">
@@ -1314,8 +1328,8 @@ const logStyles = `
 .admin-content-wrapper {
     display: flex;
     gap: 1.5rem;
-    align-items: stretch;
-    height: calc(100vh - 180px); /* Altura ajustada para llenar hasta abajo */
+    align-items: flex-start;
+    height: auto;
     max-width: 1600px;
     margin: 0 auto;
     margin-top: 1rem; /* Espacio superior para bajar las tarjetas */
@@ -1329,6 +1343,7 @@ const logStyles = `
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    height: 560px; /* Altura fija igual al panel de actividad */
 }
 
 /* Hacer que la tabla ocupe todo el espacio disponible */
@@ -1350,16 +1365,18 @@ const logStyles = `
     min-width: 320px;
     max-width: 380px;
     margin-top: 52px; /* Alinear con la tabla */
-    height: calc(100% - 52px); /* Mismo alto que la tarjeta izquierda */
+    height: 560px; /* Misma altura que la tarjeta izquierda */
+    background: var(--bg-card); /* Fondo solido sin transparencia */
+    border-radius: 12px;
 }
 
 /* Modificar admin-log-card para que ocupe todo el sidebar */
 .admin-log-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
     font-family: 'Inter', sans-serif;
     display: flex;
     flex-direction: column;
@@ -1373,9 +1390,9 @@ const logStyles = `
 
 /* Rest of styles remain same but ensuring no conflicts */
 .log-card-header {
-    background: #fff;
+    background: var(--bg-card);
     padding: 1rem 1.5rem;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1385,7 +1402,7 @@ const logStyles = `
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 1rem;
 }
@@ -1417,14 +1434,14 @@ const logStyles = `
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--border-color);
     transition: background 0.2s;
 }
 .log-item:last-child {
     border-bottom: none;
 }
 .log-item:hover {
-    background: #FFF9F5;
+    background: var(--bg-secondary);
 }
 .log-avatar-small {
     width: 36px;
@@ -1445,11 +1462,11 @@ const logStyles = `
 }
 .log-text {
     font-size: 0.95rem;
-    color: #333;
+    color: var(--text-primary);
 }
 .log-meta {
     font-size: 0.8rem;
-    color: #888;
+    color: var(--text-secondary);
 }
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(13, 148, 70, 0.4); }

@@ -445,11 +445,10 @@
     font-size: 0.85rem;
 }
 
-/* Altura fija para tabla de usuarios - 8 filas */
+/* Altura para tabla de usuarios - flexible */
 .table-scroll-container {
-    height: 344px !important;
-    min-height: 344px !important;
-    max-height: 344px !important;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
 }
