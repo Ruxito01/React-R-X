@@ -97,3 +97,9 @@
         display: none;
     }
 }
+
+/* Modo oscuro */
+[data-theme='dark'] .icono-placeholder {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    color: var(--text-muted);
+}

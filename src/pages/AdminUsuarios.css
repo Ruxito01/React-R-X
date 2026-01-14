@@ -248,7 +248,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5e1; /* Light gray for the icon */
+    color: #cbd5e1;
+    /* Light gray for the icon */
 }
 
 .profile-avatar-large.placeholder-icon svg {
@@ -1361,4 +1362,114 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* =============================================== */
+/* MODO OSCURO - Dark Theme Overrides             */
+/* =============================================== */
+[data-theme='dark'] .admin-usuarios-grid::before {
+    background: linear-gradient(135deg,
+            rgba(18, 18, 18, 0.85) 0%,
+            rgba(30, 30, 30, 0.75) 50%,
+            rgba(25, 25, 25, 0.85) 100%);
+}
+
+[data-theme='dark'] .btn-refrescar:hover:not(:disabled) {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .timeline-content {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .timeline-dot {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .badge-service {
+    background: rgba(239, 108, 0, 0.2);
+}
+
+[data-theme='dark'] .badge-ingresa {
+    background: rgba(46, 125, 50, 0.2);
+}
+
+[data-theme='dark'] .badge-cancela {
+    background: rgba(198, 40, 40, 0.2);
+}
+
+[data-theme='dark'] .badge-role-sm,
+[data-theme='dark'] .badge-role {
+    background: rgba(239, 108, 0, 0.2);
+}
+
+[data-theme='dark'] .badge-estado.creador {
+    background: rgba(255, 234, 0, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.activo {
+    background: rgba(76, 175, 80, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.inactivo {
+    background: rgba(239, 83, 80, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.programado {
+    background: rgba(25, 118, 210, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.en_curso {
+    background: rgba(46, 125, 50, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.finalizado {
+    background: rgba(97, 97, 97, 0.15);
+}
+
+[data-theme='dark'] .badge-estado.cancelado {
+    background: rgba(198, 40, 40, 0.15);
+}
+
+[data-theme='dark'] .invite-box {
+    background: rgba(33, 150, 243, 0.1);
+    border-color: rgba(33, 150, 243, 0.3);
+}
+
+[data-theme='dark'] .invite-label {
+    color: #64b5f6;
+}
+
+[data-theme='dark'] .invite-code {
+    color: #90caf9;
+}
+
+[data-theme='dark'] .participant-avatar .placeholder {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .detail-map-container {
+    background-color: var(--bg-secondary);
+}
+
+[data-theme='dark'] .placeholder-large {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .placeholder-large svg {
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .vehicle-card-bg {
+    background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .vehicle-placeholder-gradient {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    color: var(--text-muted);
 }

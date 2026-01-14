@@ -801,14 +801,17 @@
 
 /* Contenedor de tabla con scroll - el scroll va en todo el card */
 .admin-table-card {
-    max-height: 450px;
+    min-height: 550px;
+    max-height: calc(100vh - 220px);
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 .admin-table-card .table-scroll-container {
     flex: 1;
-    max-height: 320px;
+    min-height: 450px;
+    max-height: calc(100vh - 320px);
     overflow-y: auto;
     overflow-x: auto;
 }
@@ -877,4 +880,151 @@
         width: 95%;
         margin: 1rem;
     }
+}
+
+/* =============================================== */
+/* MODO OSCURO - Dark Theme Overrides             */
+/* =============================================== */
+[data-theme='dark'] .admin-container::before {
+    background: linear-gradient(135deg,
+            rgba(18, 18, 18, 0.85) 0%,
+            rgba(30, 30, 30, 0.75) 50%,
+            rgba(25, 25, 25, 0.85) 100%);
+}
+
+[data-theme='dark'] .admin-container {
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .admin-main-card {
+    background: var(--glass-bg);
+    border-color: var(--border-subtle);
+}
+
+[data-theme='dark'] .buscador-container {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .buscador-container:focus-within {
+    background: var(--bg-card);
+}
+
+[data-theme='dark'] .input-busqueda::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .btn-limpiar-busqueda {
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .btn-limpiar-busqueda:hover {
+    background: var(--text-muted);
+}
+
+[data-theme='dark'] .admin-error {
+    background: rgba(204, 0, 0, 0.15);
+    border-color: rgba(204, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .admin-table-card {
+    background: var(--bg-card);
+}
+
+[data-theme='dark'] .admin-table tbody tr {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme='dark'] .admin-table td {
+    border-bottom-color: var(--border-color);
+}
+
+/* Botones de accion en modo oscuro */
+[data-theme='dark'] .btn-editar {
+    background: rgba(0, 102, 204, 0.2);
+    color: #66aaff;
+}
+
+[data-theme='dark'] .btn-editar:hover {
+    background: rgba(0, 102, 204, 0.35);
+}
+
+[data-theme='dark'] .btn-eliminar {
+    background: rgba(204, 0, 0, 0.2);
+    color: #ff6666;
+}
+
+[data-theme='dark'] .btn-eliminar:hover {
+    background: rgba(204, 0, 0, 0.35);
+}
+
+[data-theme='dark'] .btn-refrescar {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .btn-refrescar:hover:not(:disabled) {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .count-badge {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .admin-loading,
+[data-theme='dark'] .admin-empty {
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .skeleton-row:nth-child(even) {
+    background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .table-scroll-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .modal-content {
+    background: var(--bg-card);
+}
+
+[data-theme='dark'] .modal-body {
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .btn-cancelar {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .btn-cancelar:hover {
+    background: var(--border-color);
+}
+
+[data-theme='dark'] .modal-actions {
+    border-top-color: var(--border-color);
+}
+
+[data-theme='dark'] .logo-preview-container {
+    background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .btn-seleccionar-imagen {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .btn-seleccionar-imagen:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--primary-orange);
+    color: var(--primary-orange);
+}
+
+[data-theme='dark'] .preview-image {
+    border-color: var(--border-color);
 }

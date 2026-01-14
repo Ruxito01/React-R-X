@@ -483,12 +483,12 @@ const Dashboard = () => {
           {/* Grafico de Picos - Distancias por Viaje del Ultimo Mes */}
           <div className="chart-card" id="grafica-usuarios-actividad">
             <div className="chart-title">Km por viaje (ultimo mes)</div>
-            <div className="peaks-chart" style={{ position: 'relative', padding: '1rem' }}>
+            <div className="peaks-chart" style={{ position: 'relative', padding: '1rem', overflow: 'hidden' }}>
               {loading ? (
                 <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
               ) : selectedUser?.viajesUltimoMes?.length > 0 ? (
                 <>
-                  <div style={{ display: 'flex', height: '180px' }}>
+                  <div style={{ display: 'flex', height: '180px', width: '100%' }}>
                     {/* Eje Y con etiquetas */}
                     {(() => {
                       const viajes = selectedUser.viajesUltimoMes;
@@ -502,6 +502,7 @@ const Dashboard = () => {
                           fontSize: '0.65rem',
                           color: '#888',
                           minWidth: '35px',
+                          flexShrink: 0,
                           textAlign: 'right'
                         }}>
                           <span>{maxKm.toFixed(0)} km</span>
@@ -510,76 +511,99 @@ const Dashboard = () => {
                         </div>
                       );
                     })()}
-                    {/* SVG del gráfico */}
-                    <svg viewBox="0 0 200 80" preserveAspectRatio="none" style={{ flex: 1, height: '100%' }}>
-                      <defs>
-                        <linearGradient id="peaksGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#FF6610" stopOpacity="0.7"/>
-                          <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
-                        </linearGradient>
-                      </defs>
-                      {/* Líneas de guía horizontales */}
-                      <line x1="0" y1="0" x2="200" y2="0" stroke="#eee" strokeWidth="0.5"/>
-                      <line x1="0" y1="35" x2="200" y2="35" stroke="#eee" strokeWidth="0.5" strokeDasharray="2,2"/>
-                      <line x1="0" y1="70" x2="200" y2="70" stroke="#eee" strokeWidth="0.5"/>
-                      {(() => {
-                        const viajes = selectedUser.viajesUltimoMes;
-                        const maxKm = Math.max(...viajes.map(v => v.km), 1);
-                        const width = 200;
-                        const height = 70;
-                        
-                        const points = viajes.map((v, i) => {
-                          const x = viajes.length === 1 ? width / 2 : (i / (viajes.length - 1)) * width;
-                          const y = height - (v.km / maxKm) * height;
-                          return `${x},${y}`;
-                        });
-                        
-                        const linePath = `M ${points.join(' L ')}`;
-                        const areaPath = `M 0,${height} L ${points[0]} L ${points.join(' L ')} L ${width},${height} Z`;
-                        
-                        return (
-                          <>
-                            <path d={areaPath} fill="url(#peaksGradient)" />
-                            <path d={linePath} fill="none" stroke="#FF6610" strokeWidth="1.5" />
-                            {viajes.map((v, i) => {
-                              const x = viajes.length === 1 ? width / 2 : (i / (viajes.length - 1)) * width;
-                              const y = height - (v.km / maxKm) * height;
-                              return (
-                                <g key={i}>
-                                  <circle 
-                                    cx={x} 
-                                    cy={y} 
-                                    r="3" 
-                                    fill="#FF6610"
-                                    onMouseEnter={() => setHoveredPoint(`viaje-${i}`)}
-                                    onMouseLeave={() => setHoveredPoint(null)}
-                                    style={{ cursor: 'pointer' }}
-                                  />
-                                  {/* Etiqueta del km sobre el punto */}
-                                  <text 
-                                    x={x} 
-                                    y={y - 5} 
-                                    fontSize="5" 
-                                    fill="#666" 
-                                    textAnchor="middle"
-                                  >
-                                    {v.km.toFixed(0)}
-                                  </text>
-                                </g>
-                              );
-                            })}
-                          </>
-                        );
-                      })()}
-                    </svg>
+                    {/* SVG del gráfico - contenedor fijo */}
+                    <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                      <svg viewBox="0 0 200 80" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                        <defs>
+                          <linearGradient id="peaksGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#FF6610" stopOpacity="0.7"/>
+                            <stop offset="100%" stopColor="#FFD4B8" stopOpacity="0.2"/>
+                          </linearGradient>
+                        </defs>
+                        {/* Líneas de guía horizontales */}
+                        <line x1="0" y1="0" x2="200" y2="0" stroke="#eee" strokeWidth="0.5"/>
+                        <line x1="0" y1="35" x2="200" y2="35" stroke="#eee" strokeWidth="0.5" strokeDasharray="2,2"/>
+                        <line x1="0" y1="70" x2="200" y2="70" stroke="#eee" strokeWidth="0.5"/>
+                        {(() => {
+                          const viajes = selectedUser.viajesUltimoMes;
+                          const maxKm = Math.max(...viajes.map(v => v.km), 1);
+                          const width = 200;
+                          const height = 70;
+                          
+                          const points = viajes.map((v, i) => {
+                            const x = viajes.length === 1 ? width / 2 : (i / (viajes.length - 1)) * width;
+                            const y = height - (v.km / maxKm) * height;
+                            return `${x},${y}`;
+                          });
+                          
+                          const linePath = `M ${points.join(' L ')}`;
+                          const areaPath = `M 0,${height} L ${points[0]} L ${points.join(' L ')} L ${width},${height} Z`;
+                          
+                          return (
+                            <>
+                              <path d={areaPath} fill="url(#peaksGradient)" />
+                              <path d={linePath} fill="none" stroke="#FF6610" strokeWidth="1.5" />
+                              {viajes.map((v, i) => {
+                                const x = viajes.length === 1 ? width / 2 : (i / (viajes.length - 1)) * width;
+                                const y = height - (v.km / maxKm) * height;
+                                return (
+                                  <g key={i}>
+                                    <circle 
+                                      cx={x} 
+                                      cy={y} 
+                                      r="3" 
+                                      fill="#FF6610"
+                                      onMouseEnter={() => setHoveredPoint(`viaje-${i}`)}
+                                      onMouseLeave={() => setHoveredPoint(null)}
+                                      style={{ cursor: 'pointer' }}
+                                    />
+                                    {/* Etiqueta del km sobre el punto */}
+                                    <text 
+                                      x={x} 
+                                      y={y - 5} 
+                                      fontSize="5" 
+                                      fill="#666" 
+                                      textAnchor="middle"
+                                    >
+                                      {v.km.toFixed(0)}
+                                    </text>
+                                  </g>
+                                );
+                              })}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                    </div>
                   </div>
-                  {/* Eje X con fechas */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666', marginTop: '0.5rem', marginLeft: '35px' }}>
-                    {selectedUser.viajesUltimoMes.map((v, i) => (
-                      <span key={i} style={{ flex: 1, textAlign: 'center' }}>
-                        {v.fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' })}
-                      </span>
-                    ))}
+                  {/* Eje X con fechas - maximo 7 etiquetas */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#666', marginTop: '0.5rem', marginLeft: '35px', overflow: 'hidden' }}>
+                    {(() => {
+                      const viajes = selectedUser.viajesUltimoMes;
+                      const maxLabels = 7;
+                      if (viajes.length <= maxLabels) {
+                        return viajes.map((v, i) => (
+                          <span key={i} style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                            {v.fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' })}
+                          </span>
+                        ));
+                      }
+                      // Si hay mas de maxLabels, mostrar solo algunos distribuidos
+                      const step = Math.ceil(viajes.length / maxLabels);
+                      const indices = [];
+                      for (let i = 0; i < viajes.length; i += step) {
+                        indices.push(i);
+                      }
+                      // Asegurar que el ultimo siempre este
+                      if (indices[indices.length - 1] !== viajes.length - 1) {
+                        indices.push(viajes.length - 1);
+                      }
+                      return indices.map((idx, i) => (
+                        <span key={i} style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                          {viajes[idx].fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' })}
+                        </span>
+                      ));
+                    })()}
                   </div>
                   {hoveredPoint && hoveredPoint.startsWith('viaje-') && (
                     <div className="grafico-tooltip viaje-tooltip-usuario">

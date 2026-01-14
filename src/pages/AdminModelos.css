@@ -80,3 +80,10 @@
         padding: 0.25rem 0.6rem;
     }
 }
+
+/* Modo oscuro */
+[data-theme='dark'] .admin-warning {
+    background: rgba(153, 102, 0, 0.15);
+    border-color: rgba(255, 217, 102, 0.3);
+    color: #ffd966;
+}
