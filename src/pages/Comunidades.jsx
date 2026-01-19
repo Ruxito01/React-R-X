@@ -4,6 +4,57 @@ import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+// Componente interno para manejar avatar con fallback en caso de error
+const MemberAvatar = ({ miembro }) => {
+  const [imgError, setImgError] = useState(false);
+
+  // Si no hay foto o si hubo error al cargar la imagen
+  if (!miembro.foto || imgError) {
+    return (
+      <div 
+        className="member-avatar-circle"
+        style={{ background: '#FFAB91', color: '#fff' }}
+        title={miembro.nombre}
+        onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.15)';
+            e.currentTarget.style.boxShadow = '0 10px 20px rgba(255, 102, 16, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+             e.currentTarget.style.transform = 'scale(1)';
+             e.currentTarget.style.boxShadow = '0 6px 12px rgba(255, 102, 16, 0.2)';
+        }}
+      >
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
+          {miembro.nombre?.charAt(0).toUpperCase()}
+        </div>
+      </div>
+    );
+  }
+
+  // Si hay foto y aun no ha dado error
+  return (
+    <div 
+      className="member-avatar-circle"
+      title={miembro.nombre}
+      onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.15)';
+          e.currentTarget.style.boxShadow = '0 10px 20px rgba(255, 102, 16, 0.3)';
+      }}
+      onMouseLeave={(e) => {
+           e.currentTarget.style.transform = 'scale(1)';
+           e.currentTarget.style.boxShadow = '0 6px 12px rgba(255, 102, 16, 0.2)';
+      }}
+    >
+      <img 
+        src={miembro.foto} 
+        alt="" 
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        onError={() => setImgError(true)}
+      />
+    </div>
+  );
+}; // Add semicolon here as it's a const assignment
+
 function Comunidades() {
   // Estados para datos del backend
   const [comunidades, setComunidades] = useState([]);
@@ -160,6 +211,14 @@ function Comunidades() {
     }
     return direccion === 'asc' ? valorA - valorB : valorB - valorA;
   });
+
+  // Estado para el filtro de busqueda
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filtrar comunidades
+  const comunidadesFiltradas = comunidadesOrdenadas.filter(c =>
+    c.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const selectedCommunity = comunidades[selectedCommunityIndex] || comunidades[0];
 
@@ -325,6 +384,33 @@ function Comunidades() {
 
             {/* Tabla de Comunidades */}
             <div className="communities-table-card">
+              {/* Barra de busqueda */}
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-card)' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    style={{ position: 'absolute', left: '12px', color: 'var(--text-secondary)', pointerEvents: 'none' }}
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Buscar comunidad..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="community-search-input"
+                  />
+                </div>
+              </div>
+
               <div className="table-scroll-container">
                 <table className="communities-table">
                   <thead>
@@ -349,8 +435,8 @@ function Comunidades() {
                           <td><div className="skeleton" style={{ height: '16px', width: '60px' }}></div></td>
                         </tr>
                       ))
-                    ) : (
-                      comunidadesOrdenadas.map((comunidad) => {
+                    ) : comunidadesFiltradas.length > 0 ? (
+                      comunidadesFiltradas.map((comunidad) => {
                         const originalIndex = comunidades.findIndex(c => c.id === comunidad.id);
                         return (
                           <tr
@@ -365,6 +451,12 @@ function Comunidades() {
                           </tr>
                         );
                       })
+                    ) : (
+                      <tr>
+                        <td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>
+                          No se encontraron comunidades
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
@@ -795,7 +887,7 @@ function Comunidades() {
             </div>
 
             {/* Grafico 3: Miembros de Comunidad Seleccionada - Grid Compacto y Visual */}
-            <div className="community-chart-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className="community-chart-card" style={{ height: '280px', display: 'flex', flexDirection: 'column' }}>
               <div className="community-chart-title-bold" style={{ flexShrink: 0 }}>
                 MIEMBROS: {selectedCommunity?.nombre?.toUpperCase().substring(0,25) || ''}
               </div>
@@ -804,34 +896,19 @@ function Comunidades() {
                    <div className="skeleton" style={{ height: '100%', width: '100%' }}></div>
                 ) : selectedCommunity?.miembros?.length > 0 ? (
                   <div style={{ 
-                      display: 'flex', 
-                      flexWrap: 'nowrap', 
-                      gap: '20px', 
-                      alignItems: 'center',
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))',
+                      gap: '16px', 
+                      alignItems: 'start',
+                      height: 'auto',
                       height: '100%',
-                      padding: '0 20px', /* Padding horizontal para que el primero y ultimo no se corten */
-                      minWidth: 'min-content' /* Asegura que el contenedor se expanda */
-                    }}>
+                      padding: '10px 5px',
+                      overflowY: 'auto',
+                      width: '100%'
+                    }} className="members-catalog-scroll">
                     {selectedCommunity.miembros.map((miembro, i) => (
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', minWidth: '80px', flexShrink: 0 }} title={miembro.nombre}>
-                        <div className="member-avatar-circle"
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.15)';
-                            e.currentTarget.style.boxShadow = '0 10px 20px rgba(255, 102, 16, 0.3)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.boxShadow = '0 6px 12px rgba(255, 102, 16, 0.2)';
-                        }}
-                        >
-                           {miembro.foto ? (
-                             <img src={miembro.foto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           ) : (
-                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFAB91', color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>
-                               {miembro.nombre?.charAt(0).toUpperCase()}
-                             </div>
-                           )}
-                        </div>
+                        <MemberAvatar miembro={miembro} />
                         <div className="member-name-tag">
                             {miembro.alias || miembro.nombre.split(' ')[0]}
                         </div>
@@ -856,4 +933,7 @@ function Comunidades() {
   );
 }
 
+// End of component
+
 export default Comunidades;
+

@@ -6,17 +6,25 @@ import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import AuthLoadingScreen from '../components/AuthLoadingScreen';
 import BotonPdfFlotante from '../components/BotonPdfFlotante';
 
-import { GoogleMap, LoadScript, HeatmapLayerF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, HeatmapLayerF } from '@react-google-maps/api';
 
 const DashboardGeneral = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   
-  const libraries = ['visualization'];
+  // Mover libraries fuera del componente o usar useMemo para evitar re-renders infinitos
+  const [libraries] = useState(['visualization']);
   
   // Referencias para controlar el mapa
   const mapRef = React.useRef(null);
   const hasCentered = React.useRef(false);
+
+  // Hook para cargar la API de Google Maps de forma global y segura
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: libraries
+  });
 
   // Estilos de mapa oscuro (reutilizado simplificado)
   const darkMapStyles = [
@@ -916,42 +924,37 @@ const DashboardGeneral = () => {
                   <h2>Zonas de Rutas</h2>
               </div>
               <div style={{ height: '100%', width: '100%', borderRadius: '12px', overflow: 'hidden', position:'relative' }}>
-                  {(loading || loadingBackground) ? (
+                  {(loading || loadingBackground || !isLoaded) ? (
                       <div className="skeleton" style={{width:'100%', height:'100%'}}></div>
                   ) : (
-                     <LoadScript 
-                        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-                        libraries={libraries}
-                     >
-                          <GoogleMap
-                              mapContainerStyle={{ width: '100%', height: '100%' }}
-                              defaultCenter={{ lat: -0.180653, lng: -78.467834 }} // Centro inicial (Quito)
-                              zoom={10}
-                              onLoad={onMapLoad}
-                              options={{
-                                  disableDefaultUI: true,
-                                  styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
-                                  zoomControl: true,
-                              }}
-                          >
-                              {heatmapData.length > 0 && (
-                                  <HeatmapLayerF
-                                      data={heatmapData}
-                                      options={{
-                                          radius: 40, // Radio aumentado para mejor visibilidad
-                                          opacity: 0.9,
-                                          gradient: [
-                                              'rgba(255, 165, 0, 0)',   // Transparente Naranja
-                                              'rgba(255, 200, 50, 0.8)', // Amarillo Naranja
-                                              'rgba(255, 140, 0, 1)',   // Naranja Oscuro
-                                              'rgba(255, 69, 0, 1)',    // Rojo Naranja
-                                              'rgba(255, 0, 0, 1)'      // Rojo intenso
-                                          ]
-                                      }}
-                                  />
-                              )}
-                          </GoogleMap>
-                     </LoadScript>
+                      <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          defaultCenter={{ lat: -0.180653, lng: -78.467834 }} // Centro inicial (Quito)
+                          zoom={10}
+                          onLoad={onMapLoad}
+                          options={{
+                              disableDefaultUI: true,
+                              styles: theme === 'dark' ? darkMapStyles : lightMapStyles,
+                              zoomControl: true,
+                          }}
+                      >
+                          {heatmapData.length > 0 && (
+                              <HeatmapLayerF
+                                  data={heatmapData}
+                                  options={{
+                                      radius: 40, // Radio aumentado para mejor visibilidad
+                                      opacity: 0.9,
+                                      gradient: [
+                                          'rgba(255, 165, 0, 0)',   // Transparente Naranja
+                                          'rgba(255, 200, 50, 0.8)', // Amarillo Naranja
+                                          'rgba(255, 140, 0, 1)',   // Naranja Oscuro
+                                          'rgba(255, 69, 0, 1)',    // Rojo Naranja
+                                          'rgba(255, 0, 0, 1)'      // Rojo intenso
+                                      ]
+                                  }}
+                              />
+                          )}
+                      </GoogleMap>
                   )}
               </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
 import { GraficoTopRutas, GraficoTendencia, GraficoEstado } from '../components/EstadisticasRutas';
 import { useTheme } from '../context/ThemeContext';
@@ -222,7 +222,11 @@ const Rutas = () => {
       const debeActualizarRutas = mostrarSpinner || !isUserSelection || mostrarTodosViajes;
 
       if (debeActualizarRutas) {
-         setRutas(rutasData);
+         // Optimyze: Only update state if data actually changed
+         const rutasHanCambiado = JSON.stringify(rutas) !== JSON.stringify(rutasData);
+         if (rutasHanCambiado) {
+             setRutas(rutasData);
+         }
 
          // Logica de seleccion por defecto (Solo si no hay nada seleccionado aun)
          if (!rutaSeleccionada && rutasData.length > 0) {
@@ -249,7 +253,8 @@ const Rutas = () => {
          } else if (rutaSeleccionada) {
             // Actualizar objeto de ruta seleccionada si cambio algo (distancia, etc)
             const rutaActualizada = rutasData.find(r => r.id === rutaSeleccionada.id);
-            if (rutaActualizada) {
+            // Deep compare to avoid unnecessary re-renders
+            if (rutaActualizada && JSON.stringify(rutaActualizada) !== JSON.stringify(rutaSeleccionada)) {
                setRutaSeleccionada(rutaActualizada); 
             }
          }
@@ -274,7 +279,7 @@ const Rutas = () => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       cargarDatos(false);
-    }, 5000);
+    }, 30000); // Actualizar cada 30 segundos en lugar de 5
 
     return () => clearInterval(intervalId);
   }, [cargarDatos]);
@@ -292,10 +297,27 @@ const Rutas = () => {
     }
   };
 
+  // Ref para guardar los ultimos parametros de ruta calculados y evitar llamadas duplicadas
+  const lastRouteParams = useRef('');
+
   // Calcular ruta con Google Directions API
   const calcularRuta = useCallback((ruta, puntos) => {
     if (!window.google || !ruta.latitudInicio || !ruta.latitudFin) {
       setDirectionsResponse(null);
+      setMapaCargando(false);
+      return;
+    }
+
+    // Generar key única para esta configuración de ruta
+    const routeParamsKey = JSON.stringify({
+      start: { lat: ruta.latitudInicio, lng: ruta.longitudInicio },
+      end: { lat: ruta.latitudFin, lng: ruta.longitudFin },
+      waypoints: puntos.map(p => ({ lat: p.latitud, lng: p.longitud }))
+    });
+
+    // Si los parametros son identicos a la ultima vez, no recalcular
+    if (lastRouteParams.current === routeParamsKey && directionsResponse) {
+      // Ya tenemos esta ruta calculada, no hacer nada
       setMapaCargando(false);
       return;
     }
@@ -325,9 +347,11 @@ const Rutas = () => {
       (result, status) => {
         if (status === 'OK') {
           setDirectionsResponse(result);
+          lastRouteParams.current = routeParamsKey; // Guardar params exitosos
         } else {
           console.error('Error al calcular ruta:', status);
           setDirectionsResponse(null);
+          lastRouteParams.current = ''; // Resetear en error
         }
         setMapaCargando(false);
       }
@@ -338,8 +362,8 @@ const Rutas = () => {
   useEffect(() => {
     if (isLoaded) {
       setGoogleLoaded(true);
-      // Calcular ruta inicial si hay ruta seleccionada y puntos cargados
-      if (rutaSeleccionada && puntosRuta.length > 0) {
+      // Calcular ruta inicial si hay ruta seleccionada (incluso sin puntos intermedios)
+      if (rutaSeleccionada) {
         calcularRuta(rutaSeleccionada, puntosRuta);
       }
     }
@@ -583,7 +607,9 @@ const Rutas = () => {
   const viajesActivos = (viajesReal.length > 0 ? viajesReal : viajes).filter(v => v.estado === 'en_curso').length;
   const viajesProgramados = (viajesReal.length > 0 ? viajesReal : viajes).filter(v => v.estado === 'programado').length;
   const totalParticipantes = (viajesReal.length > 0 ? viajesReal : viajes).reduce((sum, v) => sum + (v.participantes?.length || 0), 0);
-  const kmTotales = (rutasReal.length > 0 ? rutasReal : rutas).reduce((sum, r) => sum + (parseFloat(r.distanciaEstimadaKm) || 0), 0);
+  const kmTotales = (viajesReal.length > 0 ? viajesReal : viajes)
+    .filter(v => v.estado === 'finalizado')
+    .reduce((sum, v) => sum + (parseFloat(v.ruta?.distanciaEstimadaKm) || 0), 0);
 
   // Formatear fecha
   const formatearFecha = (fechaStr) => {
@@ -719,7 +745,7 @@ const Rutas = () => {
           </div>
           <div className="stat-content">
             <span className="stat-value">{kmTotales.toFixed(1)}</span>
-            <span className="stat-label">Km Totales</span>
+            <span className="stat-label">KM RECORRIDOS</span>
           </div>
         </div>
       </div>

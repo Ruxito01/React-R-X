@@ -17,6 +17,12 @@ const Dashboard = () => {
 
   // Estados para la carga de usuarios desde el backend
   const [usuarios, setUsuarios] = useState([]);
+  const [platformStats, setPlatformStats] = useState({
+    totalUsuarios: 0,
+    kmRecorridos: 0,
+    totalViajes: 0,
+    totalVehiculos: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -142,6 +148,22 @@ const Dashboard = () => {
       const usuariosData = await usuariosRes.json();
       const vehiculosData = vehiculosRes.ok ? await vehiculosRes.json() : [];
       const viajesData = viajesRes.ok ? await viajesRes.json() : [];
+      
+      // Calcular estadisticas globales (Plataforma)
+      const kmGlobales = viajesData
+        .filter(v => (v.estado || '').toLowerCase() === 'finalizado')
+        .reduce((sum, v) => sum + (parseFloat(v.ruta?.distanciaEstimadaKm) || 0), 0);
+
+      const viajesTotales = viajesData.length;
+      const vehiculosTotales = vehiculosData.length;
+      const usuariosTotales = usuariosData.length;
+
+      setPlatformStats({
+        totalUsuarios: usuariosTotales,
+        kmRecorridos: kmGlobales,
+        totalViajes: viajesTotales,
+        totalVehiculos: vehiculosTotales
+      });
       
       // Mapear datos del backend al formato del dashboard
       const usuariosMapeados = usuariosData.map((u) => {
@@ -301,12 +323,6 @@ const Dashboard = () => {
     return `al ${dia} de ${mes}`;
   };
 
-  // Calcular totales generales para las tarjetas
-  const totalUsuarios = usuarios.length;
-  const totalKmRecorridos = usuarios.reduce((sum, u) => sum + (u.distancia || 0), 0);
-  const totalViajes = usuarios.reduce((sum, u) => sum + (u.rutasMes || 0), 0);
-  const totalVehiculos = usuarios.reduce((sum, u) => sum + (u.vehiculos || 0), 0);
-
   return (
     <div className="dashboard-container" style={{ backgroundImage: `url(${fondoDashboard})` }}>
       {/* Tarjetas Resumen */}
@@ -322,7 +338,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-info">
             <span className="stat-value">
-              {loading ? <span className="skeleton skeleton-card-value"></span> : totalUsuarios}
+              {loading ? <span className="skeleton skeleton-card-value"></span> : platformStats.totalUsuarios}
             </span>
             <span className="stat-label">Usuarios Totales</span>
           </div>
@@ -336,9 +352,9 @@ const Dashboard = () => {
           </div>
           <div className="stat-info">
             <span className="stat-value">
-              {loading ? <span className="skeleton skeleton-card-value"></span> : `${totalKmRecorridos.toFixed(1)}`}
+              {loading ? <span className="skeleton skeleton-card-value"></span> : `${platformStats.kmRecorridos.toFixed(1)}`}
             </span>
-            <span className="stat-label">Km Totales</span>
+            <span className="stat-label">KM RECORRIDOS</span>
           </div>
         </div>
         <div className="stat-card">
@@ -349,7 +365,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-info">
             <span className="stat-value">
-              {loading ? <span className="skeleton skeleton-card-value"></span> : totalViajes}
+              {loading ? <span className="skeleton skeleton-card-value"></span> : platformStats.totalViajes}
             </span>
             <span className="stat-label">Viajes Totales</span>
           </div>
@@ -365,7 +381,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-info">
             <span className="stat-value">
-              {loading ? <span className="skeleton skeleton-card-value"></span> : totalVehiculos}
+              {loading ? <span className="skeleton skeleton-card-value"></span> : platformStats.totalVehiculos}
             </span>
             <span className="stat-label">Vehículos Totales</span>
           </div>

@@ -27,6 +27,9 @@
     --skeleton-shimmer-start: rgba(255, 255, 255, 0);
     --skeleton-shimmer-mid: rgba(255, 255, 255, 0.5);
     --skeleton-shimmer-end: rgba(255, 255, 255, 0);
+
+    /* Layout Stability */
+    scrollbar-gutter: stable;
 }
 
 [data-theme='dark'] {
