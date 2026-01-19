@@ -74,7 +74,7 @@
     position: relative;
     z-index: 1;
     max-width: 1400px;
-    /* Removed width: 100% to prevent overflow */
+    width: 100%;
     margin: 0 auto;
     border: 2px solid var(--border-subtle);
     min-height: 400px;
@@ -340,8 +340,10 @@
     animation-fill-mode: both;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 400px;
+    /* Removed flex: 1 and min-height to prevent stretching */
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
 }
 
 @keyframes slideInScaleUp {
@@ -359,29 +361,21 @@
 .users-table {
     width: 100%;
     border-collapse: collapse;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 
 .users-table thead {
     background: #FF6610;
     color: white;
-    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .users-table tbody {
-    flex: 1;
-    overflow-y: auto;
-    display: block;
+    /* Restore standard table behavior */
 }
 
-.users-table thead,
-.users-table tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-}
+/* Remove separate display table for rows/thead since we use standard table now */
 
 .users-table th {
     padding: 0.8rem;
@@ -445,12 +439,65 @@
     font-size: 0.85rem;
 }
 
-/* Altura para tabla de usuarios - flexible */
+/* Buscador de usuarios */
+.search-container {
+    padding: 1rem 1.5rem 0.5rem 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.user-search-input:focus {
+    border-color: #FF6610;
+    box-shadow: 0 0 0 2px rgba(255, 102, 16, 0.2);
+}
+
+.search-icon {
+    left: 2.2rem;
+    color: #ccc;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+/* Altura para tabla de usuarios - fija estricta */
+/* Altura para tabla de usuarios - fija estricta */
 .table-scroll-container {
-    flex: 1;
-    min-height: 0;
+    height: 350px !important;
+    max-height: 350px !important;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
+    border-radius: 0 0 12px 12px;
+
+    /* Custom Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #FF6610 rgba(0, 0, 0, 0.05);
+}
+
+.table-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #FF6610;
+    border-radius: 3px;
 }
 
 /* Gráficos con animaciones espectaculares y escalonadas */
@@ -505,7 +552,7 @@
 }
 
 .chart-title-bold {
-    color: #666;
+    color: #ccc;
     font-weight: 700;
     font-size: 0.9rem;
     margin-bottom: 1rem;
@@ -580,7 +627,7 @@
     justify-content: space-between;
     padding: 0.5rem 0;
     font-size: 0.75rem;
-    color: #666;
+    color: #ccc;
     font-weight: 600;
 }
 
@@ -633,7 +680,7 @@
 .bar-label-bottom {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #666;
+    color: #ccc;
     font-weight: 600;
 }
 

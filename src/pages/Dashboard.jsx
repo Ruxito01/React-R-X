@@ -46,8 +46,19 @@ const Dashboard = () => {
     );
   };
   
+  // Estado para busqueda
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Ordenar usuarios segun estado
-  const usuariosOrdenados = [...usuarios].sort((a, b) => {
+  const usuariosOrdenados = [...usuarios]
+    .filter(u => {
+      // Filtrar por nombre o alias
+      const termino = searchTerm.toLowerCase();
+      const nombre = (u.nombre || '').toLowerCase();
+      const alias = (u.alias || '').toLowerCase();
+      return nombre.includes(termino) || alias.includes(termino);
+    })
+    .sort((a, b) => { // ... existing sort logic ...
     const { columna, direccion } = ordenamiento;
     let valorA, valorB;
     
@@ -168,31 +179,35 @@ const Dashboard = () => {
           if (viaje.participantes) {
             viaje.participantes.forEach(p => {
               if (p.usuario?.id === u.id) {
-                viajesParticipados++;
-                const kmViaje = p.kmRecorridos ? parseFloat(p.kmRecorridos) : 0;
-                kmTotales += kmViaje;
-                
-                const fechaViaje = viaje.fechaInicioReal || viaje.fechaProgramada;
-                if (fechaViaje) {
-                  const fecha = new Date(fechaViaje);
+                // SOLO CONTAR VIAJES FINALIZADOS
+                const estadoViaje = viaje.estado ? viaje.estado.toUpperCase() : '';
+                if (estadoViaje === 'FINALIZADO') {
+                  viajesParticipados++;
+                  const kmViaje = p.kmRecorridos ? parseFloat(p.kmRecorridos) : 0;
+                  kmTotales += kmViaje;
                   
-                  // Agregar a viajes del último mes
-                  if (fecha >= hace30Dias) {
-                    viajesUltimoMes.push({
-                      fecha: fecha,
-                      km: kmViaje,
-                      nombre: viaje.ruta?.nombre || 'Viaje',
-                      estado: viaje.estado
-                    });
-                  }
-                  
-                  // Agregar a km por día si está en la última semana
-                  const fechaSinHora = new Date(fecha);
-                  fechaSinHora.setHours(0, 0, 0, 0);
-                  if (fechaSinHora >= hace7Dias) {
-                    const key = fechaSinHora.toDateString();
-                    if (kmPorDia[key]) {
-                      kmPorDia[key].km += kmViaje;
+                  const fechaViaje = viaje.fechaInicioReal || viaje.fechaProgramada;
+                  if (fechaViaje) {
+                    const fecha = new Date(fechaViaje);
+                    
+                    // Agregar a viajes del último mes
+                    if (fecha >= hace30Dias) {
+                      viajesUltimoMes.push({
+                        fecha: fecha,
+                        km: kmViaje,
+                        nombre: viaje.ruta?.nombre || 'Viaje',
+                        estado: viaje.estado
+                      });
+                    }
+                    
+                    // Agregar a km por día si está en la última semana
+                    const fechaSinHora = new Date(fecha);
+                    fechaSinHora.setHours(0, 0, 0, 0);
+                    if (fechaSinHora >= hace7Dias) {
+                      const key = fechaSinHora.toDateString();
+                      if (kmPorDia[key]) {
+                        kmPorDia[key].km += kmViaje;
+                      }
                     }
                   }
                 }
@@ -419,6 +434,23 @@ const Dashboard = () => {
 
           {/* Tabla de Usuarios */}
           <div className="users-table-card">
+            {/* Buscador de usuarios */}
+            <div className="search-container">
+               <input 
+                type="text" 
+                placeholder="Buscar por nombre o alias..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="user-search-input"
+              />
+              <div className="search-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+            </div>
+
             <div className="table-scroll-container">
               <table className="users-table">
                 <thead>

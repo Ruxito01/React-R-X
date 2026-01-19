@@ -389,11 +389,11 @@ const Vehiculos = () => {
 
                 {/* Propietario */}
                 <div className="number-fifteen-section" style={{ flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#666', fontWeight: '600' }}>Propietario</div>
+                  <div className="vehicle-propietario-label">Propietario</div>
                   {loading ? (
                     <div className="skeleton" style={{ height: '24px', width: '100px' }}></div>
                   ) : (
-                    <div style={{ fontSize: '1rem', fontWeight: '700', color: '#1a1a1a', textAlign: 'center' }}>
+                    <div className="vehicle-propietario-value">
                       {selectedVehicle?.propietario || 'Sin propietario'}
                     </div>
                   )}
@@ -609,14 +609,7 @@ const Vehiculos = () => {
                           onMouseEnter={() => setTooltipTipo({ visible: true, index })}
                           onMouseLeave={() => setTooltipTipo({ visible: false, index: null })}
                         >
-                          <div style={{ 
-                            fontSize: '12px', 
-                            fontWeight: '600', 
-                            color: '#333', 
-                            marginBottom: '5px',
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}>
+                          <div className="distribution-chart-label">
                             <span>{tipo}</span>
                             <span style={{ color: colores[index % colores.length] }}>{cantidad} ({porcentaje.toFixed(0)}%)</span>
                           </div>
@@ -679,20 +672,10 @@ const Vehiculos = () => {
                             key={i} 
                             style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', padding: '4px', borderRadius: '6px', cursor: 'pointer', transition: 'background 0.2s' }}
                             className={`marca-bar-hover ${tooltipMarca.index === i ? 'marca-bar-activo' : ''}`}
-                            onMouseEnter={() => setTooltipMarca({ visible: true, index: i })}
                             onMouseLeave={() => setTooltipMarca({ visible: false, index: null })}
                           >
                             {/* Nombre de marca */}
-                            <div style={{ 
-                              width: '80px', 
-                              fontSize: '0.8rem', 
-                              fontWeight: '600', 
-                              color: '#333',
-                              textAlign: 'right',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
+                            <div className="brand-chart-label">
                               {item.marca}
                             </div>
                             

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleMap, LoadScript, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
 import { GraficoTopRutas, GraficoTendencia, GraficoEstado } from '../components/EstadisticasRutas';
 import { useTheme } from '../context/ThemeContext';
 import './Rutas.css';
@@ -171,6 +171,11 @@ const Rutas = () => {
   const [mapaCargando, setMapaCargando] = useState(true);
   const [googleLoaded, setGoogleLoaded] = useState(false);
   
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+  });
+
   // Estado para el centro del mapa (controlado manualmente para evitar recentrados automaticos)
   const [mapCenter, setMapCenter] = useState(null);
   
@@ -328,6 +333,17 @@ const Rutas = () => {
       }
     );
   }, []);
+
+  // Efecto para inicializar el mapa cuando carga el script
+  useEffect(() => {
+    if (isLoaded) {
+      setGoogleLoaded(true);
+      // Calcular ruta inicial si hay ruta seleccionada y puntos cargados
+      if (rutaSeleccionada && puntosRuta.length > 0) {
+        calcularRuta(rutaSeleccionada, puntosRuta);
+      }
+    }
+  }, [isLoaded, rutaSeleccionada, puntosRuta, calcularRuta]);
 
   const seleccionarRuta = async (ruta) => {
     setIsUserSelection(true); // Marcar como seleccion manual
@@ -989,24 +1005,25 @@ const Rutas = () => {
                   
                   {/* Mapa de Google Maps */}
                   <div className="google-mapa-container" style={{ display: expandirDetallesViaje ? 'none' : 'block' }}>
+                    {/* Error de carga de API */}
+                    {loadError && (
+                      <div className="mapa-error-container" style={{ padding: '2rem', textAlign: 'center', color: '#f44336' }}>
+                        <div>Error al cargar Google Maps API</div>
+                        <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#666' }}>
+                          {loadError.message}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Shimmer mientras carga */}
-                    {(mapaCargando || !googleLoaded) && (
+                    {(mapaCargando || !isLoaded) && !loadError && (
                       <div className="mapa-shimmer">
                         <div className="shimmer-animation"></div>
                         <div className="shimmer-text">Cargando mapa...</div>
                       </div>
                     )}
                     
-                    <LoadScript 
-                      googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-                      onLoad={() => {
-                        setGoogleLoaded(true);
-                        // Calcular ruta inicial si hay ruta seleccionada
-                        if (rutaSeleccionada) {
-                          calcularRuta(rutaSeleccionada, puntosRuta);
-                        }
-                      }}
-                    >
+                    {isLoaded && (
                       <GoogleMap
                         mapContainerStyle={{ width: '100%', height: '220px', borderRadius: '8px' }}
                         center={mapCenter || {
@@ -1112,7 +1129,7 @@ const Rutas = () => {
                           />
                         )}
                       </GoogleMap>
-                    </LoadScript>
+                    )}
                     
                     {/* Controles del mapa */}
                     <div className="mapa-controles">
