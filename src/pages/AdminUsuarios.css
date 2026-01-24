@@ -213,9 +213,14 @@
 
 .modal-content-large {
     background: var(--bg-card);
-    width: 90%;
-    max-width: 900px;
+    width: 95%;
+    /* Increased width */
+    max-width: 1100px;
+    /* Increased max-width */
+    height: 700px;
+    /* Fixed sized as requested */
     max-height: 90vh;
+    /* Keep as safety */
     border-radius: 20px;
     padding: 0;
     display: flex;
@@ -233,6 +238,8 @@
     display: flex;
     align-items: center;
     gap: 2rem;
+    flex-shrink: 0;
+    /* Header shouldn't shrink */
 }
 
 .profile-avatar-large {
@@ -295,7 +302,8 @@
 }
 
 .modal-body-scroll {
-    padding: 2rem;
+    padding: 0 2rem 2rem;
+    /* Remove top padding for seamless layout with sticky/fixed tabs */
     overflow-y: auto;
     flex: 1;
 }
@@ -305,7 +313,15 @@
     display: flex;
     gap: 1rem;
     border-bottom: 2px solid var(--border-color);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    /* Adjust margin */
+}
+
+/* New class for wrapper of tabs to keep them fixed/separated */
+.profile-tabs-fixed {
+    padding: 2rem 2rem 0;
+    background: var(--bg-card);
+    flex-shrink: 0;
 }
 
 .tab-btn {

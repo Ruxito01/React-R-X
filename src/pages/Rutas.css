@@ -138,19 +138,21 @@
 }
 
 /* Tabla de rutas - 6 filas de alto */
+/* Tabla de rutas - Ajuste dinámico a la tarjeta */
+/* Tabla de rutas - Ajuste dinámico a la tarjeta */
 .table-scroll-rutas {
-    height: 400px !important;
-    min-height: 400px !important;
-    max-height: 400px !important;
-    flex: none !important;
+    flex: 1 1 auto !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto;
 }
 
-/* Tabla de viajes - altura aumentada para 2 filas mas */
+/* Tabla de viajes - Ajuste dinámico a la tarjeta */
 .table-scroll-viajes {
-    height: 386px !important;
-    min-height: 386px !important;
-    max-height: 386px !important;
-    flex: none !important;
+    flex: 1 1 auto !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto;
 }
 
 .table-scroll-container::-webkit-scrollbar {
@@ -581,16 +583,19 @@
 .routes-table-card {
     background: var(--bg-card);
     border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
     overflow: hidden;
-    box-shadow: var(--shadow-card);
-    animation: slideInScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
-    animation-fill-mode: both;
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 250px;
+    /* Ocupar espacio restante en la columna flex */
     height: 100%;
-    /* Asegurar altura completa */
+    /* Ocupar toda la altura disponible de la columna */
+    min-height: 450px;
+    /* Altura mínima consistente */
+    animation: slideInScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+    animation-fill-mode: both;
 }
 
 @keyframes slideInScaleUp {
@@ -2000,4 +2005,132 @@
 .punto-icono {
     color: #FF6610;
     font-size: 0.7rem;
+}
+
+.punto-item-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    padding: 4px 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.punto-item-mini:hover {
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.punto-icono-mini {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.punto-icono-mini.inicio {
+    color: #4CAF50;
+    /* Green for start */
+}
+
+.punto-icono-mini.destino {
+    color: #F44336;
+    /* Red for destination */
+}
+
+.punto-icono-mini.paso {
+    color: var(--text-secondary);
+    /* Neutral for waypoints */
+}
+
+.punto-icono-mini.servicio {
+    color: #FF9800;
+    /* Orange for service */
+}
+
+/* Texto de los puntos */
+.punto-texto {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.punto-texto small {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Estilos para Sección de Invitación y QR */
+.viaje-invitacion-section {
+    background: var(--bg-card);
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 2px dashed #FF6610;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.invitacion-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.invitacion-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.qr-code-wrapper {
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.invitacion-code-box {
+    background: var(--bg-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.invitacion-code-box:hover {
+    background: #FF6610;
+    color: white;
+    border-color: #FF6610;
+    transform: scale(1.05);
+}
+
+.invitacion-code-box.copiado {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+    transform: scale(1.05);
+}
+
+.copy-icon {
+    font-size: 1rem;
 }

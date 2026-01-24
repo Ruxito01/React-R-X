@@ -12,8 +12,8 @@
 /* Custom override for this page's main card */
 .admin-avatares-card {
     height: calc(100vh - 110px) !important;
-    max-width: 1400px !important;
-    margin-top: 90px;
+    max-width: 1200px !important;
+    margin-top: 2rem;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;

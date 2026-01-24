@@ -8,12 +8,34 @@ import BotonPdfFlotante from '../components/BotonPdfFlotante';
 
 import { GoogleMap, useJsApiLoader, HeatmapLayerF } from '@react-google-maps/api';
 
+// Componente para manejar avatar de comunidad con fallback
+const CommunityAvatar = ({ url, nombre }) => {
+  const [error, setError] = useState(false);
+
+  if (!url || error) {
+    return (
+      <div className="foto-placeholder" style={{ color: 'white', fontWeight: 'bold', fontSize: '1.5rem' }}>
+        {nombre ? nombre.charAt(0).toUpperCase() : '👥'}
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={url} 
+      alt={nombre} 
+      onError={() => setError(true)}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  );
+};
+
 const DashboardGeneral = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   
   // Mover libraries fuera del componente o usar useMemo para evitar re-renders infinitos
-  const [libraries] = useState(['visualization']);
+  const [libraries] = useState(['places', 'visualization']);
   
   // Referencias para controlar el mapa
   const mapRef = React.useRef(null);
@@ -752,7 +774,7 @@ const DashboardGeneral = () => {
                               <strong>{d.cantidad}</strong>
                             </div>
                             <div className="tooltip-row">
-                              <span>Promedio semanal:</span>
+                              <span>Promedio diario:</span>
                               <strong>{(viajesPorDia.reduce((a, b) => a + b.cantidad, 0) / 7).toFixed(1)}</strong>
                             </div>
                             {d.cantidad === Math.max(...viajesPorDia.map(x => x.cantidad)) && d.cantidad > 0 && (
@@ -797,11 +819,7 @@ const DashboardGeneral = () => {
                       <div key={c.id} className="comunidad-card">
                         <div className="comunidad-header">
                           <div className="comunidad-foto">
-                            {c.urlImagen ? (
-                              <img src={c.urlImagen} alt={c.nombre} />
-                            ) : (
-                              <div className="foto-placeholder">👥</div>
-                            )}
+                            <CommunityAvatar url={c.urlImagen} nombre={c.nombre} />
                           </div>
                           <div className="comunidad-info">
                             <span className="comunidad-nombre">{c.nombre}</span>

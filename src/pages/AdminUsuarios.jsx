@@ -3,11 +3,12 @@ import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from '@react-go
 import './AdminUsuarios.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import TableImage from '../components/TableImage';
+import Avatar3DViewer from '../components/Avatar3DViewer';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const libraries = ['places']; // Define libraries outside to avoid re-renders
+const libraries = ['places', 'visualization']; // Define libraries outside to avoid re-renders
 
 const AdminUsuarios = () => {
     // Cargar API de Google Maps globalmente para evitar parpadeos
@@ -51,6 +52,7 @@ const AdminUsuarios = () => {
     const [fotosUsuario, setFotosUsuario] = useState([]);
     const [cargandoFotos, setCargandoFotos] = useState(false);
     const [fotoLightbox, setFotoLightbox] = useState(null);
+    const [avatarUrl, setAvatarUrl] = useState(null);
 
     // ... (Mantener lógica de carga de usuarios intacta, omitida por brevedad en reemplazo pero NO eliminar) ...
     // NOTA: Para este replace solo reemplazamos la parte superior y lógica nueva del mapa, conservando el medio.
@@ -335,12 +337,27 @@ const AdminUsuarios = () => {
         setDirectionsResponse(null);
     };
 
-    const abrirModal = (usuario) => {
+    const abrirModal = async (usuario) => {
         setUsuarioSeleccionado(usuario);
         setModalAbierto(true);
         setActiveTab('info');
         setViewMode('list');
+        setAvatarUrl(null); // Reset
         cargarDetallesUsuario(usuario);
+        
+        // Cargar Avatar 3D si tiene
+        const avatarId = usuario.avatarActivo?.id || usuario.avatarActivoId || usuario.avatar_activo_id;
+        if (avatarId) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/catalogoavatar/${avatarId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAvatarUrl(data.url_modelo_3d || data.urlModelo3d);
+                }
+            } catch (e) {
+                console.error("Error loading avatar", e);
+            }
+        }
     };
 
     const cerrarModal = () => {
@@ -1007,7 +1024,8 @@ const AdminUsuarios = () => {
                             </div>
                         </div>
 
-                        <div className="modal-body-scroll">
+                        {/* Pestañas fijas fuera del scroll */}
+                        <div className="profile-tabs-fixed">
                             <div className="profile-tabs">
                                 <button 
                                     className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
@@ -1021,7 +1039,15 @@ const AdminUsuarios = () => {
                                 >
                                     Fotos
                                 </button>
-        <button 
+                                {(usuarioSeleccionado.avatarActivo?.id || usuarioSeleccionado.avatarActivoId || usuarioSeleccionado.avatar_activo_id) && (
+                                    <button 
+                                        className={`tab-btn ${activeTab === 'avatar' ? 'active' : ''}`}
+                                        onClick={() => handleTabChange('avatar')}
+                                    >
+                                        Avatar 3D
+                                    </button>
+                                )}
+                                <button 
                                     className={`tab-btn ${activeTab === 'vehiculos' ? 'active' : ''}`}
                                     onClick={() => handleTabChange('vehiculos')}
                                 >
@@ -1046,6 +1072,9 @@ const AdminUsuarios = () => {
                                     Comunidades
                                 </button>
                             </div>
+                        </div>
+
+                        <div className="modal-body-scroll">
 
                             <div className="tab-content">
                                 {activeTab === 'info' && (
@@ -1144,9 +1173,9 @@ const AdminUsuarios = () => {
                                                 )}
                                             </>
                                         ) : (
-                                            <div className="gallery-empty">
-                                                <div className="gallery-empty-icon">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                            <div className="empty-state">
+                                                <div className="empty-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                                                         <rect x="3" y="3" width="18" height="18" rx="2"/>
                                                         <circle cx="8.5" cy="8.5" r="1.5"/>
                                                         <path d="M21 15l-5-5L5 21"/>
@@ -1155,6 +1184,15 @@ const AdminUsuarios = () => {
                                                 <p>Este usuario no ha subido fotos</p>
                                             </div>
                                         )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'avatar' && (
+                                    <div style={{ width: '100%', height: '450px', padding: '1rem' }}>
+                                        <Avatar3DViewer 
+                                            url={avatarUrl} 
+                                            animationName={(usuarioSeleccionado.animacion_avatar || usuarioSeleccionado.animacionAvatar) || 'Idle'} 
+                                        />
                                     </div>
                                 )}
 
@@ -1298,8 +1336,8 @@ const AdminUsuarios = () => {
                                                         <li key={c.id} className="detail-list-item" style={{ cursor: 'default' }}>
                                                             <div className="detail-row-main">
                                                                 <strong>{c.nombre || 'Comunidad sin nombre'}</strong>
-                                                                <span className={`badge-general ${c.privacidad === 'privada' ? 'privada' : 'publica'}`}>
-                                                                    {c.privacidad ? c.privacidad.charAt(0).toUpperCase() + c.privacidad.slice(1) : 'Pública'}
+                                                                <span className={`badge-general ${(c.nivelPrivacidad || c.nivel_privacidad || c.privacidad || '').toLowerCase() === 'privada' ? 'privada' : 'publica'}`}>
+                                                                    {(c.nivelPrivacidad || c.nivel_privacidad || c.privacidad) ? (c.nivelPrivacidad || c.nivel_privacidad || c.privacidad).charAt(0).toUpperCase() + (c.nivelPrivacidad || c.nivel_privacidad || c.privacidad).slice(1).toLowerCase() : 'Pública'}
                                                                 </span>
                                                             </div>
                                                             <div className="detail-row-sub">

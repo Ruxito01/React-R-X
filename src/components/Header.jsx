@@ -165,6 +165,13 @@ const Header = () => {
                 >
                   Logros
                 </NavLink>
+                <NavLink 
+                  to="/admin/alertas" 
+                  className={({ isActive }) => isActive ? "dropdown-item active" : "dropdown-item"}
+                  onClick={() => { setAdminDropdownOpen(false); closeMobileMenu(); }}
+                >
+                  Alertas
+                </NavLink>
               </div>
             </div>
           </nav>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
+import { QRCodeCanvas } from 'qrcode.react';
 import { GraficoTopRutas, GraficoTendencia, GraficoEstado } from '../components/EstadisticasRutas';
 import { useTheme } from '../context/ThemeContext';
 import './Rutas.css';
@@ -105,6 +106,9 @@ const Rutas = () => {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   
+  // Estado para feedback de copiado
+  const [codigoCopiado, setCodigoCopiado] = useState(false);
+  
   // Estado para seleccion
   const [rutaSeleccionada, setRutaSeleccionada] = useState(null);
   const [viajeSeleccionado, setViajeSeleccionado] = useState(null);
@@ -171,9 +175,13 @@ const Rutas = () => {
   const [mapaCargando, setMapaCargando] = useState(true);
   const [googleLoaded, setGoogleLoaded] = useState(false);
   
+  // Definir librerias una sola vez para evitar recargas (coincidiendo con DashboardGeneral)
+  const [libraries] = useState(['places', 'visualization']);
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries: libraries
   });
 
   // Estado para el centro del mapa (controlado manualmente para evitar recentrados automaticos)
@@ -900,6 +908,37 @@ const Rutas = () => {
                                 : 'Desconocido'}
                             </span>
                           </div>
+
+                          {/* Codigo de Invitacion y QR */}
+                          <div className="viaje-invitacion-section">
+                            <div className="qr-code-wrapper">
+                              <QRCodeCanvas 
+                                value={`https://ruxapp.vercel.app/invite?code=${viajeSeleccionado.codigoInvitacion}`} 
+                                size={120} 
+                                level={"H"}
+                                includeMargin={true}
+                                bgColor={"#ffffff"}
+                                fgColor={"#FF6610"}
+                              />
+                            </div>
+                            <div className="invitacion-info">
+                              <span className="invitacion-label">CÓDIGO DE INVITACIÓN</span>
+                              <div 
+                                className={`invitacion-code-box ${codigoCopiado ? 'copiado' : ''}`}
+                                onClick={() => {
+                                  if (viajeSeleccionado.codigoInvitacion) {
+                                    navigator.clipboard.writeText(viajeSeleccionado.codigoInvitacion);
+                                    setCodigoCopiado(true);
+                                    setTimeout(() => setCodigoCopiado(false), 2000);
+                                  }
+                                }}
+                                title="Click para copiar"
+                              >
+                                {codigoCopiado ? '¡COPIADO!' : (viajeSeleccionado.codigoInvitacion || 'SIN CÓDIGO')}
+                                <span className="copy-icon">{codigoCopiado ? '✅' : '📋'}</span>
+                              </div>
+                            </div>
+                          </div>
                           
                           {/* Fecha del viaje */}
                           <div className="viaje-fecha">
@@ -965,7 +1004,7 @@ const Rutas = () => {
                                 style={{ cursor: 'pointer' }}
                               >
                                 <div className="punto-icono-mini inicio">
-                                  <svg viewBox="0 0 24 24" fill="white" width="10" height="10">
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
                                     <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
                                   </svg>
                                 </div>
