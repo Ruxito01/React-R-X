@@ -741,7 +741,7 @@ const Vehiculos = () => {
 
         {/* Top 3 Usuarios con mas vehiculos - Podio */}
         <div className="chart-card chart-card-full-width" style={{ marginTop: '1rem', overflow: 'hidden' }}>
-          <div className="chart-title-bold">TOP 3 USUARIOS CON MAS VEHICULOS</div>
+          <div className="chart-title-bold">TOP 3 USUARIOS (VEHICULOS)</div>
           <div style={{ padding: '1rem' }}>
             {loading ? (
               <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>

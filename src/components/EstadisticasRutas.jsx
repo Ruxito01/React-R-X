@@ -27,7 +27,7 @@ export const GraficoTopRutas = ({ rutas = [], viajes = [] }) => {
 
   return (
     <div className="grafico-card individual" id="grafica-rutas-top">
-      <h4>Top Rutas Mas Activas</h4>
+      <h4>Top Rutas concurridas</h4>
       <div className="grafico-wrapper mini">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
