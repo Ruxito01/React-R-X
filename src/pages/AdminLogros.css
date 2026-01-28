@@ -103,3 +103,117 @@
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
     color: var(--text-muted);
 }
+
+/* Badge de conteo */
+.badge-count {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-count.no-unlocks {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.badge-count.has-unlocks {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+[data-theme='dark'] .badge-count.no-unlocks {
+    background-color: #333;
+    color: #aaa;
+}
+
+[data-theme='dark'] .badge-count.has-unlocks {
+    background-color: rgba(25, 118, 210, 0.2);
+    color: #90caf9;
+}
+
+/* Mecanica Box */
+.mechanics-container {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.mechanics-title {
+    color: #d35400;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.mechanics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.mechanics-grid label {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.mechanics-grid select,
+.mechanics-grid input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: white;
+}
+
+.mechanics-help {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Dark Mode para Mecanica Box */
+[data-theme='dark'] .mechanics-container {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .mechanics-grid select,
+[data-theme='dark'] .mechanics-grid input {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .mechanics-help {
+    color: var(--text-muted);
+}
+
+.th-center,
+.td-center {
+    text-align: center;
+}
+
+/* Botones Deshabilitados */
+.btn-editar.disabled,
+.btn-eliminar.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e0e0e0;
+    color: #999;
+    border-color: #d0d0d0;
+    pointer-events: none;
+    /* Asegura que no sea clickeable */
+}
+
+/* Ajustes específicos para modo oscuro si necesario */
+[data-theme='dark'] .btn-editar.disabled,
+[data-theme='dark'] .btn-eliminar.disabled {
+    background-color: #333;
+    color: #555;
+    border-color: #444;
+}

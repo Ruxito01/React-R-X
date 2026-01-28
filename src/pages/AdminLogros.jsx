@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './AdminLogros.css';
 import TableImage from '../components/TableImage';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
-import { subirImagenLogro } from '../services/supabaseStorageService';
+import { subirImagenLogro, eliminarImagenLogro } from '../services/supabaseStorageService';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -15,11 +15,15 @@ const AdminLogros = () => {
   // Estados del modal
   const [modalAbierto, setModalAbierto] = useState(false);
   const [logroEditando, setLogroEditando] = useState(null);
+  
+  // LOGICA MECANICA: Separamos el string "TIPO:VALOR" en dos estados para la UI
+  const [tipoCriterio, setTipoCriterio] = useState('VIAJES'); // Default
+  const [valorMeta, setValorMeta] = useState('');
+  
   const [formulario, setFormulario] = useState({ 
     nombre: '', 
     descripcion: '', 
-    urlIcono: '', 
-    criterioDesbloqueo: '' 
+    urlIcono: ''
   });
   const [guardando, setGuardando] = useState(false);
   
@@ -73,7 +77,7 @@ const AdminLogros = () => {
   const cargarLogros = async () => {
     try {
       setCargando(true);
-      const response = await fetch(`${API_BASE_URL}/logro`);
+      const response = await fetch(`${API_BASE_URL}/logro/stats`);
       if (!response.ok) throw new Error('Error al cargar logros');
       const data = await response.json();
       setLogros(data);
@@ -87,7 +91,11 @@ const AdminLogros = () => {
 
   const abrirModalCrear = () => {
     setLogroEditando(null);
-    setFormulario({ nombre: '', descripcion: '', urlIcono: '', criterioDesbloqueo: '' });
+    setFormulario({ nombre: '', descripcion: '', urlIcono: '' });
+    // Resetear mecanica
+    setTipoCriterio('VIAJES');
+    setValorMeta('');
+    
     setArchivoImagen(null);
     setPreviewImagen('');
     setModalAbierto(true);
@@ -98,9 +106,28 @@ const AdminLogros = () => {
     setFormulario({ 
       nombre: logro.nombre, 
       descripcion: logro.descripcion || '',
-      urlIcono: logro.urlIcono || '',
-      criterioDesbloqueo: logro.criterioDesbloqueo || ''
+      urlIcono: logro.urlIcono || ''
     });
+    
+    // Parsear criterioDesbloqueo (EJ: "VIAJES:5")
+    if (logro.criterioDesbloqueo && logro.criterioDesbloqueo.includes(':')) {
+      const partes = logro.criterioDesbloqueo.split(':');
+      if (partes.length === 2) {
+        setTipoCriterio(partes[0].toUpperCase());
+        setValorMeta(partes[1]);
+      } else {
+        // Fallback si el formato es raro
+        setTipoCriterio('MANUAL');
+        setValorMeta(logro.criterioDesbloqueo);
+      }
+    } else if (logro.criterioDesbloqueo) {
+         setTipoCriterio('MANUAL');
+         setValorMeta(logro.criterioDesbloqueo);
+    } else {
+      setTipoCriterio('VIAJES');
+      setValorMeta('');
+    }
+
     setArchivoImagen(null);
     setPreviewImagen(logro.urlIcono || '');
     setModalAbierto(true);
@@ -109,7 +136,9 @@ const AdminLogros = () => {
   const cerrarModal = () => {
     setModalAbierto(false);
     setLogroEditando(null);
-    setFormulario({ nombre: '', descripcion: '', urlIcono: '', criterioDesbloqueo: '' });
+    setFormulario({ nombre: '', descripcion: '', urlIcono: '' });
+    setTipoCriterio('VIAJES');
+    setValorMeta('');
     setArchivoImagen(null);
     setPreviewImagen('');
   };
@@ -124,8 +153,8 @@ const AdminLogros = () => {
     const file = e.target.files[0];
     if (!file) return;
     
-    if (!file.type.startsWith('image/')) {
-      setError('Solo se permiten archivos de imagen');
+    if (file.type !== 'image/gif') {
+      setError('Solo se permiten archivos GIF animados');
       return;
     }
     
@@ -160,6 +189,16 @@ const AdminLogros = () => {
       
       // Si hay un archivo de imagen nuevo, subirlo a Supabase
       if (archivoImagen) {
+        // Si estamos editando y había una imagen anterior, borrarla
+        if (logroEditando && logroEditando.urlIcono) {
+            try {
+                // No bloqueamos si falla el borrado, solo logueamos
+                await eliminarImagenLogro(logroEditando.urlIcono); 
+            } catch (elimErr) {
+                console.warn("No se pudo eliminar la imagen anterior:", elimErr);
+            }
+        }
+
         setSubiendoImagen(true);
         const urlSubida = await subirImagenLogro(archivoImagen, formulario.nombre);
         setSubiendoImagen(false);
@@ -178,11 +217,21 @@ const AdminLogros = () => {
       
       const method = logroEditando ? 'PUT' : 'POST';
       
+      // CONSTRUIR EL CRITERIO FINAL
+      let criterioFinal = null;
+      if (valorMeta) {
+        if (tipoCriterio === 'MANUAL') {
+           criterioFinal = valorMeta;
+        } else {
+           criterioFinal = `${tipoCriterio}:${valorMeta}`;
+        }
+      }
+
       const body = {
         nombre: formulario.nombre.trim(),
         descripcion: formulario.descripcion.trim() || null,
         urlIcono: urlIcono || null,
-        criterioDesbloqueo: formulario.criterioDesbloqueo.trim() || null
+        criterioDesbloqueo: criterioFinal
       };
 
       if (logroEditando) {
@@ -209,6 +258,15 @@ const AdminLogros = () => {
 
   const eliminarLogro = async (id) => {
     try {
+      // 1. Encontrar el logro para ver si tiene imagen
+      const logroAEliminar = logros.find(l => l.id === id);
+      
+      // 2. Si tiene imagen, eliminarla de Supabase
+      if (logroAEliminar && logroAEliminar.urlIcono) {
+        await eliminarImagenLogro(logroAEliminar.urlIcono);
+      }
+
+      // 3. Eliminar registro del backend
       const response = await fetch(`${API_BASE_URL}/logro/${id}`, {
         method: 'DELETE'
       });
@@ -335,59 +393,74 @@ const AdminLogros = () => {
                     <th className="th-sortable" onClick={() => ordenarPor('criterio')}>
                       Criterio <IconoOrden columna="criterio" />
                     </th>
+                    <th className="th-center">Desbloqueos</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logrosFiltrados.map((logro, index) => (
-                    <tr key={logro.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
-                      <td className="td-id">{logro.id}</td>
-                      <td className="td-icono">
-                        {logro.urlIcono ? (
-                          <TableImage 
-                            src={logro.urlIcono} 
-                            alt={logro.nombre} 
-                            className="icono-preview"
-                            width="40px"
-                            height="40px"
-                          />
-                        ) : (
-                          <div className="icono-placeholder">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="8" r="6"/>
-                              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                  {logrosFiltrados.map((logro, index) => {
+                    const tieneDesbloqueos = logro.cantidadDesbloqueos > 0;
+                    return (
+                      <tr key={logro.id} className={index % 2 === 0 ? 'row-light' : 'row-white'}>
+                        <td className="td-id">{logro.id}</td>
+                        <td className="td-icono">
+                          {logro.urlIcono ? (
+                            <TableImage 
+                              src={logro.urlIcono} 
+                              alt={logro.nombre} 
+                              className="icono-preview"
+                              width="40px"
+                              height="40px"
+                            />
+                          ) : (
+                            <div className="icono-placeholder">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="8" r="6"/>
+                                <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                              </svg>
+                            </div>
+                          )}
+                        </td>
+                        <td className="td-nombre">{logro.nombre}</td>
+                        <td className="td-descripcion" title={logro.descripcion}>
+                          {truncarTexto(logro.descripcion)}
+                        </td>
+                        <td className="td-criterio">
+                          {logro.criterioDesbloqueo ? (
+                            <code className="criterio-code">{logro.criterioDesbloqueo}</code>
+                          ) : '-'}
+                        </td>
+                        <td className="td-center">
+                          <span className={`badge-count ${tieneDesbloqueos ? 'has-unlocks' : 'no-unlocks'}`}>
+                            {logro.cantidadDesbloqueos || 0}
+                          </span>
+                        </td>
+                        <td className="td-acciones">
+                          <button 
+                            className={`btn-editar ${tieneDesbloqueos ? 'disabled' : ''}`}
+                            onClick={() => !tieneDesbloqueos && abrirModalEditar(logro)} 
+                            title={tieneDesbloqueos ? "No se puede editar un logro ya desbloqueado" : "Editar"}
+                            disabled={tieneDesbloqueos}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
-                          </div>
-                        )}
-                      </td>
-                      <td className="td-nombre">{logro.nombre}</td>
-                      <td className="td-descripcion" title={logro.descripcion}>
-                        {truncarTexto(logro.descripcion)}
-                      </td>
-                      <td className="td-criterio">
-                        {logro.criterioDesbloqueo ? (
-                          <code className="criterio-code">{logro.criterioDesbloqueo}</code>
-                        ) : '-'}
-                      </td>
-                      <td className="td-acciones">
-                        <button className="btn-editar" onClick={() => abrirModalEditar(logro)} title="Editar">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className="btn-eliminar" 
-                          onClick={() => setConfirmandoEliminar(logro.id)}
-                          title="Eliminar"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          </button>
+                          <button 
+                            className={`btn-eliminar ${tieneDesbloqueos ? 'disabled' : ''}`}
+                            onClick={() => !tieneDesbloqueos && setConfirmandoEliminar(logro.id)}
+                            title={tieneDesbloqueos ? "No se puede eliminar un logro ya desbloqueado" : "Eliminar"}
+                            disabled={tieneDesbloqueos}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -435,12 +508,12 @@ const AdminLogros = () => {
               
               {/* Upload de imagen */}
               <div className="form-group">
-                <label>Icono del Logro</label>
+                <label>Icono del Logro (Solo GIFs)</label>
                 <div className="upload-container">
                   <input
                     type="file"
                     ref={inputFileRef}
-                    accept="image/*"
+                    accept="image/gif"
                     onChange={manejarSeleccionImagen}
                     style={{ display: 'none' }}
                     id="input-icono"
@@ -454,14 +527,21 @@ const AdminLogros = () => {
                       </button>
                     </div>
                   ) : (
-                    <label htmlFor="input-icono" className="btn-seleccionar-imagen">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                      </svg>
-                      Seleccionar icono
-                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                        <label htmlFor="input-icono" className="btn-seleccionar-imagen">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <path d="M8 12h8"/> {/* Simple representing frame */}
+                            </svg>
+                            Seleccionar GIF
+                        </label>
+                        <p style={{ marginTop: '8px', fontSize: '0.8rem', color: '#666' }}>
+                            Recomendamos descargar iconos animados en formato GIF desde{' '}
+                            <a href="https://www.flaticon.com/animated-icons" target="_blank" rel="noopener noreferrer" style={{ color: '#e67e22', textDecoration: 'underline' }}>
+                                Flaticon Animated Icons
+                            </a>.
+                        </p>
+                    </div>
                   )}
                 </div>
                 {subiendoImagen && (
@@ -471,18 +551,49 @@ const AdminLogros = () => {
                 )}
               </div>
               
-              <div className="form-group">
-                <label htmlFor="criterioDesbloqueo">Criterio de Desbloqueo (tecnico)</label>
-                <input
-                  type="text"
-                  id="criterioDesbloqueo"
-                  name="criterioDesbloqueo"
-                  value={formulario.criterioDesbloqueo}
-                  onChange={manejarCambio}
-                  placeholder="Ej: DISTANCIA_100KM, PRIMER_VIAJE"
-                />
-                <small className="form-hint">Identificador tecnico para la logica del sistema</small>
+              <div className="mechanics-container">
+                <label className="mechanics-title">Mecánica de Desbloqueo</label>
+                
+                <div className="mechanics-grid">
+                  <div>
+                    <label htmlFor="tipoCriterio">Condición</label>
+                    <select
+                      id="tipoCriterio"
+                      value={tipoCriterio}
+                      onChange={(e) => setTipoCriterio(e.target.value)}
+                    >
+                      <option value="VIAJES">Cantidad de Viajes</option>
+                      <option value="DISTANCIA">Distancia (Km)</option>
+                      <option value="RUTAS_CREADAS">Rutas Creadas</option>
+                      <option value="VEHICULOS">Vehículos Registrados</option>
+                      <option value="COMUNIDADES">Comunidades</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="valorMeta">
+                      {tipoCriterio === 'MANUAL' ? 'Código Técnico' : 'Cantidad Requerida'}
+                    </label>
+                    <input
+                      type={tipoCriterio === 'MANUAL' ? 'text' : 'number'}
+                      id="valorMeta"
+                      value={valorMeta}
+                      onChange={(e) => setValorMeta(e.target.value)}
+                      placeholder={tipoCriterio === 'MANUAL' ? 'CODIGO_CUSTOM' : 'Ej: 5'}
+                      min="1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mechanics-help">
+                  {tipoCriterio === 'VIAJES' && `El usuario debe completar ${valorMeta || 'N'} viajes.`}
+                  {tipoCriterio === 'DISTANCIA' && `El usuario debe acumular ${valorMeta || 'N'} km recorridos.`}
+                  {tipoCriterio === 'RUTAS_CREADAS' && `El usuario debe crear ${valorMeta || 'N'} rutas públicas.`}
+                  {tipoCriterio === 'VEHICULOS' && `El usuario debe registrar ${valorMeta || 'N'} vehículos.`}
+                  {tipoCriterio === 'COMUNIDADES' && `El usuario debe unirse a ${valorMeta || 'N'} comunidades.`}
+                </div>
               </div>
+
               <div className="modal-actions">
                 <button type="button" className="btn-cancelar" onClick={cerrarModal}>
                   Cancelar
