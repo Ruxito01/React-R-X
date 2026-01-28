@@ -8,6 +8,7 @@ const AdminModelos = () => {
   // Estados principales
   const [modelos, setModelos] = useState([]);
   const [marcas, setMarcas] = useState([]);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   
@@ -17,7 +18,7 @@ const AdminModelos = () => {
   // Estados del modal
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modeloEditando, setModeloEditando] = useState(null);
-  const [formulario, setFormulario] = useState({ nombre: '', marcaId: '' });
+  const [formulario, setFormulario] = useState({ nombre: '', marcaId: '', tipoVehiculoId: '' });
   const [guardando, setGuardando] = useState(false);
   
   // Confirmacion de eliminacion
@@ -82,6 +83,20 @@ const AdminModelos = () => {
       const modelosIniciales = modelosData.map(m => ({ ...m, vehiculosCount: null }));
       setModelos(modelosIniciales);
       setMarcas(marcasData);
+      
+      // Cargar tipos de vehiculo
+      try {
+        const tiposRes = await fetch(`${API_BASE_URL}/tipovehiculo`);
+        if (tiposRes.ok) {
+          const tiposData = await tiposRes.json();
+          setTiposVehiculo(tiposData);
+        } else {
+          console.error("Error fetching vehicle types:", tiposRes.status);
+        }
+      } catch (e) {
+        console.error("Error loading vehicle types", e);
+      }
+
       setError(null);
       setCargando(false);
       
@@ -167,20 +182,20 @@ const AdminModelos = () => {
 
   const abrirModalCrear = () => {
     setModeloEditando(null);
-    setFormulario({ nombre: '', marcaId: marcas[0]?.id || '' });
+    setFormulario({ nombre: '', marcaId: marcas[0]?.id || '', tipoVehiculoId: tiposVehiculo[0]?.id || '' });
     setModalAbierto(true);
   };
 
   const abrirModalEditar = (modelo) => {
     setModeloEditando(modelo);
-    setFormulario({ nombre: modelo.nombre, marcaId: modelo.marcaId });
+    setFormulario({ nombre: modelo.nombre, marcaId: modelo.marcaId, tipoVehiculoId: modelo.tipoVehiculoId || '' });
     setModalAbierto(true);
   };
 
   const cerrarModal = () => {
     setModalAbierto(false);
     setModeloEditando(null);
-    setFormulario({ nombre: '', marcaId: '' });
+    setFormulario({ nombre: '', marcaId: '', tipoVehiculoId: '' });
   };
 
   const manejarCambio = (e) => {
@@ -190,7 +205,7 @@ const AdminModelos = () => {
 
   const guardarModelo = async (e) => {
     e.preventDefault();
-    if (!formulario.nombre.trim() || !formulario.marcaId) return;
+    if (!formulario.nombre.trim() || !formulario.marcaId || !formulario.tipoVehiculoId) return;
 
     setGuardando(true);
     try {
@@ -205,8 +220,10 @@ const AdminModelos = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: modeloEditando ? modeloEditando.id : undefined,
+          id: modeloEditando ? modeloEditando.id : undefined,
           nombre: formulario.nombre.trim(),
-          marcaId: parseInt(formulario.marcaId)
+          marcaId: parseInt(formulario.marcaId),
+          tipoVehiculoId: parseInt(formulario.tipoVehiculoId)
         })
       });
 
@@ -409,21 +426,13 @@ const AdminModelos = () => {
               <button className="modal-close" onClick={cerrarModal}>X</button>
             </div>
             <form onSubmit={guardarModelo}>
-              <div className="form-group">
-                <label htmlFor="marcaId">Marca *</label>
-                <select
-                  id="marcaId"
-                  name="marcaId"
-                  value={formulario.marcaId}
-                  onChange={manejarCambio}
-                  required
-                >
-                  <option value="">Seleccionar marca...</option>
-                  {marcas.map(marca => (
-                    <option key={marca.id} value={marca.id}>{marca.nombre}</option>
-                  ))}
-                </select>
-              </div>
+              <SearchableSelect
+                label="Marca *"
+                options={marcas}
+                value={formulario.marcaId ? parseInt(formulario.marcaId) : ''}
+                onChange={(val) => setFormulario(prev => ({ ...prev, marcaId: val }))}
+                placeholder="Seleccionar marca..."
+              />
               <div className="form-group">
                 <label htmlFor="nombre">Nombre del Modelo *</label>
                 <input
@@ -437,6 +446,28 @@ const AdminModelos = () => {
                   autoFocus
                 />
               </div>
+              <SearchableSelect
+                label="Tipo de Vehículo *"
+                options={tiposVehiculo}
+                value={formulario.tipoVehiculoId ? parseInt(formulario.tipoVehiculoId) : ''}
+                onChange={(val) => setFormulario(prev => ({ ...prev, tipoVehiculoId: val }))}
+                placeholder="Seleccionar tipo..."
+                renderPreview={(tipo) => (
+                   <div style={{ marginRight: '10px', display: 'flex', alignItems: 'center' }}>
+                      {tipo.foto && <img src={tipo.foto} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
+                   </div>
+                )}
+              />
+              
+              {/* Preview grande abajo */}
+              {formulario.tipoVehiculoId && (
+                <div className="tipo-preview">
+                  {(() => {
+                    const tipo = tiposVehiculo.find(t => t.id == formulario.tipoVehiculoId);
+                    return tipo?.foto ? <img src={tipo.foto} alt="" /> : null;
+                  })()}
+                </div>
+              )}
               <div className="modal-actions">
                 <button type="button" className="btn-cancelar" onClick={cerrarModal}>
                   Cancelar
@@ -471,6 +502,90 @@ const AdminModelos = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Componente de selector buscable interno
+const SearchableSelect = ({ label, options, value, onChange, placeholder, renderPreview }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const wrapperRef = React.useRef(null);
+
+  // Cerrar al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.id === value);
+  const filteredOptions = options.filter(opt => 
+    opt.nombre.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="form-group" ref={wrapperRef}>
+      <label>{label}</label>
+      <div className="custom-select-container">
+        <div 
+          className={`custom-select-trigger ${isOpen ? 'open' : ''}`} 
+          onClick={() => {
+            setIsOpen(!isOpen);
+            setSearch(''); // Resetear busqueda al abrir
+          }}
+        >
+          {selectedOption ? (
+            <span className="selected-value">
+              {renderPreview && renderPreview(selectedOption)}
+              {selectedOption.nombre}
+            </span>
+          ) : (
+            <span className="placeholder">{placeholder}</span>
+          )}
+          <svg className="arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor">
+            <path d="M1 1L5 5L9 1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+
+        {isOpen && (
+          <div className="custom-options-dropdown">
+            <div className="dropdown-search">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+            </div>
+            <div className="options-list">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map(option => (
+                  <div
+                    key={option.id}
+                    className={`custom-option ${value === option.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      onChange(option.id);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {renderPreview && renderPreview(option)}
+                    {option.nombre}
+                  </div>
+                ))
+              ) : (
+                <div className="no-options">No se encontraron resultados</div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
