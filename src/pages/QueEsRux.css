@@ -118,13 +118,20 @@
     width: 100%;
 }
 
-.info-card {
+/* Scoped to avoid conflict with AdminAlertas .info-card */
+.que-es-rux-container .info-card {
     display: flex;
     align-items: center;
     gap: 60px;
+    /* Reset properties that might leak from other global styles */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
 }
 
-.info-card.reverse {
+.que-es-rux-container .info-card.reverse {
     flex-direction: row-reverse;
 }
 
@@ -163,15 +170,13 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-.info-text p {
+/* Increased specificity to ensure text is white */
+.que-es-rux-container .info-text p {
     font-size: 1.15rem;
-    /* Un poco mas grande */
     line-height: 1.8;
-    color: #ffffff;
-    /* Blanco puro para maximo contraste */
+    color: #ffffff !important;
     font-weight: 500;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-    /* Sombra fuerte */
 }
 
 .info-image {
