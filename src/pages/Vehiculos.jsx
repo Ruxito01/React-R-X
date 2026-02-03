@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../config/api';
 import './Vehiculos.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 const Vehiculos = () => {
+  const API_BASE_URL = getBaseURL();
   // Estados para datos del backend
   const [vehiculos, setVehiculos] = useState([]);
   const [vehiculosRaw, setVehiculosRaw] = useState([]);

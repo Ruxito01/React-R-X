@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getBaseURL } from '../config/api';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import './BotonPdfFlotante.css';
 import logoRux from '../assets/logo_rux.png';
 import { GraficasUsuariosPdf, GraficasVehiculosPdf, GraficasRutasPdf, GraficasComunidadesPdf } from './GraficasPdf';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 // Configuracion de dashboards
 const DASHBOARDS_CONFIG = {
@@ -17,6 +18,7 @@ const DASHBOARDS_CONFIG = {
 };
 
 const BotonPdfFlotante = () => {
+  const API_URL = getBaseURL();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [seleccionados, setSeleccionados] = useState({
     general: true,

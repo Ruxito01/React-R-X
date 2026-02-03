@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getBaseURL } from '../config/api';
 import './AdminLogros.css';
 import TableImage from '../components/TableImage';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import { subirImagenLogro, eliminarImagenLogro } from '../services/supabaseStorageService';
+import { compressImage } from '../utils/imageCompressor';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 const AdminLogros = () => {
+  const API_BASE_URL = getBaseURL();
   // Estados principales
   const [logros, setLogros] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -149,7 +152,7 @@ const AdminLogros = () => {
   };
   
   // Manejar seleccion de archivo de imagen
-  const manejarSeleccionImagen = (e) => {
+  const manejarSeleccionImagen = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
@@ -163,11 +166,28 @@ const AdminLogros = () => {
       return;
     }
     
-    setArchivoImagen(file);
-    
-    const reader = new FileReader();
-    reader.onload = (e) => setPreviewImagen(e.target.result);
-    reader.readAsDataURL(file);
+    // Intentar comprimir (la utilidad ya excluye GIFs internamente, pero aqui forzamos check por si acaso)
+    try {
+        let fileToUse = file;
+        // Solo comprimimos si NO es gif (aunque compressImage ya lo maneja, doble check)
+        if (file.type !== 'image/gif') {
+             fileToUse = await compressImage(file);
+        }
+        
+        setArchivoImagen(fileToUse);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => setPreviewImagen(e.target.result);
+        reader.readAsDataURL(fileToUse);
+        
+    } catch (err) {
+        console.error("Error compresion:", err);
+        // Fallback
+        setArchivoImagen(file);
+        const reader = new FileReader();
+        reader.onload = (e) => setPreviewImagen(e.target.result);
+        reader.readAsDataURL(file);
+    }
   };
   
   const quitarImagen = () => {

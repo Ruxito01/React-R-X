@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { getBaseURL } from '../config/api';
 import './Comunidades.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 // Componente interno para manejar avatar con fallback en caso de error
 const MemberAvatar = ({ miembro }) => {
@@ -56,6 +57,7 @@ const MemberAvatar = ({ miembro }) => {
 }; // Add semicolon here as it's a const assignment
 
 function Comunidades() {
+  const API_BASE_URL = getBaseURL();
   // Estados para datos del backend
   const [comunidades, setComunidades] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -900,7 +902,6 @@ function Comunidades() {
                       gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))',
                       gap: '16px', 
                       alignItems: 'start',
-                      height: 'auto',
                       height: '100%',
                       padding: '10px 5px',
                       overflowY: 'auto',

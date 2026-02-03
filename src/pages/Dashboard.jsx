@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../config/api';
 import './Dashboard.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
@@ -137,10 +138,11 @@ const Dashboard = () => {
       }
       
       // Cargar usuarios, vehículos y viajes en paralelo
+      const apiUrl = getBaseURL();
       const [usuariosRes, vehiculosRes, viajesRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/usuario`),
-        fetch(`${import.meta.env.VITE_API_URL}/vehiculo`),
-        fetch(`${import.meta.env.VITE_API_URL}/viaje`),
+        fetch(`${apiUrl}/usuario`),
+        fetch(`${apiUrl}/vehiculo`),
+        fetch(`${apiUrl}/viaje`),
       ]);
       
       if (!usuariosRes.ok) throw new Error('Error al cargar usuarios');

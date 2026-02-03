@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './AdminModelos.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+import { getBaseURL } from '../config/api';
 
 const AdminModelos = () => {
+  const API_BASE_URL = getBaseURL();
   // Estados principales
   const [modelos, setModelos] = useState([]);
   const [marcas, setMarcas] = useState([]);
@@ -220,7 +221,7 @@ const AdminModelos = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: modeloEditando ? modeloEditando.id : undefined,
-          id: modeloEditando ? modeloEditando.id : undefined,
+
           nombre: formulario.nombre.trim(),
           marcaId: parseInt(formulario.marcaId),
           tipoVehiculoId: parseInt(formulario.tipoVehiculoId)

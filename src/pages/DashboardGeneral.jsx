@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import './DashboardGeneral.css';
@@ -174,7 +175,7 @@ const DashboardGeneral = () => {
         console.log('Usuario de Google:', userInfo.email);
 
         // Verificar usuario en el backend
-        const apiUrl = import.meta.env.VITE_API_URL;
+        const apiUrl = getBaseURL();
         const response = await fetch(`${apiUrl}/usuario/email/${userInfo.email}`);
 
         if (response.status === 404) {
@@ -229,7 +230,7 @@ const DashboardGeneral = () => {
 
   // Funcion para cargar datos optimizada (Paralelismo Total)
   const fetchData = async (mostrarLoading = true) => {
-    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiUrl = getBaseURL();
     
     // Si es carga inicial o manual, mostrar estados de carga
     if (mostrarLoading) {
@@ -321,7 +322,7 @@ const DashboardGeneral = () => {
 
   // Funcion para actualizar solo usuarios (rapida, cada 2 segundos)
   const fetchUsuariosRapido = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiUrl = getBaseURL();
     try {
       const res = await fetch(`${apiUrl}/usuario`);
       if (res.ok) {

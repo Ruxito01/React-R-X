@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { getBaseURL } from '../config/api';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, DirectionsRenderer } from '@react-google-maps/api';
 import { QRCodeCanvas } from 'qrcode.react';
 import { GraficoTopRutas, GraficoTendencia, GraficoEstado } from '../components/EstadisticasRutas';
@@ -6,10 +7,11 @@ import { useTheme } from '../context/ThemeContext';
 import './Rutas.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const Rutas = () => {
+  const API_BASE_URL = getBaseURL();
   const { theme } = useTheme();
 
   // Estilos de mapa oscuro

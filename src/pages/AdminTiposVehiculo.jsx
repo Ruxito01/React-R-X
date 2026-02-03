@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getBaseURL } from '../config/api';
 import './AdminMarcas.css';
 import TableImage from '../components/TableImage';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import { subirImagenTipoVehiculo } from '../services/supabaseStorageService';
+import { compressImage } from '../utils/imageCompressor';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 const AdminTiposVehiculo = () => {
+  const API_BASE_URL = getBaseURL();
   // Estados principales
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -169,7 +172,7 @@ const AdminTiposVehiculo = () => {
   };
   
   // Manejar seleccion de archivo de imagen
-  const manejarSeleccionImagen = (e) => {
+  const manejarSeleccionImagen = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
@@ -184,13 +187,26 @@ const AdminTiposVehiculo = () => {
       setError('La imagen no debe superar 5MB');
       return;
     }
-    
-    setArchivoImagen(file);
-    
-    // Crear preview
-    const reader = new FileReader();
-    reader.onload = (e) => setPreviewImagen(e.target.result);
-    reader.readAsDataURL(file);
+
+    setSubiendoImagen(true); // Feedback visual temporal
+    try {
+        const compressedFile = await compressImage(file);
+        setArchivoImagen(compressedFile);
+        
+        // Crear preview
+        const reader = new FileReader();
+        reader.onload = (e) => setPreviewImagen(e.target.result);
+        reader.readAsDataURL(compressedFile);
+    } catch (err) {
+        console.error('Error al comprimir:', err);
+        // Fallback a original
+        setArchivoImagen(file);
+        const reader = new FileReader();
+        reader.onload = (e) => setPreviewImagen(e.target.result);
+        reader.readAsDataURL(file);
+    } finally {
+        setSubiendoImagen(false);
+    }
   };
   
   // Quitar imagen seleccionada

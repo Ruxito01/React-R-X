@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { getBaseURL } from '../config/api';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import './AdminUsuarios.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 import TableImage from '../components/TableImage';
 import Avatar3DViewer from '../components/Avatar3DViewer';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const libraries = ['places', 'visualization']; // Define libraries outside to avoid re-renders
 
 const AdminUsuarios = () => {
+    const API_BASE_URL = getBaseURL();
     // Cargar API de Google Maps globalmente para evitar parpadeos
     const { isLoaded: googleLoaded } = useJsApiLoader({
         id: 'google-map-script',

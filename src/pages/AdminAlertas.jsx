@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { getBaseURL } from '../config/api';
 import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import './AdminAlertas.css';
 import fondoDashboard from '../assets/fondo_dashboard_usuarios.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const libraries = ['places', 'visualization'];
 
@@ -41,6 +42,7 @@ const DARK_MAP_STYLE = [
 ];
 
 const AdminAlertas = () => {
+    const API_BASE_URL = getBaseURL();
     const { isLoaded: googleLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: GOOGLE_MAPS_API_KEY,
