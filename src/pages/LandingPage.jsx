@@ -34,11 +34,8 @@ const LandingPage = () => {
   // Estado para la franja activa (basado en posicion del mouse)
   const [activeStrip, setActiveStrip] = useState(-1);
   
-  // Estado para mostrar modal de proximamente
-  const [mostrarModal, setMostrarModal] = useState(false);
-  
-  // Estado para navbar scroll
-  const [scrolled, setScrolled] = useState(false);
+  // Estado para el selector de ambiente
+  const [showEnvSelector, setShowEnvSelector] = useState(false);
 
   // Efecto para detectar scroll y cambiar estilo de navbar
   useEffect(() => {
@@ -49,13 +46,12 @@ const LandingPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Detectar callback de Google OAuth y navegar inmediatamente al dashboard
+  // Detectar callback de Google OAuth
   useEffect(() => {
     const hash = window.location.hash;
     
-    // Si hay token en el hash, guardar y navegar inmediatamente al dashboard
+    // Si hay token en el hash
     if (hash && hash.includes('access_token')) {
-      // Guardar token para que el dashboard lo procese
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get('access_token');
       
@@ -63,33 +59,39 @@ const LandingPage = () => {
         sessionStorage.setItem('google_access_token', accessToken);
         sessionStorage.setItem('show_loading_screen', 'true');
         
-        // Limpiar el hash de la URL y flag pendiente
+        // Limpiar el hash de la URL
         window.history.replaceState(null, '', window.location.pathname);
         sessionStorage.removeItem('google_auth_pending');
         
-        // Navegar inmediatamente al dashboard (sin mostrar loading aqui)
-        navigate('/general', { replace: true });
+        // En lugar de navegar directo, mostramos el selector de ambiente
+        setShowEnvSelector(true);
         return;
       }
     }
     
-    // Limpiar flag pendiente si no hay token
     sessionStorage.removeItem('google_auth_pending');
   }, [navigate]);
 
-  // Detecta que franja esta debajo del mouse
+  const handleEnvSelect = (env) => {
+    localStorage.setItem('selected_env', env);
+    // Pequeño delay para feedback visual
+    setTimeout(() => {
+        navigate('/general', { replace: true });
+    }, 200);
+  };
+
+  // ... (mouse handlers remain same)
   const handleMouseMove = (e) => {
     const stripWidth = window.innerWidth / 5;
     const stripIndex = Math.floor(e.clientX / stripWidth);
     setActiveStrip(stripIndex);
   };
 
-  // Cuando el mouse sale del contenedor
   const handleMouseLeave = () => {
     setActiveStrip(-1);
   };
 
-  // Efecto para evitar que el scroll haga zoom en el modelo 3D
+  // ... (useEffect for smooth scroll / spline events remain same)
   useEffect(() => {
     const container = splineContainerRef.current;
     if (container) {
@@ -103,7 +105,6 @@ const LandingPage = () => {
     }
   }, []);
 
-  // Efecto que observa los elementos para animaciones
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -146,7 +147,7 @@ const LandingPage = () => {
         <Link to="/que-es-rux">¿Qué es RÜX?</Link>
       </nav>
 
-      {/* --- FONDO FIJO INTERACTIVO (COMPARTIDO ENTRE INTRO Y LOGIN) --- */}
+      {/* --- FONDO FIJO INTERACTIVO --- */}
       <div className="interactive-background">
         {loginImages.map((img, index) => (
           <div
@@ -171,11 +172,10 @@ const LandingPage = () => {
         </a>
       </section>
 
-
-
       {/* --- SECCION 2: LOGIN --- */}
       <section id="login" className="landing-section" ref={loginRef}>
-        <Login /> 
+        {/* Pasamos onSuccess para mostrar el selector */}
+        <Login onSuccess={() => setShowEnvSelector(true)} /> 
       </section>
       
       {/* --- SECCION 3: DESCARGA --- */}
@@ -218,9 +218,6 @@ const LandingPage = () => {
         <div className="proximamente-overlay" onClick={() => setMostrarModal(false)}>
           <div className="proximamente-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-glow"></div>
-            <svg className="modal-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
-            </svg>
             <h3>Proximamente</h3>
             <p>Estamos trabajando para traerte la app muy pronto</p>
             <button className="modal-close-btn" onClick={() => setMostrarModal(false)}>
@@ -230,9 +227,71 @@ const LandingPage = () => {
         </div>
       )}
 
+      {/* --- MODAL SELECTOR DE AMBIENTE --- */}
+      {showEnvSelector && (
+        <div className="proximamente-overlay" style={{zIndex: 9999}}>
+          <div className="proximamente-modal" style={{maxWidth: '500px', width: '90%'}}>
+             <div className="modal-glow" style={{background: 'linear-gradient(45deg, #00f2fe, #4facfe)'}}></div>
+             
+             <h2 style={{color: 'white', marginBottom: '10px'}}>Seleccione Entorno</h2>
+             <p style={{color: '#ccc', marginBottom: '30px'}}>¿Qué sistema deseas administrar?</p>
+             
+             <div style={{display: 'flex', flexDirection: 'column', gap: '15px', width: '100%'}}>
+                
+                {/* Opcion PROD */}
+                <button 
+                  onClick={() => handleEnvSelect('PROD')}
+                  style={{
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid #4facfe',
+                    background: 'rgba(79, 172, 254, 0.1)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(79, 172, 254, 0.2)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(79, 172, 254, 0.1)'}
+                >
+                    <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold', fontSize: '1.1rem'}}>Producción 🚀</div>
+                        <div style={{fontSize: '0.9rem', color: '#aaa', marginTop: '5px'}}>Base de datos nueva (Limpia)</div>
+                    </div>
+                </button>
+
+                {/* Opcion DEV */}
+                <button 
+                  onClick={() => handleEnvSelect('DEV')}
+                  style={{
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid #666',
+                    background: 'rgba(100, 100, 100, 0.1)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(100, 100, 100, 0.2)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(100, 100, 100, 0.1)'}
+                >
+                    <div style={{textAlign: 'left'}}>
+                         <div style={{fontWeight: 'bold', fontSize: '1.1rem'}}>Desarrollo (Legacy) 🛠️</div>
+                         <div style={{fontSize: '0.9rem', color: '#aaa', marginTop: '5px'}}>Base de datos antigua (Pruebas)</div>
+                    </div>
+                </button>
+
+             </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
-
-
     
     </motion.div>
   );

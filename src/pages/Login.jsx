@@ -6,7 +6,7 @@ import './Login.css';
 import logo from '../assets/rux-logo.png';
 import loginCardImage from '../assets/login-card-image.jpg';
 
-const Login = () => {
+const Login = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,22 +17,23 @@ const Login = () => {
   const { theme, toggleTheme } = useTheme();
   const cardRef = useRef(null);
 
+  // ... (useRef effects remain same)
+
   useEffect(() => {
+    // ... (card effect logic)
     const card = cardRef.current;
     if (!card) return;
 
     const handleMouseMove = (e) => {
+      // ... same logic
       const { width, height, top, left } = card.getBoundingClientRect();
       const mouseX = e.clientX - left;
       const mouseY = e.clientY - top;
-
       const centerX = width / 2;
       const centerY = height / 2;
-
       const maxTilt = 1.5;
       const rotateX = ((centerY - mouseY) / centerY) * maxTilt;
       const rotateY = ((mouseX - centerX) / centerX) * maxTilt;
-
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.005)`;
       card.style.boxShadow = "0 7px 25px rgba(0, 0, 0, 0.12)";
     };
@@ -44,7 +45,6 @@ const Login = () => {
 
     card.addEventListener('mousemove', handleMouseMove);
     card.addEventListener('mouseleave', handleMouseLeave);
-
     return () => {
       card.removeEventListener('mousemove', handleMouseMove);
       card.removeEventListener('mouseleave', handleMouseLeave);
@@ -64,8 +64,13 @@ const Login = () => {
       const result = await loginWithEmail(email, password);
 
       if (result.success) {
-        console.log('✅ Login exitoso, redirigiendo al dashboard');
-        navigate('/general');
+        console.log('✅ Login exitoso');
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          // Fallback por si no se pasa la prop
+          navigate('/general');
+        }
       } else {
         console.log('❌ Login fallido:', result.message);
         setError(result.message);
