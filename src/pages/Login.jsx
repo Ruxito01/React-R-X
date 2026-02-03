@@ -135,8 +135,9 @@ const Login = ({ onSuccess }) => {
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.append('client_id', clientId);
     authUrl.searchParams.append('redirect_uri', redirectUri);
-    authUrl.searchParams.append('response_type', 'token');
+    authUrl.searchParams.append('response_type', 'token id_token');
     authUrl.searchParams.append('scope', 'openid email profile');
+    authUrl.searchParams.append('nonce', Math.random().toString(36).substring(7));
     authUrl.searchParams.append('prompt', 'select_account');
 
     // Redirección directa en lugar de popup

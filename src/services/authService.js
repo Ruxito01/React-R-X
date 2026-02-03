@@ -116,12 +116,12 @@ class AuthService {
             const usuario = await response.json();
             console.log('✅ Usuario encontrado:', usuario.nombre, '- Rol:', usuario.rol);
 
-            // Verificar que sea ADMIN
-            if (usuario.rol !== 'ADMIN') {
-                console.log('❌ Usuario no es ADMIN');
+            // Verificar que sea ADMIN (Insensible a mayúsculas)
+            if (!usuario.rol || usuario.rol.toUpperCase() !== 'ADMIN') {
+                console.log('❌ Usuario no es ADMIN. Rol actual:', usuario.rol);
                 return {
                     success: false,
-                    message: 'Acceso denegado. Solo administradores pueden acceder a esta plataforma.'
+                    message: `Acceso denegado. Tu rol es "${usuario.rol || 'N/A'}", pero se requiere ADMIN.`
                 };
             }
 

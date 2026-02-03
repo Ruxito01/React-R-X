@@ -572,6 +572,14 @@ html {
   background: radial-gradient(circle, rgba(255, 102, 0, 0.15) 0%, transparent 60%);
   animation: glowRotate 6s linear infinite;
   pointer-events: none;
+  z-index: 0;
+}
+
+.proximamente-modal h2,
+.proximamente-modal p,
+.proximamente-modal button {
+  position: relative;
+  z-index: 2;
 }
 
 .modal-icon {

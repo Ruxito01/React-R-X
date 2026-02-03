@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Spline from '@splinetool/react-spline';
@@ -24,6 +25,7 @@ const loginImages = [img1, img2, img3, img4, img5];
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { loginWithGoogle } = useAuth();
 
   // Referencias para animaciones
   const loginRef = useRef(null);
@@ -42,6 +44,8 @@ const LandingPage = () => {
   
   // Estado para el selector de ambiente
   const [showEnvSelector, setShowEnvSelector] = useState(false);
+  const [googleIdToken, setGoogleIdToken] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Efecto para detectar scroll y cambiar estilo de navbars
   useEffect(() => {
@@ -57,33 +61,54 @@ const LandingPage = () => {
     const hash = window.location.hash;
     
     // Si hay token en el hash
-    if (hash && hash.includes('access_token')) {
+    if (hash && (hash.includes('access_token') || hash.includes('id_token'))) {
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get('access_token');
+      const idToken = params.get('id_token');
       
-      if (accessToken) {
-        sessionStorage.setItem('google_access_token', accessToken);
-        sessionStorage.setItem('show_loading_screen', 'true');
+      if (idToken) {
+        // Guardar token y mostrar selector SIN validar aún
+        setGoogleIdToken(idToken);
+        if (accessToken) sessionStorage.setItem('google_access_token', accessToken);
         
-        // Limpiar el hash de la URL
+        // Limpiar URL
         window.history.replaceState(null, '', window.location.pathname);
         sessionStorage.removeItem('google_auth_pending');
-        
-        // En lugar de navegar directo, mostramos el selector de ambiente
+
         setShowEnvSelector(true);
         return;
       }
     }
     
     sessionStorage.removeItem('google_auth_pending');
-  }, [navigate]);
+  }, [navigate, loginWithGoogle]);
 
-  const handleEnvSelect = (env) => {
+  const handleEnvSelect = async (env) => {
+    // 1. Establecer el entorno elegido
     localStorage.setItem('selected_env', env);
-    // Pequeño delay para feedback visual
-    setTimeout(() => {
+    
+    // 2. Intentar login con ese entorno usando el token guardado
+    if (googleIdToken) {
+        setAuthLoading(true);
+        try {
+            const result = await loginWithGoogle(googleIdToken);
+            if (result.success) {
+                navigate('/general', { replace: true });
+            } else {
+                alert(`Error al ingresar a ${env}: ${result.message}`);
+                // Si falla, podrías permitir elegir el otro entorno o cerrar
+                // setGoogleIdToken(null); // Opcional: resetear
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión al intentar iniciar sesión.');
+        } finally {
+            setAuthLoading(false);
+        }
+    } else {
+        // Fallback raro si no hay token (dev testing?)
         navigate('/general', { replace: true });
-    }, 200);
+    }
   };
 
   // ... (mouse handlers remain same)
@@ -237,12 +262,12 @@ const LandingPage = () => {
       {showEnvSelector && (
         <div className="proximamente-overlay" style={{zIndex: 9999}}>
           <div className="proximamente-modal" style={{maxWidth: '500px', width: '90%'}}>
-             <div className="modal-glow" style={{background: 'linear-gradient(45deg, #00f2fe, #4facfe)'}}></div>
+             <div className="modal-glow"></div>
              
              <h2 style={{color: 'white', marginBottom: '10px'}}>Seleccione Entorno</h2>
-             <p style={{color: '#ccc', marginBottom: '30px'}}>¿Qué sistema deseas administrar?</p>
+             <p style={{color: '#ccc', marginBottom: '30px', position: 'relative', zIndex: 2}}>¿Qué sistema deseas administrar?</p>
              
-             <div style={{display: 'flex', flexDirection: 'column', gap: '15px', width: '100%'}}>
+             <div style={{display: 'flex', flexDirection: 'column', gap: '15px', width: '100%', position: 'relative', zIndex: 2}}>
                 
                 {/* Opcion PROD */}
                 <button 
@@ -250,8 +275,8 @@ const LandingPage = () => {
                   style={{
                     padding: '20px',
                     borderRadius: '12px',
-                    border: '1px solid #4facfe',
-                    background: 'rgba(79, 172, 254, 0.1)',
+                    border: '1px solid #ff6600',
+                    background: 'rgba(255, 102, 0, 0.1)',
                     color: 'white',
                     cursor: 'pointer',
                     display: 'flex',
@@ -259,11 +284,11 @@ const LandingPage = () => {
                     justifyContent: 'space-between',
                     transition: 'all 0.3s ease'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(79, 172, 254, 0.2)'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(79, 172, 254, 0.1)'}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 102, 0, 0.2)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 102, 0, 0.1)'}
                 >
                     <div style={{textAlign: 'left'}}>
-                        <div style={{fontWeight: 'bold', fontSize: '1.1rem'}}>Producción 🚀</div>
+                        <div style={{fontWeight: 'bold', fontSize: '1.1rem', color: '#ff8800'}}>Producción 🚀</div>
                         <div style={{fontSize: '0.9rem', color: '#aaa', marginTop: '5px'}}>Base de datos nueva (Limpia)</div>
                     </div>
                 </button>
@@ -275,7 +300,7 @@ const LandingPage = () => {
                     padding: '20px',
                     borderRadius: '12px',
                     border: '1px solid #666',
-                    background: 'rgba(100, 100, 100, 0.1)',
+                    background: 'rgba(255, 255, 255, 0.05)',
                     color: 'white',
                     cursor: 'pointer',
                     display: 'flex',
@@ -283,8 +308,8 @@ const LandingPage = () => {
                     justifyContent: 'space-between',
                     transition: 'all 0.3s ease'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(100, 100, 100, 0.2)'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(100, 100, 100, 0.1)'}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
                 >
                     <div style={{textAlign: 'left'}}>
                          <div style={{fontWeight: 'bold', fontSize: '1.1rem'}}>Desarrollo (Legacy) 🛠️</div>
