@@ -34,6 +34,12 @@ const LandingPage = () => {
   // Estado para la franja activa (basado en posicion del mouse)
   const [activeStrip, setActiveStrip] = useState(-1);
   
+  // Estado para mostrar modal de proximamente
+  const [mostrarModal, setMostrarModal] = useState(false);
+  
+  // Estado para navbar scroll
+  const [scrolled, setScrolled] = useState(false);
+  
   // Estado para el selector de ambiente
   const [showEnvSelector, setShowEnvSelector] = useState(false);
 
