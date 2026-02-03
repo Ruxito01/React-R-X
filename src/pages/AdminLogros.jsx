@@ -136,6 +136,9 @@ const AdminLogros = () => {
     setModalAbierto(true);
   };
 
+  // Determinar si el criterio seleccionado requiere valor numerico
+  const requiereValor = !['PRIMER_PERFIL', 'SUBIR_FOTO_PERFIL', 'INVITAR_AMIGO', 'COMENTAR_RUTA'].includes(tipoCriterio) && tipoCriterio !== 'MANUAL';
+
   const cerrarModal = () => {
     setModalAbierto(false);
     setLogroEditando(null);
@@ -239,7 +242,13 @@ const AdminLogros = () => {
       
       // CONSTRUIR EL CRITERIO FINAL
       let criterioFinal = null;
-      if (valorMeta) {
+      
+      // Casos sin valor requerido (Flags)
+      if (['PRIMER_PERFIL', 'SUBIR_FOTO_PERFIL', 'INVITAR_AMIGO', 'COMENTAR_RUTA'].includes(tipoCriterio)) {
+          criterioFinal = tipoCriterio;
+      } 
+      // Casos con valor requerido
+      else if (valorMeta) {
         if (tipoCriterio === 'MANUAL') {
            criterioFinal = valorMeta;
         } else {
@@ -587,20 +596,26 @@ const AdminLogros = () => {
                       <option value="RUTAS_CREADAS">Rutas Creadas</option>
                       <option value="VEHICULOS">Vehículos Registrados</option>
                       <option value="COMUNIDADES">Comunidades</option>
+                      <option value="PRIMER_PERFIL">Registro en RUX</option>
+                      <option value="SUBIR_FOTO_PERFIL">Foto de Perfil</option>
+                      <option value="INVITAR_AMIGO">Invitar Amigos</option>
+                      <option value="COMENTAR_RUTA">Comentar Rutas</option>
+                      <option value="MANUAL">Codigo Manual</option>
                     </select>
                   </div>
 
                   <div>
                     <label htmlFor="valorMeta">
-                      {tipoCriterio === 'MANUAL' ? 'Código Técnico' : 'Cantidad Requerida'}
+                      {tipoCriterio === 'MANUAL' ? 'Código Técnico' : (requiereValor ? 'Cantidad Requerida' : 'No requiere valor')}
                     </label>
                     <input
                       type={tipoCriterio === 'MANUAL' ? 'text' : 'number'}
                       id="valorMeta"
                       value={valorMeta}
                       onChange={(e) => setValorMeta(e.target.value)}
-                      placeholder={tipoCriterio === 'MANUAL' ? 'CODIGO_CUSTOM' : 'Ej: 5'}
+                      placeholder={tipoCriterio === 'MANUAL' ? 'CODIGO_CUSTOM' : (requiereValor ? 'Ej: 5' : '-')}
                       min="1"
+                      disabled={!requiereValor && tipoCriterio !== 'MANUAL'}
                     />
                   </div>
                 </div>
@@ -611,6 +626,10 @@ const AdminLogros = () => {
                   {tipoCriterio === 'RUTAS_CREADAS' && `El usuario debe crear ${valorMeta || 'N'} rutas públicas.`}
                   {tipoCriterio === 'VEHICULOS' && `El usuario debe registrar ${valorMeta || 'N'} vehículos.`}
                   {tipoCriterio === 'COMUNIDADES' && `El usuario debe unirse a ${valorMeta || 'N'} comunidades.`}
+                  {tipoCriterio === 'PRIMER_PERFIL' && `Se otorga al registrarse por primera vez.`}
+                  {tipoCriterio === 'SUBIR_FOTO_PERFIL' && `Se otorga al subir una foto de perfil.`}
+                  {tipoCriterio === 'INVITAR_AMIGO' && `Se otorga al invitar a un amigo.`}
+                  {tipoCriterio === 'COMENTAR_RUTA' && `Se otorga al comentar en una ruta.`}
                 </div>
               </div>
 
