@@ -37,7 +37,7 @@ const LandingPage = () => {
   // Estado para el selector de ambiente
   const [showEnvSelector, setShowEnvSelector] = useState(false);
 
-  // Efecto para detectar scroll y cambiar estilo de navbar
+  // Efecto para detectar scroll y cambiar estilo de navbars
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
